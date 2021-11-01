@@ -1,0 +1,49 @@
+#!/bin/bash
+
+#PBS -l nodes=1:ppn=1
+#PBS -l walltime=24:00:00
+#PBS -l mem=8gb
+
+echo "#-#-#Job started on `hostname` at `date` "
+echo This job runs on the following processors:
+echo `cat $PBS_NODEFILE`
+
+module load python/2.7.14-anaconda5.0.1
+
+source activate myenv
+
+export PYTHONPATH=$batml_path:$PYTHONPATH
+export PYTHONPATH=$ht_path:$PYTHONPATH
+
+HEADAS=/storage/work/jjd330/heasoft/heasoft-6.24/x86_64-pc-linux-gnu-libc2.12
+export HEADAS
+. $HEADAS/headas-init.sh
+
+# CALDB stuff
+CALDB=/storage/work/jjd330/caldb_files; export CALDB
+source $CALDB/software/tools/caldbinit.sh
+
+export HEADASNOQUERY=
+export HEADASPROMPT=/dev/null
+
+export PFILES="/tmp/$$.tmp/pfiles;$HEADAS/syspfiles"
+
+
+
+batml_path='/storage/work/jjd330/local/bat_data/BatML/'
+ht_path=$batml_path'HeasoftTools/'
+
+export PYTHONPATH=$batml_path:$PYTHONPATH
+export PYTHONPATH=$ht_path:$PYTHONPATH
+
+echo ${jobid}
+echo ${workdir}
+echo ${njobs}
+echo ${pyscript}
+echo ${extra_args}
+
+cd ${workdir}
+
+python $batml_path${pyscript} --job_id ${jobid} --Njobs ${njobs} ${extra_args}
+
+echo "#-#-#Job Ended at `date`"
