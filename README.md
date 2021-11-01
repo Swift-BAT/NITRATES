@@ -1,6 +1,10 @@
-# BatML
+# Non-Imaging Transient Reconstruction And TEmporal Search (NITRATES)
 
-Some functions and scripts for doing a Maximum Likelihood analysis on Swift BAT data
+This repo contains the full NITRATES pipeline for maximum likelihood-driven discovery and localization of Gamma Ray Bursts in the Neil Gehrels Swift Observatory's Burst Alert Telescope (BAT) instrument. 
+
+A description of the method can be found in [DeLaunay & Tohuvavohu (2021)](FILLME). We ask scientific users of this code to cite the paper.
+
+The BAT instrumental response functions necessary for this pipeline can be found in [this Zenodo community](https://zenodo.org/communities/swift-bat).
 
 # Current Analysis Scripts
 
