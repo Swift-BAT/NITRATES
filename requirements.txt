@@ -1,11 +1,8 @@
 astropy == 4.1
 bs4 == 0.0.1
 healpy == 1.14.0
-httpsproxy-urllib2 == 1.0
 matplotlib == 3.2.2
-numba == 0.54.1
 numpy == 1.19.2
 pandas == 1.1.5
-paramiko == 2.8.0
 requests == 2.18.4
 scipy == 1.5.2
