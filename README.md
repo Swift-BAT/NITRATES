@@ -6,52 +6,55 @@ A description of the method can be found in [DeLaunay & Tohuvavohu (2021)](FILLM
 
 The BAT instrumental response functions necessary for this pipeline can be found in [this Zenodo community](https://zenodo.org/communities/swift-bat).
 
-# Current Analysis Scripts
+This codebase is under active cleanup, and development, and at present time simply presents a snapshot of the entire autonomous pipeline (from listeners to results). Readability is low. \
+We welcome questions, comments, issues, and pull requests.
+
+# Current Full Pipeline Orchestration Scripts
 
 `run_stuff_grb2.sh`
-Used to run the full targeted analysis. 
-Runs `mkdb.py`, `do_data_setup.py`, `do_full_rates.py`, then `do_manage2.py`
-first arg is the trigger time, second arg is the Name of the trigger, and the optional third arg is the minimum duration to use
+*Used to launch the full targeted analysis. 
+**Runs `mkdb.py`, `do_data_setup.py`, `do_full_rates.py`, then `do_manage2.py`.
+**The first arg is the trigger time, second arg is the Name of the trigger, and the optional third arg is the minimum duration to use
 
-`mkdb.py`
-Creates an sqlite DB that contains the trigger time and important file names
-DB not used much in the analysis, used to be used to store results and is kind of a relic now
+`mkdb.py` 
+*Creates a sqlite DB that contains the trigger time and important file names.
+*DB not used much in the analysis, used to be used to store results and is kind of a relic now.
 
 `do_data_setup.py`
-Gathers the event, attitude, and enabled detectors files
-Chooses which dets to mask, based on any hot or cold dets or any det glitches
-Makes a "filtered" event file that has the events removed outside the usable energy range or far away from the analysis time
-Also adds a GTI table to the event file for when it's not slewing and there's no multi-det glitches
-Also makes a partial coding image if there's a usable set of HEASOFT tools
+*Gathers the event, attitude, and enabled detectors files.
+*Chooses which dets to mask, based on any hot or cold dets or any det glitches.
+*Makes a "filtered" event file that has the events removed outside the usable energy range or far away from the analysis time.
+*Adds a GTI table to the event file for when Swift not slewing and no multi-detector glitches.
+*Also makes a partial coding image if there's a usable set of HEASOFT tools.
 
 `do_full_rates.py`
-Runs the full rates analysis to pick time bins as seeds for the analysis
+*Runs the full rates analysis to pick time bins as seeds for the full likelihood analysis.
 
-`do_manage2.py`
-Manages the rest of the analysis
-Submits jobs to the cluster, organizes results, and emails out top results
-First submits a job for the bkg fit to off-time data
-Then submits several jobs for the split detector rates analysis
-Gathers the split rates results and makes the final set of position and time seeds
-Assigns which jobs will processes which seeds and writes them to rate_seeds.csv (for inside FoV jobs) and out_job_table.csv (for out of FoV jobs)
-Submits several jobs to the cluster for both inside FoV and outside FoV analysis
-Gathers results and emails out top results when all of the jobs are done
+`do_manage2.py` 
+*Manages the rest of the analysis.
+**Submits jobs to the cluster, organizes results, and emails out top results.
+**First submits a job for the bkg fit to off-time data. 
+**Then submits several jobs for the split detector rates analysis. 
+**Gathers the split rates results and makes the final set of position and time seeds. 
+**Assigns which jobs will processes which seeds and writes them to rate_seeds.csv (for inside FoV jobs) and out_job_table.csv (for out of FoV jobs). 
+**Submits several jobs to the cluster for both inside FoV and outside FoV analysis. 
+**Gathers results and emails out top results when all of the jobs are done.
 
-`do_bkg_estimation_wPSs_mp2.py`
-Script to perform the bkg fit to off-time data
-Ran as a single job, usually with 4 procs
+`do_bkg_estimation_wPSs_mp2.py` 
+*Script to perform the bkg fit to off-time data. 
+*Run as a single job, usually with 4 procs.
 
 `do_rates_mle_InOutFoV2.py`
-Script to perform the split rates analysis
-Ran as several single proc jobs
+*Script to perform the split rates analysis.
+*Run as several single proc jobs.
 
 `do_llh_inFoV4realtime2.py`
-Script to perform the likelihood analysis for seeds that are inside the FoV
-Ran as several single proc jobs
+*Script to perform the likelihood analysis for seeds that are inside the FoV. \
+*Run as several single proc jobs.
 
 `do_llh_outFoV4realtime2.py`
-Script to perform the likelihood analysis for seeds that are outside the FoV
-Ran as several single proc jobs
+*Script to perform the likelihood analysis for seeds that are outside the FoV. \
+*Run as several single proc jobs.
 
 
 # Important Modules 
