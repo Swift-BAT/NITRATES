@@ -2,7 +2,7 @@
 
 This repo contains the full NITRATES pipeline for maximum likelihood-driven discovery and localization of Gamma Ray Bursts in the Neil Gehrels Swift Observatory's Burst Alert Telescope (BAT) instrument. 
 
-A description of the method can be found in [DeLaunay & Tohuvavohu (2021)](FILLME). We ask scientific users of this code to cite the paper.
+A description of the method can be found in [DeLaunay & Tohuvavohu (2021)](https://arxiv.org/abs/2111.01769). We ask scientific users of this code to cite the paper.
 
 The BAT instrumental response functions necessary for this pipeline can be found in [this Zenodo community](https://zenodo.org/communities/swift-bat).
 
@@ -31,8 +31,7 @@ We welcome questions, comments, issues, and pull requests.
 * Runs the full rates analysis to pick time bins as seeds for the full likelihood analysis.
 
 `do_manage2.py` 
-* Manages the rest of the analysis.
-  * Submits jobs to the cluster, organizes results, and emails out top results.
+* Manages the rest of the analysis. Submits jobs to the cluster, organizes results, and emails out top results.
   * First submits a job for the bkg fit to off-time data. 
   * Then submits several jobs for the split detector rates analysis. 
   * Gathers the split rates results and makes the final set of position and time seeds. 
