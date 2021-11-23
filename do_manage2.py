@@ -9,7 +9,11 @@ from scipy import interpolate
 import os, socket, subprocess, shlex
 import argparse
 import logging, traceback
-import paramiko
+try:
+    import paramiko
+    # paramiko is only used when ssh commands are needed to submit jobs
+except:
+    pass
 
 from helper_funcs import send_email, send_error_email, send_email_attach, send_email_wHTML
 
