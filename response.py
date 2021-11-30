@@ -254,9 +254,9 @@ class Comp_Resp_Obj(object):
 
         self.comp_trans[:self.ncomp_pnts] += self.struct_obj.get_trans()
 
-        print np.shape(self.trans[0]), np.shape(self.wts_list[0]),\
-                np.shape(self.comp_trans[self.inds_list[0],:])
-        print np.shape(np.sum(self.comp_trans[self.inds_list[0],:]*self.wts_list[0][:,np.newaxis],axis=0))
+        print(np.shape(self.trans[0]), np.shape(self.wts_list[0]),\
+                np.shape(self.comp_trans[self.inds_list[0],:]))
+        print(np.shape(np.sum(self.comp_trans[self.inds_list[0],:]*self.wts_list[0][:,np.newaxis],axis=0)))
         for i in range(self.ndets):
             self.trans[i] += np.sum(self.comp_trans[self.inds_list[i],:]*self.wts_list[i][:,np.newaxis],axis=0)
 
@@ -370,7 +370,7 @@ def get_detxys_from_colrows(col0, col1, row0, row1, orientation='NonEdges'):
         good_detys = np.append(good_detys, np.array(detys_by_sand1[row0:row1]))
         good_detys = np.append(good_detys, np.array(detys_by_sand0[row0:row1]))
     else:
-        print "bad orientation"
+        print("bad orientation")
     blx = np.isin(detx_dpi, good_detxs)
     bly = np.isin(dety_dpi, good_detys)
     bl = blx&bly
@@ -615,8 +615,8 @@ class ResponseDPI(object):
 
     def __init__(self, resp_fname, pha_emins, pha_emaxs, phi0, bl_dmask, correct_comp=False):
 
-        print "initing ResponseDPI, with fname"
-        print resp_fname
+        print("initing ResponseDPI, with fname")
+        print(resp_fname)
         self.orig_resp_tab = Table.read(resp_fname)
         self.pha_tab = Table.read(resp_fname, hdu='EBOUNDS')
 
@@ -1338,7 +1338,7 @@ class ResponseInFoV(object):
             th0 -= 1
         theta0 = thetas[th0]
         theta1 = thetas[th0+1]
-        print theta0, theta1
+        print(theta0, theta1)
         if np.abs(theta0 - theta) < eps:
             ths = [theta0]
             th_wts = [1.0]
@@ -1352,10 +1352,10 @@ class ResponseInFoV(object):
 
 
         phi_ = phi - (int(phi)/45)*45.0
-        print phi_
+        print(phi_)
         if (int(phi)/45)%2 == 1:
             phi_ = 45.0 - phi_
-        print phi_
+        print(phi_)
         ph0 = np.digitize(phi_, phis) - 1
         if phi_ == 45.0:
             ph0 -= 1
@@ -1630,7 +1630,7 @@ class CompFlorResponseDPI(object):
 
 class ResponseInFoV2(object):
 
-    def __init__(self, resp_dname, flor_resp_dname, pha_emins, pha_emaxs, bl_dmask, rt_obj):
+    def __init__(self, resp_dname, flor_resp_dname, comp_flor_resp_dname, pha_emins, pha_emaxs, bl_dmask, rt_obj):
 
         self.flor_resp_dname = flor_resp_dname
         self.resp_dname = resp_dname
@@ -1664,13 +1664,15 @@ class ResponseInFoV2(object):
         dual_struct = get_dual_struct_obj(self.PhotonEs)
         self.comp_obj = Comp_Resp_Obj(self.batxs, self.batys, self.batzs, dual_struct)
 
-        self.flor_resp_obj = FlorResponseDPI(self.flor_resp_dname,\
-                                             pha_tab, self.pha_emins, self.pha_emaxs,\
-                                             self.bl_dmask, NphotonEs=self.NphotonEs)
+        # self.flor_resp_obj = FlorResponseDPI(self.flor_resp_dname,\
+        #                                      pha_tab, self.pha_emins, self.pha_emaxs,\
+        #                                      self.bl_dmask, NphotonEs=self.NphotonEs)
 
-        self.flor_resp_dname2 = '/gpfs/scratch/jjd330/bat_data/hp_flor_resps/'
+        # self.flor_resp_dname2 = '/gpfs/scratch/jjd330/bat_data/hp_flor_resps/'
+        self.flor_resp_dname2 = flor_resp_dname
 
         self.comp_flor_resp_dname = '/gpfs/scratch/jjd330/bat_data/comp_flor_resps/'
+        self.comp_flor_resp_dname = comp_flor_resp_dname
         self.comp_flor_resp_obj = CompFlorResponseDPI(self.comp_flor_resp_dname, self.bl_dmask)
         self.comp_flor_resp_obj.set_photonEs(self.PhotonEs)
         self.comp_flor_resp_obj.set_ebins(self.pha_emins, self.pha_emaxs)
@@ -1733,17 +1735,19 @@ class ResponseInFoV2(object):
             self.comp_trans_dpis = self.lines_trans_dpis
 
 
-        if self.use_comp_flor:
-            try:
-                self.comp_flor_resp_obj.set_theta_phi(self.theta, self.phi)
-            except Exception as E:
-                logging.warning("Can't use comp flor object")
-                logging.error(E)
-                self.use_comp_flor = False
-                self.flor_resp_obj.set_theta_phi(self.theta, self.phi)
+        self.comp_flor_resp_obj.set_theta_phi(self.theta, self.phi)
 
-        else:
-            self.flor_resp_obj.set_theta_phi(self.theta, self.phi)
+        # if self.use_comp_flor:
+        #     try:
+        #         self.comp_flor_resp_obj.set_theta_phi(self.theta, self.phi)
+        #     except Exception as E:
+        #         logging.warning("Can't use comp flor object")
+        #         logging.error(E)
+        #         self.use_comp_flor = False
+        #         self.flor_resp_obj.set_theta_phi(self.theta, self.phi)
+        #
+        # else:
+        #     self.flor_resp_obj.set_theta_phi(self.theta, self.phi)
 
 
         self.calc_resp_dpis()
@@ -1805,8 +1809,8 @@ class ResponseInFoV2(object):
         self.comp_resp_dpi = comp_dpi
         self.lines_resp_dpi = lines_dpi
         self.non_flor_resp_dpi = lines_dpi + comp_dpi
-        if not self.use_comp_flor:
-            self.flor_resp_dpi = self.flor_resp_obj.get_resp_dpi()
+        # if not self.use_comp_flor:
+        #     self.flor_resp_dpi = self.flor_resp_obj.get_resp_dpi()
 
 
 #         self.tot_resp_dpis = self.non_flor_resp_dpi + self.flor_resp_dpi
@@ -1828,8 +1832,8 @@ class ResponseInFoV2(object):
     def get_comp_resp_dpis(self):
         return self.comp_resp_dpis
 
-    def get_flor_resp_dpis(self):
-        return self.flor_resp_obj.get_resp_dpi()
+    # def get_flor_resp_dpis(self):
+    #     return self.flor_resp_obj.get_resp_dpi()
 
     def get_comp_flor_resp_dpis(self):
         return self.comp_flor_resp_dpis
@@ -1895,7 +1899,7 @@ class ResponseInFoV2(object):
             th0 -= 1
         theta0 = thetas[th0]
         theta1 = thetas[th0+1]
-        print theta0, theta1
+        print(theta0, theta1)
         if np.abs(theta0 - theta) < eps:
             ths = [theta0]
             th_wts = [1.0]
@@ -1909,10 +1913,10 @@ class ResponseInFoV2(object):
 
 
         phi_ = phi - (int(phi)/45)*45.0
-        print phi_
+        print(phi_)
         if (int(phi)/45)%2 == 1:
             phi_ = 45.0 - phi_
-        print phi_
+        print(phi_)
         ph0 = np.digitize(phi_, phis) - 1
         if phi_ == 45.0:
             ph0 -= 1
