@@ -502,8 +502,8 @@ def setup_tab_info(conn, ev_fname, trigtime):
         trigtimeMET = utc2met(trigtime.isot, event_file)
         trigtimeUTC = trigtime.iso
 
-    print "trigtimeUTC: ", trigtimeUTC
-    print "tmin_UTC: ", tmin_utc
+    print("trigtimeUTC: ", trigtimeUTC)
+    print("tmin_UTC: ", tmin_utc)
 
     sql = '''INSERT INTO DataInfo
             (tstartMET, tstopMET, trigtimeMET, tstartUTC, tstopUTC, trigtimeUTC)

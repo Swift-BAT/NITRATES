@@ -148,7 +148,7 @@ class NLLH_Minimizer(object):
         elif trans_type == 'lognorm':
             return self.lognorm_param(x, pname)
         else:
-            print "Bad trans type:", trans_type
+            print("Bad trans type:", trans_type)
             return x
 
     def untrans_param(self, x, pname):
@@ -163,7 +163,7 @@ class NLLH_Minimizer(object):
         elif trans_type == 'lognorm':
             return self.unlognorm_param(x, pname)
         else:
-            print "Bad trans type:", trans_type
+            print("Bad trans type:", trans_type)
             return x
 
     def trans_params(self, x):
@@ -269,9 +269,9 @@ class NLLH_DualAnnealingMin(NLLH_Minimizer):
         bounds = optimize.Bounds(np.array(lowers), np.array(uppers))
 
         bounds = np.array([lowers, uppers]).T
-        print "bounds shape: ", bounds.shape
-        print "bounds: "
-        print bounds
+        print("bounds shape: ", bounds.shape)
+        print("bounds: ")
+        print(bounds)
 
         if x0s is not None:
             x0s = np.array(self.trans_params(x0s))
@@ -572,7 +572,7 @@ def imxy_grid_miner_wimjacob(miner, imx0, imy0, imx1, imy1,\
     param_list = []
     nllhs = []
 
-    print len(imxs), " grid points to minimize at"
+    print(len(imxs), " grid points to minimize at")
     x0s = [miner.get_default_x0()]
 
 

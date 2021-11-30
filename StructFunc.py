@@ -128,7 +128,7 @@ def get_full_struct_manager(Es=None, structs2ignore=[]):
     pcb_elec_half_dims = [59.5,16.2,2.7]
     pcb_pos0 = (0.0, 30.48, BATZ_offset -17.304-32.612)
     pcb_pos1 = (0.0, -30.48, BATZ_offset -17.304-32.612)
-    print pcb_pos0
+    print(pcb_pos0)
 
     PCB_box0 = Box_Polygon(pcb_half_dims[0], pcb_half_dims[1], pcb_half_dims[2],\
                             np.array(pcb_pos0))

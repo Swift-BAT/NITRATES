@@ -12,10 +12,10 @@ def guess_dbfname(dname='.'):
     if len(db_fnames) == 1:
         return db_fnames[0]
     elif len(db_fnames) > 1:
-        print "More than one db fname to pick from"
+        print("More than one db fname to pick from")
         return db_fnames
     else:
-        print "Can't find a db fname"
+        print("Can't find a db fname")
         return
 
 

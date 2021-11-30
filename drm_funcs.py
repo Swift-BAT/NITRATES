@@ -139,8 +139,8 @@ def get_cnts_intp_obj(ind_ax, drm, ebin_ind_edges, abs_cor, E0=50.0, normed=True
                     drm, ebin_ind_edges, abs_cor=abs_cor, E0=E0)
 
     if np.any(np.isnan(cnt_ebins_ind_mat)):
-        print "Bad cnt_ebins_ind_mat"
-        print np.sum(np.isnan(cnt_ebins_ind_mat))
+        print("Bad cnt_ebins_ind_mat")
+        print(np.sum(np.isnan(cnt_ebins_ind_mat)))
 
     if normed:
         intp_obj = cnts_norm_intp(cnt_ebins_ind_mat, ind_ax)
