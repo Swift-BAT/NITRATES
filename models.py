@@ -3198,7 +3198,8 @@ class Source_Model_InOutFoV(Model):
     def __init__(self, flux_model,\
                  ebins, bl_dmask, rt_obj,\
                  name='Signal', use_deriv=False,\
-                 use_prior=False):
+                 use_prior=False, resp_tab_dname=None,\
+                 hp_flor_resp_dname=None, comp_flor_resp_dname=None):
 
 
         self.fmodel = flux_model
@@ -3208,9 +3209,27 @@ class Source_Model_InOutFoV(Model):
         self.ebins1 = ebins[1]
         nebins = len(self.ebins0)
 
-        self.resp_dname = '/storage/work/jjd330/local/bat_data/resp_tabs_ebins/'
-        self.flor_resp_dname = '/gpfs/scratch/jjd330/bat_data/flor_resps_ebins/'
-        self.flor_resp_dname2 = '/gpfs/scratch/jjd330/bat_data/hp_flor_resps/'
+        if resp_tab_dname is None:
+            from config import RESP_TAB_DNAME
+            self.resp_dname = RESP_TAB_DNAME
+        else:
+            self.resp_dname = resp_tab_dname
+
+        if hp_flor_resp_dname is None:
+            from config import HP_FLOR_RESP_DNAME
+            self.flor_resp_dname = HP_FLOR_RESP_DNAME
+        else:
+            self.flor_resp_dname = hp_flor_resp_dname
+
+        if comp_flor_resp_dname is None:
+            from config import COMP_FLOR_RESP_DNAME
+            self.comp_flor_resp_dname = COMP_FLOR_RESP_DNAME
+        else:
+            self.comp_flor_resp_dname = comp_flor_resp_dname
+
+        # self.resp_dname = '/storage/work/jjd330/local/bat_data/resp_tabs_ebins/'
+        # self.flor_resp_dname = '/gpfs/scratch/jjd330/bat_data/flor_resps_ebins/'
+        # self.flor_resp_dname2 = '/gpfs/scratch/jjd330/bat_data/hp_flor_resps/'
 
         param_names = ['theta', 'phi']
         param_names += self.fmodel.param_names
@@ -3301,8 +3320,9 @@ class Source_Model_InOutFoV(Model):
         if (ang_sep(phi, 90.0-theta, self._resp_phi, 90.0-self._resp_theta) > self._resp_update) or np.isnan(self._resp_phi):
             logging.info("Making new response object")
             self.resp_obj = ResponseInFoV2(self.resp_dname, self.flor_resp_dname,\
-                                          self.ebins0, self.ebins1,\
-                                          self.bl_dmask, self.rt_obj)
+                                            self.comp_flor_resp_dname,\
+                                            self.ebins0, self.ebins1,\
+                                            self.bl_dmask, self.rt_obj)
             self._resp_theta = theta
             self._resp_phi = phi
             self._trans_theta = theta
