@@ -97,12 +97,12 @@ def flags2gti(times, flags):
     chngs2good = times[chngs2good_bl]
     if start_ind == 0:
         chngs2good = np.append(times[0], chngs2good)
-    print Nchngs2good
+    print(Nchngs2good)
 
     chngs2bad_bl = (diffs<-0.1)
     Nchngs2bad = np.sum(chngs2bad_bl)
     chngs2bad = times[chngs2bad_bl]
-    print Nchngs2bad
+    print(Nchngs2bad)
 
 #     if Nchngs2bad > 0:
     stops = [chngs2bad[0]]

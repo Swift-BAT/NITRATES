@@ -16,7 +16,7 @@ from sqlite_funcs import get_conn, write_result, write_results,\
 from dbread_funcs import get_rate_fits_tab, guess_dbfname,\
                     get_seeds_tab, get_info_tab, get_files_tab,\
                     get_square_tab, get_full_sqlite_table_as_df
-from config import EBINS0, EBINS1, solid_angle_dpi_fname, fp_dir, rt_dir
+from config import EBINS0, EBINS1, solid_angle_dpi_fname, rt_dir
 from flux_models import Plaw_Flux, Cutoff_Plaw_Flux
 from minimizers import NLLH_ScipyMinimize_Wjacob, imxy_grid_miner, NLLH_ScipyMinimize
 # from drm_funcs import DRMs
@@ -110,7 +110,7 @@ def parse_bkg_csv(bkg_fname, solid_angle_dpi, ebins0, ebins1, bl_dmask, rt_dir):
     for name in col_names:
         if '_imx' in name:
             PSnames.append(name.split('_')[0])
-    print PSnames
+    print(PSnames)
     Nsrcs = len(PSnames)
     if Nsrcs > 0:
         bkg_name = 'Background_'
@@ -259,8 +259,8 @@ def do_scan_around_peak(peak_row, bkg_bf_params, bkg_name, sig_miner,\
 
     for ii in range(N_impnts):
 
-        print imxs[ii], imys[ii]
-        print thetas[ii], phis[ii]
+        print(imxs[ii], imys[ii])
+        print(thetas[ii], phis[ii])
         sig_miner.set_fixed_params(['Signal_theta', 'Signal_phi'],\
                                     values=[thetas[ii],phis[ii]])
 
@@ -337,7 +337,7 @@ def analysis_for_imxy_square(imx0, imx1, imy0, imy1, bkg_bf_params_list,\
     imys = np.ravel(imyg) + imy0
     Npnts = len(imxs)
 
-    print Npnts
+    print(Npnts)
     logging.info("%d imxy points to do" %(Npnts))
 
     thetas, phis = imxy2theta_phi(imxs, imys)
@@ -418,8 +418,8 @@ def analysis_for_imxy_square(imx0, imx1, imy0, imy1, bkg_bf_params_list,\
 
     for ii in range(Npnts):
 
-        print imxs[ii], imys[ii]
-        print thetas[ii], phis[ii]
+        print(imxs[ii], imys[ii])
+        print(thetas[ii], phis[ii])
         sig_miner.set_fixed_params(['Signal_theta', 'Signal_phi'],\
                                     values=[thetas[ii],phis[ii]])
 

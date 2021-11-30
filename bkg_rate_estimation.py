@@ -376,9 +376,9 @@ class Linear_Rates(object):
                                          sigma=np.sqrt(_cnts[:,j][bl]),\
                                          absolute_sigma=False)
                 except Exception as E:
-                    print E
-                    print "_cnts[:,j].shape: ", _cnts[:,j].shape
-                    print "_t_ax.shape: ", _t_ax.shape
+                    print(E)
+                    print("_cnts[:,j].shape: ", _cnts[:,j].shape)
+                    print("_t_ax.shape: ", _t_ax.shape)
                     raise E
 
                 tot_cnts = np.sum(_cnts[:,j][bl])
@@ -526,7 +526,7 @@ def get_linear_bkg_rates(quad_cnts_mat, t_bins0, t_bins1, trig_time, quad_dicts)
     # t_bins0 = np.arange(-150.*1.024, 300.*1.024, tstep) + trig_time
     # t_bins1 = t_bins0 + bin_size
     ntbins = len(t_bins0)
-    print ntbins
+    print(ntbins)
     nebins = quad_cnts_mat.shape[1]
 
     sig_window = (-5.*1.024, 10.24)
@@ -542,7 +542,7 @@ def get_linear_bkg_rates(quad_cnts_mat, t_bins0, t_bins1, trig_time, quad_dicts)
 
     t_poly_ax = np.arange(t0, t1, t_poly_step)
     nptbins = len(t_poly_ax)
-    print nptbins
+    print(nptbins)
 
 
     lin_params = np.zeros((nptbins, nebins, 3))
