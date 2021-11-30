@@ -9,6 +9,20 @@ The BAT instrumental response functions necessary for this pipeline can be found
 This codebase is under active cleanup, and development, and at present time simply presents a snapshot of the entire autonomous pipeline (from listeners to results). Readability is low. \
 We welcome questions, comments, issues, and pull requests.
 
+# Response Files
+
+There are many internal data files (mostly used for generating the detector response) used in the codebase. Some are found in this repo and others are found in the [Zenodo community](https://zenodo.org/communities/swift-bat). 
+
+The simplest way to organize these files is to put all of them into a single directory, and setting the path to that directory as an environment variable named `NITRATES_RESP_DIR`. If `NITRATES_RESP_DIR` is set and all of the response files are placed in there with their original file names (and directory structure for tarred directories) then `config.py` should be able to find the full path to all of the necessary files. `NITRATES_RESP_DIR` can also be hard coded into the `config.py` file instead of being set as an env variable. 
+
+In the [Zenodo community](https://zenodo.org/communities/swift-bat), the [Swift-BAT Response Files for NITRATES](https://zenodo.org/record/5634207) dataset contains sevaral .tar.gz files that each contain a folder of data files to be downloaded and extracted into `NITRATES_RESP_DIR`. In order to perform the NITRATES likelihood analysis and run the example notebook `Example_LLH_setup_fixed_dirs.ipynb`, the tarred directories: `resp_tabs_ebins.tar.gz`, `comp_flor_resps.tar.gz`, `hp_flor_resps.tar.gz` need to be downloaded and extracted into `NITRATES_RESP_DIR`, along with the file `solid_angle_dpi.npy`. The other files either contain more energy bins or are used only for the seeding analyses. 
+
+The .tar.gz files in the datasets [Swift-BAT Response Files for NITRATES: Forward Ray Tracings at IMX > 0](https://zenodo.org/record/5639481) and [Swift-BAT Response Files for NITRATES: Forward Ray Tracings at IMX < 0](https://zenodo.org/record/5639084) also need to be downloaded and extracted into `NITRATES_RESP_DIR`. These are the forward ray tracing files and are a few hundred GBs uncompressed. They're split up into seperate tarred files do to size limits, but should end up in the same directory, `NITRATES_RESP_DIR/ray_traces_detapp_npy/`. 
+
+The `bright_src_cat.fits` file and the `element_cross_sections` folder in this repo should also be copied into `NITRATES_RESP_DIR`. 
+
+Paths to these files can instead be given as arguments to some of the analysis objects, such as Source_Model_InOutFoV(). 
+
 # Current Full Pipeline Orchestration Scripts
 
 `run_stuff_grb2.sh`
