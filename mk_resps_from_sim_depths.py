@@ -21,24 +21,24 @@ def cli():
 
 cal_resp_fname = '/storage/work/jjd330/caldb_files/data/swift/bat/cpf/swbresponse20030101v007.rsp'
 resp_ebins_tab = Table.read(cal_resp_fname, hdu='EBOUNDS')
-print resp_ebins_tab.colnames
+print(resp_ebins_tab.colnames)
 
 params_fname = '/storage/work/jjd330/caldb_files/data/swift/bat/bcf/swbparams20030101v009.fits'
 mt_tab = Table.read(params_fname, hdu=2)
 params_tab = Table.read(params_fname)
-print mt_tab.colnames
-print params_tab.colnames
+print(mt_tab.colnames)
+print(params_tab.colnames)
 
 params_header = fits.open(params_fname)[1].header
 
 psv = []
 for i in range(14):
     psv.append(float(params_header['PSV_'+str(i)]))
-print psv
+print(psv)
 
 depth_fname = '/storage/work/jjd330/caldb_files/data/swift/bat/bcf/swbdepthdis20030101v003.fits'
 dtab = Table.read(depth_fname)
-print dtab.colnames
+print(dtab.colnames)
 
 
 pha_emins = resp_ebins_tab['E_MIN']
@@ -50,7 +50,7 @@ pha_extras = np.append(pha_extras, [1e5])
 pha_emins = np.append(pha_emins, pha_extras[:-1])
 pha_emaxs = np.append(pha_emaxs, pha_extras[1:])
 Npha_bins = len(pha_emins)
-print Npha_bins
+print(Npha_bins)
 
 Ephotons = np.linspace(10.0, 100.0, 90+1)[:-1] + 0.5
 Ephotons = np.append(Ephotons, np.linspace(100.5, 200.5, 50+1)[:-1])
@@ -372,11 +372,11 @@ def get_resp_dicts(depth_file, Ephotons, pha_emins, pha_emaxs):
 
         Primary_ind0 = np.digitize(Ephoton, PrimaryEs) - 1
         Primary_ind1 = Primary_ind0 + 1
-        print PrimaryEs[Primary_ind0], PrimaryEs[Primary_ind1]
+        print(PrimaryEs[Primary_ind0], PrimaryEs[Primary_ind1])
         dE = PrimaryEs[Primary_ind1] - PrimaryEs[Primary_ind0]
         wt0 = (PrimaryEs[Primary_ind1] - Ephoton)/dE
         wt1 = (Ephoton - PrimaryEs[Primary_ind0])/dE
-        print wt0, wt1
+        print(wt0, wt1)
 
         comp_Ebins = np.linspace(10.0, Ephoton, int(Ephoton-10.0)+1)
         comp_Eax = (comp_Ebins[:-1]+comp_Ebins[1:])/2.
@@ -437,8 +437,8 @@ def get_resp_dicts(depth_file, Ephotons, pha_emins, pha_emaxs):
                 for ei, wt in zip([Primary_ind0, Primary_ind1],[wt0,wt1]):
 
                     PrimaryE = PrimaryEs[ei]
-                    print PrimaryE
-                    print depth_file[ei+2].name
+                    print(PrimaryE)
+                    print(depth_file[ei+2].name)
                     comp_tab = depth_file[ei+2].data
                     if not colname in comp_tab.columns.names:
                         colname = oname + '_comp_Depth_dE'
@@ -452,10 +452,10 @@ def get_resp_dicts(depth_file, Ephotons, pha_emins, pha_emaxs):
                         depths_ = get_comp_depths(comp_tab, PrimaryE, comp_dEax, colname)
                         depths += wt*depths_
                     except Exception as E:
-                        print E
-                        print "trouble with depth from"
-                        print "ind: ", ei
-                        print colname
+                        print(E)
+                        print("trouble with depth from")
+                        print("ind: ", ei)
+                        print(colname)
 
                 comp_res = multi_mutau_func(comp_Eax, Npha_bins, mt_tab, 200.0, depths,\
                                             z_lows.astype(np.float), z_highs.astype(np.float),\
@@ -463,10 +463,10 @@ def get_resp_dicts(depth_file, Ephotons, pha_emins, pha_emaxs):
                 res_dict[cname+'_comp'] = comp_res
 
         res_dicts.append(res_dict)
-        print '********************************'
-        print "done with Energy %.3f" %(Ephoton)
-        print '********************************'
-        print
+        print('********************************')
+        print("done with Energy %.3f" %(Ephoton))
+        print('********************************')
+        print()
 
     return res_dicts
 

@@ -64,13 +64,13 @@ def get_in_out_rates4EpeakGamma(sig_mod, Epeak, gamma):
 def get_in_out_rates(sig_mod):
 
     Epeaks = np.logspace(1, 3.2, 11*2+1)
-    print Epeaks
+    print(Epeaks)
     gammas = np.linspace(-0.2, 2.3, 4*5+1)
-    print gammas
+    print(gammas)
     Gs = np.meshgrid(Epeaks, gammas)
     Epeaks = Gs[0].ravel()
     gammas = Gs[1].ravel()
-    print len(Epeaks)
+    print(len(Epeaks))
     Npnts = len(Epeaks)
 
     res_dicts = []
@@ -97,7 +97,7 @@ def mk_in_out_rates_tab_masks(sig_mod, theta, phi):
     out_fov_bl = ~in_fov_bl
     in_ndets = np.sum(in_fov_bl)
     if in_ndets < 100:
-        print "Only %d dets in FoV"%(in_ndets)
+        print("Only %d dets in FoV"%(in_ndets))
         return None, None, None
 
     mask_in = np.zeros(dpi_shape, dtype=np.bool)
@@ -124,7 +124,7 @@ def mk_npz_file_in_out_rates(sig_mod, theta, phi):
     RatesIn = tab['RatesIn']
     RatesOut = tab['RatesOut']
     save_fname = os.path.join(dname,fname)
-    print save_fname
+    print(save_fname)
     np.savez(save_fname, RatesIn=RatesIn, RatesOut=RatesOut, Epeak=Epeak,\
              gamma=gamma, mask_in=mask_in, mask_out=mask_out)
 
@@ -171,8 +171,8 @@ def main(args):
                     x = xax[ii] + dx + xmid
                     xs = np.append(xs, [x])
                     ys = np.append(ys, [y])
-    print len(xs)
-    print len(ys)
+    print(len(xs))
+    print(len(ys))
 
 
 

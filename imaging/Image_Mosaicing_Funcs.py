@@ -133,18 +133,18 @@ def get_and_add_skymaps(Nside, dname, fname_arr, pc_fname, pc_min=0.01):
 #     print "bkgvar maps 2 array"
 
     Nmaps = np.sum(pc_maps>=pc_min, axis=0)
-    print np.shape(Nmaps)
-    print np.min(Nmaps), np.max(Nmaps)
+    print(np.shape(Nmaps))
+    print(np.min(Nmaps), np.max(Nmaps))
 
     pc_tot = np.nansum(pc_maps, axis=0)
 
     # Making the normalized bkgvar weights
-    print(np.shape(np.sum(1./bkgvar_maps, axis=0)))
+    print((np.shape(np.sum(1./bkgvar_maps, axis=0))))
     wt_norm = Nmaps*np.nanmean(1./bkgvar_maps, axis=0)
     wt_maps = (1./bkgvar_maps)/wt_norm
-    print(np.shape(wt_maps))
+    print((np.shape(wt_maps)))
     wt_sums = np.nansum(wt_maps, axis=0)
-    print(wt_sums[(wt_sums>0)])
+    print((wt_sums[(wt_sums>0)]))
 
     # Summing the maps with the normalized weights
     summed_sky_map = np.nansum(sky_maps*wt_maps, axis=0)
@@ -165,11 +165,11 @@ def sky_map2bkg_maps(sky_map, pc_map, pc_min=1e-1, sig_rad=0.5, bkg_rad=2.5):
     nside = hp.npix2nside(Npix)
     bl_good = (pc_map>=pc_min)
     good_hp_inds = np.where(bl_good)
-    print np.shape(good_hp_inds)
+    print(np.shape(good_hp_inds))
     good_hp_inds = good_hp_inds[0]
-    print np.shape(good_hp_inds)
+    print(np.shape(good_hp_inds))
     Npix2use = np.sum(bl_good)
-    print Npix2use
+    print(Npix2use)
     all_hp_inds = np.arange(hp.nside2npix(nside),dtype=np.int)
     hp_map_vecs = hp.pix2vec(nside, all_hp_inds)
     hp_map_vecs = np.swapaxes(np.array(hp_map_vecs),0,1)
@@ -242,11 +242,11 @@ def sky_map2bkg_maps_mp(sky_map, pc_map, pc_min=1e-1, sig_rad=0.5, bkg_rad=2.5, 
     nside = hp.npix2nside(Npix)
     bl_good = (pc_map>=pc_min)
     good_hp_inds = np.where(bl_good)
-    print np.shape(good_hp_inds)
+    print(np.shape(good_hp_inds))
     good_hp_inds = good_hp_inds[0]
-    print np.shape(good_hp_inds)
+    print(np.shape(good_hp_inds))
     Npix2use = np.sum(bl_good)
-    print Npix2use
+    print(Npix2use)
     all_hp_inds = np.arange(hp.nside2npix(nside),dtype=np.int)
     hp_map_vecs = hp.pix2vec(nside, all_hp_inds)
     hp_map_vecs = np.swapaxes(np.array(hp_map_vecs),0,1)
@@ -326,7 +326,7 @@ def main(args):
     print("Summed Partial Coding, S/N, RA, Dec")
     inds_ = np.where((sig_map>6)&(np.isfinite(sig_map)&(pc_tot>0.4)))
     for ind in inds_[0]:
-        print(pc_tot[ind], sig_map[ind], hp.pix2ang(args.Nside, ind, lonlat=True))
+        print((pc_tot[ind], sig_map[ind], hp.pix2ang(args.Nside, ind, lonlat=True)))
 
 
 

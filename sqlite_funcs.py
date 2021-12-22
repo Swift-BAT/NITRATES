@@ -328,7 +328,7 @@ def write_square_res_line(conn, data_dict):
 
     col_names = []
     values = []
-    for k, val in data_dict.iteritems():
+    for k, val in data_dict.items():
         col_names.append(k)
         values.append(val)
 
@@ -371,7 +371,7 @@ def write_twind_line(conn, timeID, data_dict):
     data_dict['timeID'] = timeID
     col_names = []
     values = []
-    for k, val in data_dict.iteritems():
+    for k, val in data_dict.items():
         col_names.append(k)
         values.append(val)
 
@@ -399,9 +399,9 @@ def setup_tab_twinds(conn, trig_time, ntdbls=4,\
         tstarts = tstarts[bl]
         tstops = tstops[bl]
 
-    for ii in xrange(ntdbls):
+    for ii in range(ntdbls):
 
-        for i in xrange(len(tstarts)):
+        for i in range(len(tstarts)):
 
             timeID = make_timeID(tstarts[i], bin_size, trig_time)
             data_dict = {}
@@ -458,7 +458,7 @@ def setup_tab_twinds(conn, trig_time, ntdbls=4,\
     conn.commit()
 
 def setup_tab_twind_status(conn, timeIDs):
-    for i in xrange(len(timeIDs)):
+    for i in range(len(timeIDs)):
         sql = '''INSERT INTO TimeWindowStatus (timeID, BlipsFounds, SeedsAssigned, llhDone)
                 VALUES (%d, %d, %d, %d);'''\
                 %(timeIDs[i], 0, 0, 0)
@@ -502,8 +502,8 @@ def setup_tab_info(conn, ev_fname, trigtime):
         trigtimeMET = utc2met(trigtime.isot, event_file)
         trigtimeUTC = trigtime.iso
 
-    print("trigtimeUTC: ", trigtimeUTC)
-    print("tmin_UTC: ", tmin_utc)
+    print(("trigtimeUTC: ", trigtimeUTC))
+    print(("tmin_UTC: ", tmin_utc))
 
     sql = '''INSERT INTO DataInfo
             (tstartMET, tstopMET, trigtimeMET, tstartUTC, tstopUTC, trigtimeUTC)
@@ -531,9 +531,9 @@ def write_rate_fit_line(conn, rate_obj, ind, ebin, quadID, rate, err, chi2):
 
 def write_rate_fits_from_obj(conn, rate_obj, quadID):
 
-    for i in xrange(rate_obj.n_lin_pnts):
+    for i in range(rate_obj.n_lin_pnts):
         rates, errs, chi2s = rate_obj.get_rate(rate_obj.t_poly_ax[i], chi2=True)
-        for j in xrange(rate_obj.nebins):
+        for j in range(rate_obj.nebins):
             if ~np.isfinite(chi2s[j]):
                 chi2s[j] = 0.0
             if ~np.isfinite(errs[j]):
@@ -628,7 +628,7 @@ def write_seeds(conn, blip_df):
 
     """
 
-    for i in xrange(len(blip_df)):
+    for i in range(len(blip_df)):
 
         write_seed_line(conn, blip_df['blipID'][i], blip_df['timeID'][i],\
                         blip_df['time'][i], blip_df['duration'][i],\
@@ -657,7 +657,7 @@ def write_result(conn, seed_tab_row, sig_param_dict,\
     imy = sig_param_dict['Signal_imy']
     A = sig_param_dict['Signal_A']
     ind = sig_param_dict['Signal_gamma']
-    bkg_pnames = sorted([k for k in sig_param_dict.keys() if 'bkg_rate' in k])
+    bkg_pnames = sorted([k for k in list(sig_param_dict.keys()) if 'bkg_rate' in k])
     bkg_rates = "'"
     for bkg_pname in bkg_pnames:
         bkg_rates += "%.3f, " %(sig_param_dict[bkg_pname])
@@ -718,12 +718,12 @@ def write_results(conn, seed_tab_rows, sig_param_dicts,\
 
     nrows = len(TSs)
     data = []
-    for i in xrange(nrows):
+    for i in range(nrows):
         imx = sig_param_dicts[i]['Signal_imx']
         imy = sig_param_dicts[i]['Signal_imy']
         A = sig_param_dicts[i]['Signal_A']
         ind = sig_param_dicts[i]['Signal_gamma']
-        bkg_pnames = sorted([k for k in sig_param_dicts[i].keys() if 'bkg_rate' in k])
+        bkg_pnames = sorted([k for k in list(sig_param_dicts[i].keys()) if 'bkg_rate' in k])
         bkg_rates = "'"
         for bkg_pname in bkg_pnames:
             bkg_rates += "%.3f, " %(sig_param_dicts[i][bkg_pname])

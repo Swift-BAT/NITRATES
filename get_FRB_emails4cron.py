@@ -111,7 +111,7 @@ def fetch_parse_FRB_emails(M, nums):
 
     for num in nums:
         rv, data = M.fetch(num, '(RFC822)')
-        print(data[0][1])
+        print((data[0][1]))
         msg = email.message_from_string(data[0][1])
         print(msg)
         m = msg.get_payload()#[0]
@@ -170,7 +170,7 @@ def fetch_parse_LVC_emails(M, nums):
                 data_dict['isot'] = apyt.isot
             data_dict[k] = val
 
-        if 'GPSTime' in data_dict.keys():
+        if 'GPSTime' in list(data_dict.keys()):
             data_dicts.append(data_dict)
             if len(data_dicts)%25 == 0:
                 logging.debug('%d of %d emails parsed'%(len(data_dicts),len(nums)))
@@ -217,7 +217,7 @@ def fetch_parse_LVC_skymap_emails(M, nums, dname):
                 data_dict['isot'] = apyt.isot
             data_dict[k] = val
 
-        if 'UnixTime' in data_dict.keys():
+        if 'UnixTime' in list(data_dict.keys()):
             data_dicts.append(data_dict)
 
         direc = os.path.join(dname, data_dict['SID'])

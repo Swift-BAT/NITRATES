@@ -143,17 +143,17 @@ def main(args):
     if not np.isclose(imys[-1], args.imy1):
         imys = np.append(imys, [args.imy1])
 
-    print "imxs: "
-    print imxs
-    print "imys: "
-    print imys
+    print("imxs: ")
+    print(imxs)
+    print("imys: ")
+    print(imys)
 
     grids = np.meshgrid(imxs, imys, indexing='ij')
 
     imxs = grids[0].ravel()
     imys = grids[1].ravel()
 
-    print len(imxs), " DRMs to make"
+    print(len(imxs), " DRMs to make")
 
     if not os.path.exists(args.workdir):
         os.mkdir(args.workdir)
@@ -210,7 +210,7 @@ def main(args):
     ras = ras[bl_good]
     decs = decs[bl_good]
 
-    for i in xrange(len(imxs)):
+    for i in range(len(imxs)):
 
         aux_fname = os.path.join(args.workdir, str(pid)+'_aux.fits')
         mk_rt_aux_file(new_event, aux_fname, imxs[i], imys[i], "NONE", attfile, ras[i], decs[i])
@@ -223,7 +223,7 @@ def main(args):
         mk_drm(pha_fname, drm_fname, "NONE")
 
 
-    print "Took %.2f seconds, %.2f minutes to do %d DRMs" %(time.time()-t_1, (time.time()-t_1)/60., len(imxs))
+    print("Took %.2f seconds, %.2f minutes to do %d DRMs" %(time.time()-t_1, (time.time()-t_1)/60., len(imxs)))
 
 
 

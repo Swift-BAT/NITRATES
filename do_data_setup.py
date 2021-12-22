@@ -456,7 +456,7 @@ def get_dmask(args, evdata, use_glob=False):
 
 
         enb_tab = None
-        for i in xrange(len(enb_fnames)):
+        for i in range(len(enb_fnames)):
             if (mid_ev_time > enb_t0s[i]) and (mid_ev_time < enb_t1s[i]):
                 enb_tab = Table.read(os.path.join(args.enb_dname,enb_fnames[i]))
 
@@ -517,7 +517,7 @@ def get_att(args, MET_time):
     max_dt = 30.0
 
     att_fname = None
-    for i in xrange(len(att_fnames)):
+    for i in range(len(att_fnames)):
         if (MET_time > att_t0s[i]) and (MET_time < att_t1s[i]):
             att_fname = att_fnames[i]
 
@@ -555,7 +555,7 @@ def get_acs(args, trigtime):
     max_dt = 30.0
 
     acs_fname = None
-    for i in xrange(len(acs_fnames)):
+    for i in range(len(acs_fnames)):
         if (trigtime > acs_t0s[i]) and (trigtime < acs_t1s[i]):
             acs_fname = acs_fnames[i]
 

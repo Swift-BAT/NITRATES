@@ -39,8 +39,8 @@ class llh_ebins_square(object):
 
         self.ebin_ind_edges = get_ebin_ind_edges(self.drm_obj.get_drm(\
                                 0.0, 0.0), self.ebins0, self.ebins1)
-        print "shape(self.ebin_ind_edges): ",\
-                np.shape(self.ebin_ind_edges)
+        print("shape(self.ebin_ind_edges): ",\
+                np.shape(self.ebin_ind_edges))
 
         self.set_bkg_time(bkg_t0, bkg_dt)
 
@@ -51,39 +51,39 @@ class llh_ebins_square(object):
 
     def set_bkg_time(self, t0, dt):
 
-        print "Setting up Bkg calcs"
+        print("Setting up Bkg calcs")
 
         self.bkg_t0 = t0
         self.bkg_dt = dt
 
-        print "bkg_t0, bkg_dt", self.bkg_t0, self.bkg_dt
+        print("bkg_t0, bkg_dt", self.bkg_t0, self.bkg_dt)
 
         #bkg_data = self._all_data
         t_bl = (self._all_data['TIME']>self.bkg_t0)&\
                 (self._all_data['TIME']<(self.bkg_t0+self.bkg_dt))
         self.bkg_data = self._all_data[t_bl]
 
-        print "bkg sum time: ", np.sum(t_bl)
+        print("bkg sum time: ", np.sum(t_bl))
 
         self.bkg_data_dpis = det2dpis(self.bkg_data,\
                                       self.ebins0,\
                                       self.ebins1)
         self.bkg_cnts = np.array([np.sum(bkg_dpi[self.bl_dmask]) for\
                                   bkg_dpi in self.bkg_data_dpis])
-        print "bkg_cnts: ", self.bkg_cnts
+        print("bkg_cnts: ", self.bkg_cnts)
         self.bkg_rates = self.bkg_cnts/self.bkg_dt
         self.bkg_rate_errs = np.sqrt(self.bkg_cnts)/self.bkg_dt
 
-        print "Done with Bkg calcs"
-        print "bkg rates: "
-        print self.bkg_rates
-        print "bkg rate errors: "
-        print self.bkg_rate_errs
+        print("Done with Bkg calcs")
+        print("bkg rates: ")
+        print(self.bkg_rates)
+        print("bkg rate errors: ")
+        print(self.bkg_rate_errs)
 
 
     def set_sig_time(self, t0, dt):
 
-        print "Setting up Signal Data"
+        print("Setting up Signal Data")
 
         self.sig_t0 = t0
         self.sig_dt = dt
@@ -98,13 +98,13 @@ class llh_ebins_square(object):
         self.data_cnts_blm = np.array([dpi[self.bl_dmask] for dpi in\
                               self.data_dpis])
 
-        print 'Data Counts per Ebins: '
-        print [np.sum(self.data_cnts_blm[i]) for i in xrange(self.nebins)]
+        print('Data Counts per Ebins: ')
+        print([np.sum(self.data_cnts_blm[i]) for i in range(self.nebins)])
 
         self.exp_bkg_cnts = self.bkg_rates*self.sig_dt
         self.bkg_cnt_errs = 5.*self.bkg_rate_errs*self.sig_dt
 
-        print "Done setting up Signal Stuff"
+        print("Done setting up Signal Stuff")
 
 
     def model(self, imx, imy, sig_cnts, index, bkg_cnts):
@@ -151,7 +151,7 @@ class llh_ebins_square(object):
         #                    in sig_cnts_per_ebin])
 
         mod_cnts = np.array([bkg_mod[i] + rt_bl*sig_cnts_per_ebin[i] for\
-                             i in xrange(self.nebins)])
+                             i in range(self.nebins)])
 
 
         #return np.add(bkg_mod, sig_mod)
@@ -200,10 +200,10 @@ class llh_ebins_square(object):
 
         llh = np.sum(log_pois_prob(model_cnts, self.data_cnts_blm))
 
-        print imx, imy
-        print sig_cnts, index
-        print bkg_cnts
-        print llh
+        print(imx, imy)
+        print(sig_cnts, index)
+        print(bkg_cnts)
+        print(llh)
 
         return llh
 
@@ -272,8 +272,8 @@ class llh_ebins_square(object):
 
             bnds = np.array([lowers, uppers]).T
 
-            print np.shape(bnds)
-            print bnds
+            print(np.shape(bnds))
+            print(bnds)
 
             func2min = self.nllh_normed_params
 
@@ -303,8 +303,8 @@ class llh_ebins_square(object):
 
             bnds = np.array([lowers, uppers]).T
 
-            print np.shape(bnds)
-            print bnds
+            print(np.shape(bnds))
+            print(bnds)
 
             res = optimize.dual_annealing(func2min, bnds)
 
@@ -331,7 +331,7 @@ class llh_ebins_square(object):
 
         nlogprior = -1.*np.sum(self.calc_logprior(bkg_cnts))
 
-        for i in xrange(self.nebins):
+        for i in range(self.nebins):
 
             bcnts = bkg_cnts[i]/self.ndets
             nllhs.append( -1.*log_pois_prob(bcnts,\
@@ -452,33 +452,33 @@ def main(args):
 
     t0 = time.time()
 
-    for ii in xrange(len(test_dts)):
+    for ii in range(len(test_dts)):
 
         sig_dt = test_dts[ii]
 
         sig_t0_ax = np.arange(test_twind[0], test_twind[1], sig_dt/2.)
 
-        for jj in xrange(len(sig_t0_ax)):
+        for jj in range(len(sig_t0_ax)):
 
             sig_t0 = args.trig_time + sig_t0_ax[jj]
 
             llh_obj.set_sig_time(sig_t0, sig_dt)
 
             res_bkg = llh_obj.min_bkg_nllh()
-            print res_bkg
+            print(res_bkg)
             bkg_nllh = res_bkg.fun
             bkg_nllhs.append(bkg_nllh)
             bkg_xs.append(res_bkg.x)
 
             res = llh_obj.min_nllh(meth='dual_annealing', maxfun=5000, seed=seed)
-            print "Sig result"
-            print res
+            print("Sig result")
+            print(res)
             sig_nllhs.append(res.fun)
             sig_xs.append(res.x)
 
-            print "Done with dt %.3f at t0 %.3f" (sig_dt, sig_t0_ax)
-            print "Taken %.2f seconds, %.2f minutes so far"\
-                %(time.time()-t0,(time.time()-t0)/60.)
+            print("Done with dt %.3f at t0 %.3f" (sig_dt, sig_t0_ax))
+            print("Taken %.2f seconds, %.2f minutes so far"\
+                %(time.time()-t0,(time.time()-t0)/60.))
 
 
 

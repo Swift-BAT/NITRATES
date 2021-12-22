@@ -157,7 +157,7 @@ def get_cnts_intp_obj(ind_ax, drm, ebin_ind_edges, abs_cor):
     nebins = len(ebin_ind_edges)
     cnt_ebins_norm_ind_mat = np.zeros((len(ind_ax),nebins))
 
-    for i in xrange(len(ind_ax)):
+    for i in range(len(ind_ax)):
         cnt_ebins_norm_ind_mat[i] =\
                 get_cnt_ebins_normed(ind_ax[i],\
                 drm, ebin_ind_edges, abs_cor=abs_cor)
@@ -174,7 +174,7 @@ def get_cnts_per_tbins(t_bins0, t_bins1,\
     nebins = len(ebins0)
     cnts_per_tbin = np.zeros((ntbins, nebins))
 
-    for i in xrange(ntbins):
+    for i in range(ntbins):
 
         sig_bl = (ev_data['TIME']>=t_bins0[i])&\
                 (ev_data['TIME']<(t_bins1[i]))
@@ -194,13 +194,13 @@ def get_quad_cnts_tbins(tbins0, tbins1, ebins0, ebins1, evd):
 
     cnts_mat = np.zeros((ntbins,nebins,4))
 
-    for i in xrange(ntbins):
+    for i in range(ntbins):
 
         sig_bl = (evd['TIME']>=tbins0[i])&\
                 (evd['TIME']<(tbins1[i]))
         sig_data = evd[sig_bl]
 
-        for j in xrange(nebins):
+        for j in range(nebins):
 
             e_bl = (sig_data['ENERGY']>=ebins0[j])&\
                     (sig_data['ENERGY']<(ebins1[j]))
@@ -217,11 +217,11 @@ def get_cnts(ev, t_bins0, t_bins1, ebin_inds, nebins):
     ntbins = len(t_bins0)
     cnts = np.zeros((ntbins, nebins))
 
-    for i in xrange(ntbins):
+    for i in range(ntbins):
         blt = (ev['TIME']>=t_bins0[i])&(ev['TIME']<t_bins1[i])
         ebin_inds_ = ebin_inds[blt]
 
-        for j in xrange(nebins):
+        for j in range(nebins):
 
             cnts[i,j] = np.sum(ebin_inds_==j)
 
@@ -236,7 +236,7 @@ def get_data_cube(tbins0, tbins1, ebins0, ebins1, evd, dmask_bl):
 
     data_cube = np.zeros((ntbins, nebins, ndets), dtype=np.int)
 
-    for i in xrange(ntbins):
+    for i in range(ntbins):
 
         blt = (evd['TIME']>=tbins0[i])&(evd['TIME']<tbins1[i])
         ev_ = evd[blt]
@@ -293,8 +293,8 @@ def main(args):
     ndets_quad = dmask2ndets_perquad(dmask)
 
     #bkg_cnts = np.array([np.sum(dpi[(dmask==0)]) for dpi in bkg_data_dpis])
-    print bkg_quad_cnts
-    print bkg_quad_cnts/args.bkgdt
+    print(bkg_quad_cnts)
+    print(bkg_quad_cnts/args.bkgdt)
 
     bkg_err = 2.*np.sqrt(bkg_quad_cnts)
 
@@ -303,7 +303,7 @@ def main(args):
     t_bins0 = np.arange(-15.008, 15.008, tstep) + trig_time
     t_bins1 = t_bins0 + bin_size
     ntbins = len(t_bins0)
-    print ntbins
+    print(ntbins)
 
     #cnts_per_tbin = get_cnts_per_tbins(t_bins0, t_bins1, ebins0, ebins1,\
     #                                  ev_data0, dmask)
@@ -351,9 +351,9 @@ def main(args):
                     }
 
 
-    for ii in xrange(N_dbl_dt):
+    for ii in range(N_dbl_dt):
 
-        for direction, quad_dict in quad_dicts.iteritems():
+        for direction, quad_dict in quad_dicts.items():
 
             tab = Table()
 
@@ -376,12 +376,12 @@ def main(args):
                             quad_dict['quads']], axis=0)
 
             bkg_err = 5.*np.sqrt(bkg_cnts)
-            print imx, imy
-            print bkg_err
-            print bin_size*bkg_err/args.bkgdt
+            print(imx, imy)
+            print(bkg_err)
+            print(bin_size*bkg_err/args.bkgdt)
 
 
-            for i in xrange(ntbins):
+            for i in range(ntbins):
 
                 bkg_llh_tbins[i] = rates_llh(\
                             cnts_per_tbin[i], 0.,\
@@ -392,7 +392,7 @@ def main(args):
             bf_inds = np.zeros(ntbins)
             llhs = np.zeros(ntbins)
 
-            for i in xrange(ntbins):
+            for i in range(ntbins):
 
                 x0 = [1., 1.]
                 _args = (cnts_per_tbin[i], bkg_cnts, bkg_err,\
@@ -430,7 +430,7 @@ def main(args):
         t_bins0 = np.arange(-15.008, 15.008, tstep) + trig_time
         t_bins1 = t_bins0 + bin_size
         ntbins = len(t_bins0)
-        print ntbins
+        print(ntbins)
 
         quad_cnts_mat = get_quad_cnts_tbins(t_bins0, t_bins1,\
                                     ebins0, ebins1, ev_data0)
@@ -449,7 +449,7 @@ def main(args):
     exps = tab['tstop'] - tab['tstart']
     pvals = stats.chi2.sf(2.*llhrs, 1)
     Nexps = args.ndbl + 1
-    for i in xrange(Nexps):
+    for i in range(Nexps):
         bl_exp = np.isclose(exps, .128*(2**(i)))
         pvals[bl_exp] *= (np.sum(bl_exp)/dt_tot)
     pvals = 1. - np.exp(-pvals)

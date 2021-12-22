@@ -78,7 +78,7 @@ def run_batcelldetect(infile, cat_fname, snr_thresh=3.5,\
                 "pcodefile="+pcode, "chatter=1"]
     if sigmap is not None:
         arg_list.append('signifmap='+sigmap)
-    print arg_list
+    print(arg_list)
     run_ftool(ftool, arg_list)
 
 
@@ -128,7 +128,7 @@ def get_seed_times(args):
     ts = np.vstack({tuple([row['tstart'], row['tstop']]) for\
                 row in tab[bl]})
     #print np.sum(bl), ' seed times to search'
-    print len(ts), ' seed times to search'
+    print(len(ts), ' seed times to search')
     #tstart = tab['tstart'][bl]
     #tstop = tab['tstop'][bl]
     tstart = ts[:,0]
@@ -144,7 +144,7 @@ def get_times_all(tmin, tmax):
     tstarts = np.arange(tmin, tmax-tstep, tstep)
     tstops = tstarts + tsize
 
-    for i in xrange(3):
+    for i in range(3):
         tstep *= 2
         tsize *= 2
 
@@ -270,7 +270,7 @@ def do_search_mp(tstarts, dts, args, bkg_full_dpi, pc_fname):
 
     arg_dict_keys = ['tstart', 'dt', 'args', 'bkg_full_dpi', 'bkg_ebins_dpi', 'ebins', 'pc_fname']
     args_dict_list = []
-    for i in xrange(len(tstarts)):
+    for i in range(len(tstarts)):
 
         arg_dict = {'tstart':tstarts[i], 'dt':dts[i], 'args':args,
                     'bkg_full_dpi':bkg_full_dpi,
@@ -280,20 +280,20 @@ def do_search_mp(tstarts, dts, args, bkg_full_dpi, pc_fname):
     t0 = time.time()
 
     if args.nproc == 1:
-        for i in xrange(len(args_dict_list)):
+        for i in range(len(args_dict_list)):
             do_search(args_dict_list[i])
     else:
         p = mp.Pool(args.nproc)
 
-        print "Starting %d procs" %(args.nproc)
+        print("Starting %d procs" %(args.nproc))
 
         p.map_async(do_search, args_dict_list).get()
 
         p.close()
         p.join()
 
-    print "Done with all searches"
-    print "Took %.2f seconds, %.2f minutes" %(time.time()-t0,(time.time()-t0)/60.)
+    print("Done with all searches")
+    print("Took %.2f seconds, %.2f minutes" %(time.time()-t0,(time.time()-t0)/60.))
 
 
 
@@ -308,16 +308,16 @@ def main(args):
 
     if not os.path.isdir(obs_save_dir):
 
-        print "Directory, %s doesn't exist" %(obs_save_dir)
-        print "So making it"
+        print("Directory, %s doesn't exist" %(obs_save_dir))
+        print("So making it")
         os.makedirs(obs_save_dir)
 
     bkg_full_dpi = "NONE"
 
     if not args.nobkg:
-        print "Making full energy bkg dpi"
+        print("Making full energy bkg dpi")
         bkg_full_dpi = do_bkg(args)
-        print "Made ", bkg_full_dpi
+        print("Made ", bkg_full_dpi)
 
     pc_fname = os.path.join(obs_save_dir, 'pc.img')
 
@@ -336,9 +336,9 @@ def main(args):
     min_time = np.min(ev_tab['TIME'])
     max_time = np.max(ev_tab['TIME'])
 
-    print "min time: ", min_time
-    print "max time: ", max_time
-    print "total time: ", max_time - min_time
+    print("min time: ", min_time)
+    print("max time: ", max_time)
+    print("total time: ", max_time - min_time)
 
     if args.tabfname == 'all':
         tstarts, tstops = get_times_all(min_time, max_time)
@@ -354,11 +354,11 @@ def main(args):
 
     ntbins = len(tstarts)
 
-    print "Done with doing bkg"
-    print "Took %.3f seconds" %(time.time() - t_0)
+    print("Done with doing bkg")
+    print("Took %.3f seconds" %(time.time() - t_0))
 
-    print ntbins, " time bins to search"
-    print "Now setting up search"
+    print(ntbins, " time bins to search")
+    print("Now setting up search")
 
     do_search_mp(tstarts, dts, args, bkg_full_dpi, pc_fname)
 

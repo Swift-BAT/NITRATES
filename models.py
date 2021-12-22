@@ -186,9 +186,7 @@ class Flux2Rate_4PBtrans(object):
 
 
 
-class Model(object):
-
-    __metaclass__ = abc.ABCMeta
+class Model(object, metaclass=abc.ABCMeta):
 
     def __init__(self, name, bl_dmask, param_names,\
                  param_dict, nebins,\
@@ -259,7 +257,7 @@ class Bkg_Model(Model):
         self.bkg_obj = bkg_obj
 
         param_names = ['bkg_rate_' + str(i) for i\
-                       in xrange(nebins)]
+                       in range(nebins)]
 
         param_dict = {}
 
@@ -315,7 +313,7 @@ class Bkg_Model(Model):
 
         rate_dpis = []
 
-        for i in xrange(len(rates)):
+        for i in range(len(rates)):
 
             rate_dpis.append(rates[i]*self._rate_ones)
 
@@ -331,7 +329,7 @@ class Bkg_Model(Model):
     def get_log_prior(self, params, t=None):
 
         lp = 0.0
-        for k, val in params.iteritems():
+        for k, val in params.items():
             lp += stats.norm.logpdf(val, loc=self._rates[int(k[-1])],\
                                    scale=self._errs[int(k[-1])])
         return lp
@@ -348,9 +346,9 @@ class Bkg_Model_wSA(Model):
         self.solid_angs = solid_ang_dpi[bl_dmask]
 
         self.dif_names = ['diffuse_' + str(i) for i\
-                       in xrange(nebins)]
+                       in range(nebins)]
         self.flat_names = ['flat_' + str(i) for i\
-                       in xrange(nebins)]
+                       in range(nebins)]
 
         param_names = self.dif_names
         param_names += self.flat_names
@@ -474,10 +472,10 @@ class Bkg_Model_wFlatA(Model):
         self.solid_ang_mean = np.mean(self.solid_angs)
 
         self.rate_names = ['bkg_rate_' + str(i) for i\
-                       in xrange(nebins)]
+                       in range(nebins)]
 
         self.flat_names = ['flat_' + str(i) for i\
-                           in xrange(nebins)]
+                           in range(nebins)]
 
 #         self.rat_names = ['diff_flat_' + str(i) for i\
 #                                in xrange(nebins)]
@@ -693,10 +691,10 @@ class Bkg_Model_wFlatA(Model):
         self.solid_ang_mean = np.mean(self.solid_angs)
 
         self.rate_names = ['bkg_rate_' + str(i) for i\
-                       in xrange(nebins)]
+                       in range(nebins)]
 
         self.flat_names = ['flat_' + str(i) for i\
-                           in xrange(nebins)]
+                           in range(nebins)]
 
 #         self.rat_names = ['diff_flat_' + str(i) for i\
 #                                in xrange(nebins)]
@@ -1760,7 +1758,7 @@ class Point_Source_Model_Binned_Rates(Model):
     def get_log_prior(self, params):
 
         lp = 0.0
-        for k, val in params.iteritems():
+        for k, val in params.items():
             lp += stats.norm.logpdf(val, loc=self._rates[int(k[-1])],\
                                    scale=self._errs[int(k[-1])])
         return lp
@@ -1977,7 +1975,7 @@ class Point_Source_Model_Binned_Rates(Model):
     def get_log_prior(self, params):
 
         lp = 0.0
-        for k, val in params.iteritems():
+        for k, val in params.items():
             lp += stats.norm.logpdf(val, loc=self._rates[int(k[-1])],\
                                    scale=self._errs[int(k[-1])])
         return lp
@@ -2093,7 +2091,7 @@ class Bkg_and_Point_Source_Model(Model):
 
     def set_bkg_row(self, bkg_row):
 
-        col_names = bkg_row.keys()
+        col_names = list(bkg_row.keys())
 
         PSnames = []
         for name in col_names:
@@ -2371,7 +2369,7 @@ class Bkg_and_Point_Source_Model(Model):
                 res_dict[pname] = dnlpdps[i]
 
         for pname in self.param_names:
-            if pname in res_dict.keys():
+            if pname in list(res_dict.keys()):
                 if self.param_dict[pname]['fixed']:
                     continue
                 dnlp_dps.append(res_dict[pname])

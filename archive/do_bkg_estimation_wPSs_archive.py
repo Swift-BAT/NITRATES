@@ -81,7 +81,7 @@ def add_imxy2src_tab(src_tab, attfile, t0):
     imxs = np.zeros(len(src_tab))
     imys = np.zeros(len(src_tab))
     src_tab['PntSep'] = ang_sep(pnt_ra, pnt_dec, src_tab['RAJ2000'], src_tab['DEJ2000'])
-    for i in xrange(len(imxs)):
+    for i in range(len(imxs)):
         if src_tab['PntSep'][i] > 80.0:
             imxs[i], imys[i] = np.nan, np.nan
             continue
@@ -116,7 +116,7 @@ def min_by_ebin(miner, params_):
     NLLH = 0.0
 
     for e0 in range(nebins):
-        miner.set_fixed_params(params.keys(), values=params.values())
+        miner.set_fixed_params(list(params.keys()), values=list(params.values()))
         e0_pnames = []
         for pname in miner.param_names:
             try:
@@ -200,7 +200,7 @@ def bkg_withPS_fit(PS_tab, model, llh_obj, t0s, t1s,\
     for i in range(Npnts):
         bf_params = {}
         im_names = []
-        params_ = {pname:val['val'] for pname, val in bkg_miner.param_info_dict.iteritems()}
+        params_ = {pname:val['val'] for pname, val in bkg_miner.param_info_dict.items()}
 
 
         for j in range(Nps):
@@ -356,7 +356,7 @@ def do_init_bkg_wPSs(bkg_mod, llh_obj, src_tab, rt_obj, GTI, sig_twind,\
         logging.debug("min_rate: ")
         logging.debug(min_rate)
         PSs2keep = []
-        for name, TS in TS_nulls.iteritems():
+        for name, TS in TS_nulls.items():
             ps_rates = np.array([bf_params[name+'_rate_'+str(j)] for j in range(nebins)])
             logging.debug(name + " rates: ")
             logging.debug(ps_rates)
@@ -488,12 +488,12 @@ def bkg_withPS_fit_fiximxy(PS_tab, model, llh_obj, t0s, t1s, params_,\
         for ii, pname in enumerate(e0_pnames):
             bf_params[pname] = bf_vals[0][ii]
 
-        print bf_params
+        print(bf_params)
 
         err_dict, corr_dict = get_errs_corrs(llh_obj, model, copy(bf_params), e0, pnames2skip=fixed_pnames)
-        for k, val in err_dict.iteritems():
+        for k, val in err_dict.items():
             errs_dict[k] = val
-        for k, val in corr_dict.iteritems():
+        for k, val in corr_dict.items():
             corrs_dict[k] = val
 
     return nllh, bf_params, errs_dict, corrs_dict
@@ -606,7 +606,7 @@ def main(args):
 
 
     if Nsrcs > 0:
-        fixed_pars = [pname for pname in init_bf_params.keys() if '_flat_' in pname\
+        fixed_pars = [pname for pname in list(init_bf_params.keys()) if '_flat_' in pname\
                     or '_imx' in pname or '_imy' in pname]
 
         mod_list = [bkg_mod]
@@ -651,8 +651,8 @@ def main(args):
         bkg_t1 = tmid + sig_wind/2. + bkg_dur/2.
         bkg_bti = Table(data=([-np.inf, bkg_t1], [bkg_t0, np.inf]), names=('START', 'STOP'))
         gti_ = add_bti2gti(bkg_bti, gti_)
-        print tmid - trigtime
-        print gti_
+        print(tmid - trigtime)
+        print(gti_)
         t0s = gti_['START']
         t1s = gti_['STOP']
         exp = 0.0

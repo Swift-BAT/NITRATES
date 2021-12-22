@@ -381,8 +381,8 @@ def main(args):
     w_t = WCS(PC.header, key='T')
 
     pcs = world2val(w_t, pc, imxs, imys)
-    print np.min(pcs), np.max(pcs)
-    print np.sum(pcs>.16)
+    print(np.min(pcs), np.max(pcs))
+    print(np.sum(pcs>.16))
     pc_bl = (pcs>.16)
     imxs = imxs[pc_bl]
     imys = imys[pc_bl]
