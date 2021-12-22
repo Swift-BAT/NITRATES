@@ -101,7 +101,7 @@ def do_bkg_analysis_mp(i_proc, nprocs):
     logging.debug("min(t_bins0), max(t_bins0): %.3f, %.3f" %(np.min(t_bins0),np.max(t_bins0)))
     logging.debug("min(t_bins1), max(t_bins1): %.3f, %.3f" %(np.min(t_bins1),np.max(t_bins1)))
 
-    for i in xrange(ntbins):
+    for i in range(ntbins):
 
         # pretty sure I don't have to do miner.set_llh() again
         dt = t_bins1[i] - t_bins0[i]
@@ -200,7 +200,7 @@ def main(args):
         logging.debug("min(t_bins0), max(t_bins0): %.3f, %.3f" %(np.min(t_bins0),np.max(t_bins0)))
         logging.debug("min(t_bins1), max(t_bins1): %.3f, %.3f" %(np.min(t_bins1),np.max(t_bins1)))
 
-        for i in xrange(ntbins):
+        for i in range(ntbins):
 
             # pretty sure I don't have to do miner.set_llh() again
             llh_bkg.set_time(t_bins0[i], dt)

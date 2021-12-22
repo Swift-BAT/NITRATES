@@ -39,7 +39,7 @@ def get_cub_rate_quad_objs(quad_dicts, ev_data, trig_time, ebins0, ebins1,\
 
     rate_quad_dict = {}
 
-    for direc, quad_dict in quad_dicts.iteritems():
+    for direc, quad_dict in quad_dicts.items():
 
         cnts_per_tbin = np.sum( [quad_cnts_mat[:,:,q] for\
                 q in quad_dict['quads']], axis=0)
@@ -63,7 +63,7 @@ def get_lin_rate_quad_objs(quad_dicts, ev_data, trig_time, ebins0, ebins1,\
 
     lin_rate_quad_dict = {}
 
-    for direc, quad_dict in quad_dicts.iteritems():
+    for direc, quad_dict in quad_dicts.items():
 
         cnts_per_tbin = np.sum( [quad_cnts_mat[:,:,q] for\
                 q in quad_dict['quads']], axis=0)
@@ -160,7 +160,7 @@ class Cubic_Rates(object):
 
 
     def do_fits(self):
-        for i in xrange(self.n_lin_pnts):
+        for i in range(self.n_lin_pnts):
 
             t_mid = self.t_poly_ax[i]
 
@@ -183,7 +183,7 @@ class Cubic_Rates(object):
             _cnts = np.append(self.cnts_per_tbin[ind0:ind0_sig],\
                                   self.cnts_per_tbin[ind1_sig:ind1], axis=0)
 
-            for j in xrange(self.nebins):
+            for j in range(self.nebins):
 
                 res_ = optimize.curve_fit(cubic_func, _t_ax,\
                                      _cnts[:,j],\
@@ -252,7 +252,7 @@ class Linear_Rates(object):
 
 
     def do_fits(self):
-        for i in xrange(self.n_lin_pnts):
+        for i in range(self.n_lin_pnts):
 
             t_mid = self.t_poly_ax[i]
 
@@ -275,7 +275,7 @@ class Linear_Rates(object):
             _cnts = np.append(self.cnts_per_tbin[ind0:ind0_sig],\
                                   self.cnts_per_tbin[ind1_sig:ind1], axis=0)
 
-            for j in xrange(self.nebins):
+            for j in range(self.nebins):
 
                 res_lin = optimize.curve_fit(lin_func, _t_ax,\
                                      _cnts[:,j],\
@@ -322,7 +322,7 @@ def get_linear_bkg_rates(quad_cnts_mat, t_bins0, t_bins1, trig_time, quad_dicts)
     # t_bins0 = np.arange(-150.*1.024, 300.*1.024, tstep) + trig_time
     # t_bins1 = t_bins0 + bin_size
     ntbins = len(t_bins0)
-    print ntbins
+    print(ntbins)
     nebins = quad_cnts_mat.shape[1]
 
     sig_window = (-5.*1.024, 10.24)
@@ -338,19 +338,19 @@ def get_linear_bkg_rates(quad_cnts_mat, t_bins0, t_bins1, trig_time, quad_dicts)
 
     t_poly_ax = np.arange(t0, t1, t_poly_step)
     nptbins = len(t_poly_ax)
-    print nptbins
+    print(nptbins)
 
 
     lin_params = np.zeros((nptbins, nebins, 3))
     #lin_cov = np.zeros((nptbins, nebins, 2, 2))
     quads_lin_resdict = {}
     #quads_lin_covdict = {}
-    for k in quad_dicts.keys():
+    for k in list(quad_dicts.keys()):
         quads_lin_resdict[k] = np.copy(lin_params)
         #quads_lin_covdict[k] = np.copy(lin_cov)
 
 
-    for i in xrange(len(t_poly_ax)):
+    for i in range(len(t_poly_ax)):
 
         t_mid = t_poly_ax[i]
 
@@ -375,13 +375,13 @@ def get_linear_bkg_rates(quad_cnts_mat, t_bins0, t_bins1, trig_time, quad_dicts)
 
 
 
-        for direc, quad_dict in quad_dicts.iteritems():
+        for direc, quad_dict in quad_dicts.items():
 
             cnts_per_tbin = np.sum( [quad_cnts[:,:,q] for\
                         q in quad_dict['quads']], axis=0 )
 
 
-            for ii in xrange(nebins):
+            for ii in range(nebins):
                 res_lin = optimize.curve_fit(lin_func, _t_ax,\
                                      cnts_per_tbin[:,ii],\
                                      sigma=np.sqrt(cnts_per_tbin[:,ii]),\

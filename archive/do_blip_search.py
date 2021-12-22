@@ -99,7 +99,7 @@ def main(args):
 
     dpi_bkg_fnames = []
     logging.info("Making the bkg DPIs")
-    for i in xrange(Nebins):
+    for i in range(Nebins):
         dpi_bkg_fnames.append(do_bkg(bkg_t0, bkg_t1, ev_fname,\
                             dmask, work_dir, e0=ebins0[i], e1=ebins1[i]))
     logging.info("DPI bkg from MET %.3f - %.3f" %(bkg_t0, bkg_t1))
@@ -110,7 +110,7 @@ def main(args):
     dts = np.zeros(Nimgs)
 
     logging.info("Getting times and exposures")
-    for i in xrange(Nimgs):
+    for i in range(Nimgs):
         times[i], dts[i] = timeID2time_dur(timeIDs[i], trig_time)
 
 
@@ -123,7 +123,7 @@ def main(args):
                     db_fname=db_fname, timeIDs=timeIDs)
 
     else:
-        for i in xrange(Nimgs):
+        for i in range(Nimgs):
 
             cat_fname = std_grb(times[i], dts[i], ev_fname, dpi_bkg_fname,\
                                 att_fname, dmask, work_dir, pc=pc_fname)

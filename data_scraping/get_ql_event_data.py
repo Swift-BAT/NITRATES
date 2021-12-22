@@ -1,7 +1,7 @@
 import logging, traceback, argparse
 import requests
-import urllib2
-import urllib
+import urllib.request, urllib.error, urllib.parse
+import urllib.request, urllib.parse, urllib.error
 from bs4 import BeautifulSoup
 import os
 from astropy.io import fits
@@ -35,7 +35,7 @@ def get_obsid_dict(url):
             f0s = f0[0].split('.')
             obsid = f0s[0][2:]
             ver = int(f0s[1])
-            if obsid in obsid_dict.keys():
+            if obsid in list(obsid_dict.keys()):
                 if ver <= obsid_dict[obsid]['ver']:
                     continue
             obsid_dict[obsid] = {}
@@ -46,7 +46,7 @@ def get_obsid_dict(url):
 
 def get_bat_files_from_list_url(url, aux=False):
 
-    data = urllib2.urlopen(url).read()
+    data = urllib.request.urlopen(url).read()
     data = data.split("\n")
     bat_files = []
     aux_files = []
@@ -97,12 +97,12 @@ def get_urls2download(obsid_url):
 def download_file(url, fname):
 
     try:
-        urllib.urlretrieve(url, fname)
+        urllib.request.urlretrieve(url, fname)
     except Exception as E:
         logging.error(E)
         try:
             logging.info("Let's try again")
-            urllib.urlretrieve(url, fname)
+            urllib.request.urlretrieve(url, fname)
         except Exception as E:
             logging.error(E)
 
@@ -168,7 +168,7 @@ def main(args):
     # get the obsid and vers from the ql website
     obsid_dict = get_obsid_dict(base_url)
 
-    for obsid, obs_dict in obsid_dict.iteritems():
+    for obsid, obs_dict in list(obsid_dict.items()):
 
         new_obsid = True
 
@@ -235,7 +235,7 @@ def main(args):
                 utcf = float(gti.header['UTCFINIT'])
                 obs_mode = ev_file[1].header['OBS_MODE']
                 Ngtis = len(gti.data['START'])
-                for ii in xrange(Ngtis):
+                for ii in range(Ngtis):
                     db_data_dict = {}
                     db_data_dict['eventFname'] = ev_file_dict['eventFname']
                     db_data_dict['eventURL'] = ev_file_dict['eventURL']

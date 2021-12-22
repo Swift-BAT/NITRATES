@@ -113,7 +113,7 @@ def do_analysis(imxs, imys, t0, t1, pl_flux, drm_obj, rt_obj,\
 
     logging.info(str(len(imxs)) + " positions to minimize")
 
-    for ii in xrange(len(imxs)):
+    for ii in range(len(imxs)):
         try:
             sig_miner.set_fixed_params(['Signal_imx', 'Signal_imy'],\
                                         [imxs[ii],imys[ii]])

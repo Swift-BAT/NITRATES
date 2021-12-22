@@ -77,9 +77,7 @@ def cli():
 def im_dist(imx0, imy0, imx1, imy1):
     return np.hypot((imx1 - imx0), (imy1 - imy0))
 
-class Flux_Model(object):
-
-    __metaclass__ = abc.ABCMeta
+class Flux_Model(object, metaclass=abc.ABCMeta):
 
     def __init__(self, name, param_names, param_bounds=None, E0=50.0):
 
@@ -147,7 +145,7 @@ class Flux_Model(object):
         else:
             Npnts = len(Ebins) - 1
             photon_fluxes = np.zeros(Npnts)
-            for i in xrange(Npnts):
+            for i in range(Npnts):
                 photon_fluxes[i] = self.get_photon_flux(Ebins[i],\
                                                         Ebins[i+1],\
                                                         params,\
@@ -411,7 +409,7 @@ class Bkg_Model_wSAfixed(Model):
         self.solid_ang_mean = np.mean(self.solid_angs)
 
         self.rate_names = ['bkg_rate_' + str(i) for i\
-                       in xrange(nebins)]
+                       in range(nebins)]
 
         self.ratios = np.array(flat_diff_ratios)
         # 1 = Af + Ad
@@ -673,8 +671,8 @@ class Point_Source_Model_Wuncoded(Model):
         param_names += self.frac_names
 #         param_names.append('scat_fact')
 
-        print "param_names: "
-        print param_names
+        print("param_names: ")
+        print(param_names)
 
         param_bounds = {'imx':(self.imx0, self.imx1),
                        'imy':(self.imy0, self.imy1)}
@@ -1231,7 +1229,7 @@ class FootPrints(object):
 
         fname = fp_arr0['fname']
 
-        if fname not in self.fp_files.keys():
+        if fname not in list(self.fp_files.keys()):
             self.open_fp_file_obj(fp_arr0)
         self.fp_arr['time'][ind] = time.time()
         return self.fp_files[fname]
@@ -1373,7 +1371,7 @@ class LLH_webins(object):
             dNs_dparam = self.model.get_dr_dps(params)
 
             jacob = [np.sum(fact*dNs_dparam[i])*self.dt for i\
-                    in xrange(len(dNs_dparam))]
+                    in range(len(dNs_dparam))]
 
         else:
 
@@ -1391,7 +1389,7 @@ class LLH_webins(object):
                 dNLP_dparams = np.zeros(len(dR_dparams))
 
             jacob = [dNLP_dparams[i] + np.sum(fact*dR_dparams[i])*self.dt\
-                     for i in xrange(len(dR_dparams))]
+                     for i in range(len(dR_dparams))]
 
         return jacob
 
@@ -1472,7 +1470,7 @@ def integrated_LLH_webins(llh_obj, miner, params, bl_dmask,\
 
     for j in range(nebins):
 
-        miner.set_fixed_params(params.keys(), values=params.values())
+        miner.set_fixed_params(list(params.keys()), values=list(params.values()))
         # logging.debug('Params: ')
         # logging.debug(params)
         e0_pnames = []

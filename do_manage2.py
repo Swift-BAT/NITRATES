@@ -440,8 +440,8 @@ def mk_in_seed_tab(rates_res, TS_min=4.5, im_steps=25, max_Ntwinds=8, max_overla
             rank48_dlogl = get_Nrank_val(dlogls.values, 48)
             rank196_dlogl = get_Nrank_val(dlogls.values, 196)
 
-            print("max, med dlogl: ", max_dlogl, med_dlogl)
-            print("rank 48, 196 dlogl: ", rank48_dlogl, rank196_dlogl)
+            print(("max, med dlogl: ", max_dlogl, med_dlogl))
+            print(("rank 48, 196 dlogl: ", rank48_dlogl, rank196_dlogl))
 
 
             # dlogl_cut at most the median
@@ -455,7 +455,7 @@ def mk_in_seed_tab(rates_res, TS_min=4.5, im_steps=25, max_Ntwinds=8, max_overla
                 dlogl_cut = min(dlogl_cut, rank196_dlogl)
 
             print(dlogl_cut)
-            print(np.sum(dlogls<=dlogl_cut), len(dlogls))
+            print((np.sum(dlogls<=dlogl_cut), len(dlogls)))
 
 
 
@@ -631,9 +631,9 @@ def mk_out_seed_tab(in_seed_tab, hp_inds, att_q, Nside=2**4, Nmax_jobs=24):
 
     Npix = len(hp_inds)
 
-    print("Npix: ", Npix)
+    print(("Npix: ", Npix))
     Njobs = min(Npix, Nmax_jobs)
-    print("Njobs: ", Njobs)
+    print(("Njobs: ", Njobs))
 
     timeIDs = []
     t0s = []
@@ -852,7 +852,7 @@ def sub_jobs(njobs, name, pyscript, pbs_fname, queue='open',\
     cmd = ''
     jobids = []
 
-    for i in xrange(njobs):
+    for i in range(njobs):
 
         # cmd_ = 'jobid=%d,workdir=%s,njobs=%d,pyscript=%s' %(i,workdir,njobs,pyscript)
         cmd_ = 'jobid=%d,workdir=%s,njobs=%d,pyscript=%s,extra_args="%s"' %(i,workdir,njobs,pyscript,extra_args)

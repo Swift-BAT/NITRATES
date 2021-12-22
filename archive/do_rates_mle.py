@@ -120,7 +120,7 @@ def main(args):
 
         logging.info("Finished making quad_cnts_mat")
 
-        for direction, quad_dict in quad_dicts.iteritems():
+        for direction, quad_dict in quad_dicts.items():
 
             # I still have to import and define like all of this
             # how to store rate results in the loop?

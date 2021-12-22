@@ -44,10 +44,10 @@ def det2dpis_tbins(tab, ebins0, ebins1, tbins0, tbins1, bl_dmask=None):
 
     dpi_list = []
     ntbins = len(tbins0)
-    for ii in xrange(ntbins):
+    for ii in range(ntbins):
         blt = (tab['TIME']>=tbins0[ii])&(tab['TIME']<tbins1[ii])
         dpis = []
-        for i in xrange(len(ebins0)):
+        for i in range(len(ebins0)):
 
             bl = (tab['ENERGY']>=ebins0[i])&(tab['ENERGY']<ebins1[i])&blt
 

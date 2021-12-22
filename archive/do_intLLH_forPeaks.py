@@ -81,7 +81,7 @@ def integrated_LLH_webins(llh_obj, miner, params,\
     for j in range(nebins):
 
         params_ = copy(bf_params)
-        miner.set_fixed_params(params_.keys(), values=params_.values())
+        miner.set_fixed_params(list(params_.keys()), values=list(params_.values()))
         e0_pnames = []
         for pname in miner.param_names:
             try:
@@ -308,7 +308,7 @@ def parse_bkg_csv(bkg_fname, solid_angle_dpi, ebins0, ebins1, bl_dmask, rt_dir):
     for name in col_names:
         if '_imx' in name:
             PSnames.append(name.split('_')[0])
-    print PSnames
+    print(PSnames)
     Nsrcs = len(PSnames)
     if Nsrcs > 0:
         bkg_name = 'Background_'
@@ -402,7 +402,7 @@ def do_analysis(peaks_tab, pl_flux, drm_obj, rt_dir, fp_dir,\
 
         comp_mod = CompoundModel([bkg_mod, sig_mod])
 
-        params_ = copy({pname:d['val'] for pname, d in comp_mod.param_dict.iteritems()})
+        params_ = copy({pname:d['val'] for pname, d in comp_mod.param_dict.items()})
         params_['Signal_A'] = peak_row['Signal_A']
         params_['Signal_gamma'] = peak_row['Signal_gamma']
         sig_llh_obj.set_model(comp_mod)

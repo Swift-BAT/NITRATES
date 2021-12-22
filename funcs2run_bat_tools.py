@@ -134,7 +134,7 @@ def mk_sig_imgs_mp(nproc, tstarts, dts, evf, dpi_bkg_fname, pc_fname,\
                     'oversamp']
     args_dict_list = []
 
-    for i in xrange(len(tstarts)):
+    for i in range(len(tstarts)):
 
         arg_dict = {'tstart':tstarts[i], 'dt':dts[i], 'ev_fname':evf,
                     'bkg_dpi':dpi_bkg_fname,
@@ -155,7 +155,7 @@ def mk_sig_imgs_mp(nproc, tstarts, dts, evf, dpi_bkg_fname, pc_fname,\
         p.close()
         p.join()
     else:
-        sig_img_fnames = map(mk_sky_sig_img4mp, args_dict_list)
+        sig_img_fnames = list(map(mk_sky_sig_img4mp, args_dict_list))
 
     logging.info("Done with all images")
     logging.info("Took %.2f seconds, %.2f minutes"\
@@ -192,7 +192,7 @@ def get_sig_pix_mp(nproc, tstarts, dts, evf, dpi_bkg_fname, pc_fname,\
     exp_bins = np.digitize(dts, bins=exp_bins)
 
 
-    for i in xrange(len(tstarts)):
+    for i in range(len(tstarts)):
 
         if RateTSs is not None:
             if RateTSs[i] < TS_cuts[exp_bins[i]]:
@@ -365,7 +365,7 @@ def std_grb(tstart, dt, evf, dpi_bkg_fnames, attfile,\
 
     cat_fnames = []
 
-    for i in xrange(len(e0)):
+    for i in range(len(e0)):
 
         dpif = 'dpi_%.1f_%.1f_%.3f_%.3f_.dpi' %(e0[i], e1[i], tstart, tstop)
         dpi_fname = os.path.join(savedir, dpif)
@@ -493,7 +493,7 @@ def do_search_mp(nproc, tstarts, dts, ev_fname, bkg_dpis, pc_fname, att_fname,\
                     'savedir', 'pc_fname', 'e0', 'e1',
                     'oversamp', 'db_fname']
     args_dict_list = []
-    for i in xrange(len(tstarts)):
+    for i in range(len(tstarts)):
 
         arg_dict = {'tstart':tstarts[i], 'dt':dts[i], 'ev_fname':ev_fname,
                     'bkg_dpis':bkg_dpis,
@@ -507,7 +507,7 @@ def do_search_mp(nproc, tstarts, dts, ev_fname, bkg_dpis, pc_fname, att_fname,\
     t0 = time.time()
 
     if nproc == 1:
-        for i in xrange(len(args_dict_list)):
+        for i in range(len(args_dict_list)):
             do_search(args_dict_list[i])
     else:
         p = mp.Pool(nproc)

@@ -63,7 +63,7 @@ def main(args):
 
     Nexps2do = len(tstarts)
 
-    print("Nexps2do: ", Nexps2do)
+    print(("Nexps2do: ", Nexps2do))
 
     pcfname = do_pc(args.dmask, args.att_fname, '.',\
                     ovrsmp=args.oversamp, detapp=True)
@@ -80,7 +80,7 @@ def main(args):
                 oversamp=args.oversamp, detapp=True)
 
         print("**********************************")
-        print("************* Done with image %d of %d *********************"%(i+1,Nexps2do))
+        print(("************* Done with image %d of %d *********************"%(i+1,Nexps2do)))
         print("**********************************")
 
 

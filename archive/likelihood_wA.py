@@ -21,7 +21,7 @@ def get_sys_err(sys_err_file, ebin_ind_edges):
     sys_errs = np.array([np.mean(sys_err_file['SYS_ERR'][0]\
                         [ebin_ind_edges[i][0]:\
                         ebin_ind_edges[i][1]+1]) for i \
-                        in xrange(len(ebin_ind_edges))])
+                        in range(len(ebin_ind_edges))])
 
     return sys_errs
 
@@ -63,8 +63,8 @@ class llh_ebins_square_wsampler(object):
 
         self.ebin_ind_edges = get_ebin_ind_edges(self.drm,\
                                 self.ebins0, self.ebins1)
-        print "ebin_ind_edges"
-        print self.ebin_ind_edges
+        print("ebin_ind_edges")
+        print(self.ebin_ind_edges)
 
 
         self.abs_cor = get_abs_cor_rates((imx0+imx1)/2.,\
@@ -121,40 +121,40 @@ class llh_ebins_square_wsampler(object):
 
     def set_bkg_time(self, t0, dt):
 
-        print "Setting up Bkg calcs"
+        print("Setting up Bkg calcs")
 
         self.bkg_t0 = t0
         self.bkg_dt = dt
 
-        print "bkg_t0, bkg_dt", self.bkg_t0, self.bkg_dt
+        print("bkg_t0, bkg_dt", self.bkg_t0, self.bkg_dt)
 
         #bkg_data = self._all_data
         t_bl = (self._all_data['TIME']>self.bkg_t0)&\
                 (self._all_data['TIME']<(self.bkg_t0+self.bkg_dt))
         self.bkg_data = self._all_data[t_bl]
 
-        print "bkg sum time: ", np.sum(t_bl)
+        print("bkg sum time: ", np.sum(t_bl))
 
         self.bkg_data_dpis = det2dpis(self.bkg_data,\
                                       self.ebins0,\
                                       self.ebins1)
         self.bkg_cnts = np.array([np.sum(bkg_dpi[self.bl_dmask]) for\
                                   bkg_dpi in self.bkg_data_dpis])
-        print "bkg_cnts: ", self.bkg_cnts
+        print("bkg_cnts: ", self.bkg_cnts)
         self.bkg_rates = self.bkg_cnts/self.bkg_dt
         self.bkg_rate_errs = 5.*np.sqrt(self.bkg_cnts)/self.bkg_dt
 
-        print "Done with Bkg calcs"
-        print "bkg rates: "
-        print self.bkg_rates
-        print "bkg rate errors: "
-        print self.bkg_rate_errs
+        print("Done with Bkg calcs")
+        print("bkg rates: ")
+        print(self.bkg_rates)
+        print("bkg rate errors: ")
+        print(self.bkg_rate_errs)
 
 
 
     def set_sig_time(self, t0, dt):
 
-        print "Setting up Signal Data"
+        print("Setting up Signal Data")
 
         self.sig_t0 = t0
         self.sig_dt = dt
@@ -169,21 +169,21 @@ class llh_ebins_square_wsampler(object):
         self.data_cnts_blm = np.array([dpi[self.bl_dmask] for dpi in\
                               self.data_dpis])
 
-        print 'Data Counts per Ebins: '
-        print [np.sum(self.data_cnts_blm[i]) for i in xrange(self.nebins)]
+        print('Data Counts per Ebins: ')
+        print([np.sum(self.data_cnts_blm[i]) for i in range(self.nebins)])
 
         self.tot_data_cnts = np.sum(self.data_cnts_blm)
-        print "Total data counts: ", self.tot_data_cnts
+        print("Total data counts: ", self.tot_data_cnts)
 
         self.exp_bkg_cnts = self.bkg_rates*self.sig_dt
         self.bkg_cnt_errs = self.bkg_rate_errs*self.sig_dt
 
-        print "Expected bkg cnts and err: "
-        print self.exp_bkg_cnts
-        print self.bkg_cnt_errs
+        print("Expected bkg cnts and err: ")
+        print(self.exp_bkg_cnts)
+        print(self.bkg_cnt_errs)
 
 
-        print "Done setting up Signal Stuff"
+        print("Done setting up Signal Stuff")
 
 
     def flux2rate(self, A, ind):
@@ -234,7 +234,7 @@ class llh_ebins_square_wsampler(object):
         #rt_bl = rt_bl/rt_sum
 
         mod_cnts = np.array([bkg_mod[i] + rt_bl*sig_cnts_per_ebin[i]\
-                             for i in xrange(self.nebins)])
+                             for i in range(self.nebins)])
 
         #mod_cnts = np.array([bkg_mod[i] + rt_bl*sig_cnts_per_ebin[i]\
         #                     for i in xrange(self.nebins)])
@@ -273,7 +273,7 @@ class llh_ebins_square_wsampler(object):
         rt_bl = rt_bl/np.sum(rt_bl)
 
         mod_cnts = np.array([bkg_mod[i] + rt_bl*sig_cnts_per_ebin[i] for\
-                             i in xrange(self.nebins)])
+                             i in range(self.nebins)])
 
         return mod_cnts
 
@@ -320,7 +320,7 @@ class llh_ebins_square_wsampler(object):
 
         mod_cnts = np.array([bkg_mod[i] +\
                              rt_bl*sig_cnts_per_ebin[i]/rt_sum\
-                             for i in xrange(self.nebins)])
+                             for i in range(self.nebins)])
 
         cnt_lprob = np.log(cnts_pdf(sig_cnts_per_ebin,\
                                    sig_cnts_per_ebin0,\
@@ -408,6 +408,6 @@ class llh_ebins_square_wsampler(object):
         else:
             starts = [starting_guesses +\
                   rngs*(np.random.random(size=self.npars) - .5)\
-                  for i in xrange(self.nwalkers)]
+                  for i in range(self.nwalkers)]
 
         self.sampler.run_mcmc(starts, Nsteps)
