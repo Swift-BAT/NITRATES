@@ -1,0 +1,71 @@
+[22;0t]0;IPython: NITRATES_GIT/NITRATESNebins:  9
+ebins0:  [ 15.   24.   35.   48.   64.   84.  120.  171.5 245. ]
+ebins1:  [ 24.   35.   48.   64.   84.  120.  171.5 245.  350. ]
+trigger_time:  646018383.1787
+attitude quaternion:  [-0.03597053  0.2345147  -0.64420835  0.72712074]
+Ndets:  14932
+Nevents:  1367885
+38.54132137017975 137.65241966813443
+-0.5887551341212709 -0.5366203642198198
+INFO:root:0.02
+INFO:root:0.002
+DEBUG:root:opening file: fwd_ray_trace_-0.60000_-0.54000_-0.58000_-0.52000_.npy
+DEBUG:root:nbytes_total=95789408.0
+(173, 286)
+CPU times: user 339 µs, sys: 9 µs, total: 348 µs
+Wall time: 351 µs
+INFO:root:Making new response object
+WARNING:astropy:hdu= was not specified but multiple tables are present, reading in first available table (hdu=1)
+(0.0, 30.48, -14.117)
+(0.0, 30.48, -14.117)
+(36.0, 45.0)
+0.6524196681344279
+0.6524196681344279
+max rt: 0.8604
+DEBUG:root:Openning file: resp_by_sand_hpind_46.fits
+DEBUG:root:Openning file: resp_by_sand_hpind_47.fits
+DEBUG:root:Openning file: resp_by_sand_theta_0.fits
+initing ResponseDPI, with fname
+/Users/tparsota/Documents/BAT_SCRIPTS/NITRATES_BAT_RSP_FILES/resp_tabs_ebins/drm_theta_36.0_phi_0.0_.fits
+initing ResponseDPI, with fname
+/Users/tparsota/Documents/BAT_SCRIPTS/NITRATES_BAT_RSP_FILES/resp_tabs_ebins/drm_theta_36.0_phi_15.0_.fits
+initing ResponseDPI, with fname
+/Users/tparsota/Documents/BAT_SCRIPTS/NITRATES_BAT_RSP_FILES/resp_tabs_ebins/drm_theta_45.0_phi_0.0_.fits
+initing ResponseDPI, with fname
+/Users/tparsota/Documents/BAT_SCRIPTS/NITRATES_BAT_RSP_FILES/resp_tabs_ebins/drm_theta_45.0_phi_15.0_.fits
+CPU times: user 3.83 s, sys: 1.59 s, total: 5.43 s
+Wall time: 5.62 s
+['4U 1700-377', 'GRO J1655-40', 'GX 339-4', 'Sco X-1']
+INFO:root:0.02
+INFO:root:0.002
+DEBUG:root:opening file: fwd_ray_trace_-0.10000_-0.48000_-0.08000_-0.46000_.npy
+DEBUG:root:nbytes_total=95789408.0
+DEBUG:root:opening file: fwd_ray_trace_-0.12000_-0.54000_-0.10000_-0.52000_.npy
+DEBUG:root:nbytes_total=191578816.0
+DEBUG:root:opening file: fwd_ray_trace_0.00000_-0.70000_0.02000_-0.68000_.npy
+DEBUG:root:nbytes_total=287368224.0
+DEBUG:root:opening file: fwd_ray_trace_-0.50000_-0.22000_-0.48000_-0.20000_.npy
+DEBUG:root:nbytes_total=383157632.0
+CPU times: user 77.9 ms, sys: 502 µs, total: 78.5 ms
+Wall time: 79.9 ms
+CPU times: user 66.2 ms, sys: 8.79 ms, total: 75 ms
+Wall time: 75.7 ms
+[      fun: 45893.461149418945
+ hess_inv: <1x1 LbfgsInvHessProduct with dtype=float64>
+      jac: array([0.00255971])
+  message: 'CONVERGENCE: REL_REDUCTION_OF_F_<=_FACTR*EPSMCH'
+     nfev: 8
+      nit: 5
+     njev: 8
+   status: 0
+  success: True
+        x: array([0.00692558])]
+[45893.461149418945]
+[[0.006925579106911662]]
+46038.74332721739
+17.045948363082807
+CPU times: user 4.68 ms, sys: 484 µs, total: 5.16 ms
+Wall time: 5.17 ms
+WARNING: hdu= was not specified but multiple tables are present, reading in first available table (hdu=1) [astropy.io.fits.connect]
+/Users/tparsota/Documents/BAT_SCRIPTS/NITRATES/NITRATES_GIT/NITRATES/response.py:1498: RuntimeWarning: invalid value encountered in true_divide
+  self.E_A0s = (self.orig_photonEs[self.Einds1] - self.photonEs) /\
