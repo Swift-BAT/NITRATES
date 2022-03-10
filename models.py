@@ -10,6 +10,8 @@ from trans_func import get_pb_absortion, get_pb_mu
 from stat_funcs import Norm_1D, Norm_2D, Norm_3D
 from hp_funcs import ang_sep
 from coord_conv_funcs import imxy2theta_phi, theta_phi2imxy
+import six
+
 
 
 # have model classes for all things that contribute counts
@@ -185,8 +187,9 @@ class Flux2Rate_4PBtrans(object):
 
 
 
-
-class Model(object, metaclass=abc.ABCMeta):
+@six.add_metaclass(abc.ABCMeta)
+class Model(object):
+    #, metaclass=abc.ABCMeta
 
     def __init__(self, name, bl_dmask, param_names,\
                  param_dict, nebins,\
