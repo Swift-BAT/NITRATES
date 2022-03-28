@@ -577,9 +577,9 @@ def assign_in_seeds2jobs(seed_tab, Nmax_jobs=96):
                 job_ids[bl] = job_iter%Njobs
                 job_iter += 1
                 continue
-            job_ids[bl][:(Nt/2)] = job_iter%Njobs
+            job_ids[bl][:(Nt//2)] = job_iter%Njobs
             job_iter += 1
-            job_ids[bl][(Nt/2):] = job_iter%Njobs
+            job_ids[bl][(Nt//2):] = job_iter%Njobs
             job_iter += 1
         logging.debug("Njobs, job_iter: %d, %d"%(Njobs, job_iter))
 
@@ -592,9 +592,9 @@ def assign_in_seeds2jobs(seed_tab, Nmax_jobs=96):
             Nt = np.sum(bl)
             if Nt > (2*Ntbins_perSq):
                 inds_ = np.where(bl)[0]
-                job_ids[inds_[:(Nt/2)]] = job_iter%Njobs
+                job_ids[inds_[:(Nt//2)]] = job_iter%Njobs
                 job_iter += 1
-                job_ids[inds_[(Nt/2):]] = job_iter%Njobs
+                job_ids[inds_[(Nt//2):]] = job_iter%Njobs
                 job_iter += 1
                 continue
             job_ids[bl] = job_iter%Njobs
@@ -612,9 +612,9 @@ def assign_in_seeds2jobs(seed_tab, Nmax_jobs=96):
                 job_ids[bl] = job_iter%Njobs
                 job_iter += 1
                 continue
-            job_ids[bl][:(Nt/2)] = job_iter%Njobs
+            job_ids[bl][:(Nt//2)] = job_iter%Njobs
             job_iter += 1
-            job_ids[bl][(Nt/2):] = job_iter%Njobs
+            job_ids[bl][(Nt//2):] = job_iter%Njobs
             job_iter += 1
         logging.debug("Njobs, job_iter: %d, %d"%(Njobs, job_iter))
 
