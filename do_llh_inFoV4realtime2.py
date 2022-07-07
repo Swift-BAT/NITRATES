@@ -7,6 +7,8 @@ import argparse
 import logging, traceback
 import time
 import pandas as pd
+from memory_profiler import profile
+import gc
 
 from bkg_rate_estimation import rate_obj_from_sqltab
 from sqlite_funcs import get_conn, write_result, write_results,\
@@ -307,7 +309,7 @@ def do_scan_around_peak(peak_row, bkg_bf_params, bkg_name, sig_miner,\
 
     return res_df
 
-
+@profile
 def analysis_for_imxy_square(imx0, imx1, imy0, imy1, bkg_bf_params_list,\
                             bkg_mod, flux_mod, ev_data,\
                             ebins0, ebins1, tbins0, tbins1,\
@@ -578,13 +580,14 @@ def analysis_for_imxy_square(imx0, imx1, imy0, imy1, bkg_bf_params_list,\
             peak_res_dfs.append(df2)
 
         peak_res_df = pd.concat(peak_res_dfs, ignore_index=True)
-
+        del sig_mod
         return res_df, peak_res_df
     else:
+        del sig_mod
         return res_df, None
 
 
-
+@profile
 def do_analysis(square_tab, ev_data, flux_mod, rt_dir,\
                 ebins0, ebins1, bl_dmask,\
                 trigger_time, work_dir,\
@@ -684,7 +687,8 @@ def do_analysis(square_tab, ev_data, flux_mod, rt_dir,\
                                         ebins0, ebins1, t0s, t1s, timeIDs,\
                                         TS2keep=TS2keep, minTS2scan=minTS2scan)
 
-
+            gc.collect()
+            
             res_df['squareID'] = squareID
 
 
