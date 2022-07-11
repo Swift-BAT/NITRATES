@@ -7,6 +7,7 @@ import argparse
 import logging, traceback
 import time
 import pandas as pd
+import gc
 
 from bkg_rate_estimation import rate_obj_from_sqltab
 from sqlite_funcs import get_conn, write_result, write_results,\
@@ -349,6 +350,7 @@ def do_analysis(proc_num, seed_tab, ev_data, flux_mod, rt_dir,\
                                 bkg_params_list, bkg_mod,\
                                 flux_mod, ev_data, ebins0, ebins1,\
                                 t0s, t1s, timeIDs)
+        gc.collect()
         res_df['hp_ind'] = hp_ind
 
         fname = os.path.join(work_dir,\
