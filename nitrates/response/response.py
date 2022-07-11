@@ -1329,8 +1329,7 @@ class ResponseInFoV(object):
 
 
     def get_intp_theta_phi_wts(self, theta, phi, eps=0.1):
-    #py3
-        #stop
+
         thetas = np.sort(np.unique(self.resp_arr['theta']))
         phis = np.sort(np.unique(self.resp_arr['phi']))
 
@@ -1352,9 +1351,9 @@ class ResponseInFoV(object):
             th_wts = [(theta1 - theta)/dth, (theta - theta0)/dth]
 
 
-        phi_ = phi - (int(phi)//45)*45.0
+        phi_ = phi - (int(phi)/45)*45.0
         print(phi_)
-        if (int(phi)//45)%2 == 1:
+        if (int(phi)/45)%2 == 1:
             phi_ = 45.0 - phi_
         print(phi_)
         ph0 = np.digitize(phi_, phis) - 1
@@ -1891,8 +1890,7 @@ class ResponseInFoV2(object):
 
 
     def get_intp_theta_phi_wts(self, theta, phi, eps=0.1):
-    #py3
-        #stop
+
         thetas = np.sort(np.unique(self.resp_arr['theta']))
         phis = np.sort(np.unique(self.resp_arr['phi']))
 
@@ -1914,9 +1912,9 @@ class ResponseInFoV2(object):
             th_wts = [(theta1 - theta)/dth, (theta - theta0)/dth]
 
 
-        phi_ = phi - (int(phi)//45)*45.0
+        phi_ = phi - (int(phi)/45)*45.0
         print(phi_)
-        if (int(phi)//45)%2 == 1:
+        if (int(phi)/45)%2 == 1:
             phi_ = 45.0 - phi_
         print(phi_)
         ph0 = np.digitize(phi_, phis) - 1

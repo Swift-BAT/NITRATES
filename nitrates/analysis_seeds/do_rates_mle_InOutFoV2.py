@@ -966,7 +966,7 @@ def main(args):
             save_fname = 'rates_llh_res_%d_.csv' %(args.job_id)
 
         elif i0 >= Nim_pnts:
-            i0_ = Nper_job*(int(i0-Nim_pnts)//Nper_job)
+            i0_ = Nper_job*(int(i0-Nim_pnts)/Nper_job)
             i1_ = i0_ + Nper_job
             hp_inds = hp_inds[i0_:i1_]
             logging.info('hp_inds: ')

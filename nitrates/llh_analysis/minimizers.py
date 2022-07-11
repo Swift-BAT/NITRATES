@@ -1,11 +1,8 @@
 import numpy as np
 import abc
 from scipy import optimize
-import six
 
-@six.add_metaclass(abc.ABCMeta)
-class NLLH_Minimizer(object):
-    #, metaclass=abc.ABCMeta
+class NLLH_Minimizer(object, metaclass=abc.ABCMeta):
 
     # should remember to put in support for several seeds
 
