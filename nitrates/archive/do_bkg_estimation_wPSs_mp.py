@@ -99,7 +99,7 @@ def add_imxy2src_tab(src_tab, attfile, t0):
 
 def get_srcs_infov(attfile, t0, pcfname=None, pcmin=5e-2):
 
-    brt_src_tab = Table.read(bright_source_table_fname)
+    brt_src_tab = Table.read(config.bright_source_table_fname)
     add_imxy2src_tab(brt_src_tab, attfile, t0)
     bl_infov = (np.abs(brt_src_tab['imy'])<.95)&(np.abs(brt_src_tab['imx'])<1.75)
     if pcfname is not None:
@@ -580,15 +580,15 @@ def main(args):
     logging.info(sig_twind)
 
 
-    ebins0 = np.array(EBINS0)
-    ebins1 = np.array(EBINS1)
+    ebins0 = np.array(config.EBINS0)
+    ebins1 = np.array(config.EBINS1)
     nebins = len(ebins0)
     logging.debug("ebins0")
     logging.debug(ebins0)
     logging.debug("ebins1")
     logging.debug(ebins1)
 
-    solid_angle_dpi = np.load(solid_angle_dpi_fname)
+    solid_angle_dpi = np.load(config.solid_angle_dpi_fname)
 
     src_tab = get_srcs_infov(attfile, tmid, pcfname=args.pcfname)
     Nsrcs = len(src_tab)
