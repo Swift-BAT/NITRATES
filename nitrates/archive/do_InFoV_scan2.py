@@ -11,21 +11,23 @@ import argparse
 import logging, traceback
 from copy import copy, deepcopy
 
-from StructFunc import get_full_struct_manager
-from StructClasses import Swift_Structure, Swift_Structure_Manager
-from Materials import PB, TI
-from Polygons import Polygon2D, Box_Polygon
-from flux_models import Plaw_Flux, Cutoff_Plaw_Flux, Band_Flux
-from config import solid_angle_dpi_fname, rt_dir, fp_dir, bright_source_table_fname
-from logllh_ebins_funcs import log_pois_prob, get_eflux, get_gammaln
-from event2dpi_funcs import det2dpis, mask_detxy
-from models import Model
-from minimizers import NLLH_DualAnnealingMin, NLLH_ScipyMinimize, NLLH_ScipyMinimize_Wjacob
-from coord_conv_funcs import convert_radec2imxy, convert_imxy2radec,\
+import ..config
+
+from ..models.StructFunc import get_full_struct_manager
+from ..models.StructClasses import Swift_Structure, Swift_Structure_Manager
+from ..response.Materials import PB, TI
+from ..response.Polygons import Polygon2D, Box_Polygon
+from ..models.flux_models import Plaw_Flux, Cutoff_Plaw_Flux, Band_Flux
+#from config import solid_angle_dpi_fname, rt_dir, fp_dir, bright_source_table_fname
+from ..lib.logllh_ebins_funcs import log_pois_prob, get_eflux, get_gammaln
+from ..lib.event2dpi_funcs import det2dpis, mask_detxy
+from ..models.models import Model
+from ..llh_analysis.minimizers import NLLH_DualAnnealingMin, NLLH_ScipyMinimize, NLLH_ScipyMinimize_Wjacob
+from ..lib.coord_conv_funcs import convert_radec2imxy, convert_imxy2radec,\
                     convert_radec2batxyz, convert_radec2thetaphi
-from ray_trace_funcs import RayTraces, FootPrints
-from hp_funcs import ang_sep
-from do_bkg_estimation_wPSs_mp import get_srcs_infov
+from ..response.ray_trace_funcs import RayTraces, FootPrints
+from ..lib.hp_funcs import ang_sep
+from ..archive.do_bkg_estimation_wPSs_mp import get_srcs_infov
 
 
 def cli():
@@ -3672,8 +3674,8 @@ def analysis_for_imxy_square(imx0, imx1, imy0, imy1, bkg_bf_params,\
     Nspec_pnts = len(Epeaks)
     ntbins = len(tbins0)
 
-    rt_obj = RayTraces(rt_dir)
-    fp_obj = FootPrints(fp_dir)
+    rt_obj = RayTraces(config.rt_dir)
+    fp_obj = FootPrints(config.fp_dir)
 
     sig_mod = Source_Model_InFoV(flux_mod, [ebins0,ebins1], bl_dmask,\
                                     rt_obj, use_deriv=True)
@@ -3928,7 +3930,7 @@ def main(args):
     att_ind = np.argmin(np.abs(attfile['TIME'] - (trigger_time+args.min_dt)))
     att_q = attfile['QPARAM'][att_ind]
 
-    solid_angle_dpi = np.load(solid_angle_dpi_fname)
+    solid_angle_dpi = np.load(config.solid_angle_dpi_fname)
     bkg_mod = Bkg_Model_wFlatA(bl_dmask, solid_angle_dpi, nebins, use_deriv=True)
     llh_obj = LLH_webins(ev_data0, ebins0, ebins1, bl_dmask, has_err=True)
 
@@ -3942,7 +3944,7 @@ def main(args):
 
     brt_src_tab = get_srcs_infov(attfile, bkg_t0+bkg_dt/2.)
     cygx1_row = brt_src_tab[0]
-    rt_obj = RayTraces(rt_dir)
+    rt_obj = RayTraces(config.rt_dir)
     cyg_mod = Point_Source_Model_Binned_Rates(cygx1_row['imx'], cygx1_row['imy'], 0.1,\
                                           [ebins0,ebins1],\
                                           rt_obj, bl_dmask,\
