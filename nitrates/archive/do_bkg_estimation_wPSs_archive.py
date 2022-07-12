@@ -9,19 +9,21 @@ import pandas as pd
 from copy import copy, deepcopy
 import multiprocessing as mp
 
-from bkg_rate_estimation import get_avg_lin_cub_rate_quad_obs
-from config import quad_dicts, EBINS0, EBINS1,\
-                solid_angle_dpi_fname, bright_source_table_fname
-from sqlite_funcs import write_rate_fits_from_obj, get_conn
-from dbread_funcs import get_info_tab, guess_dbfname, get_files_tab
-from event2dpi_funcs import filter_evdata
-from models import Bkg_Model_wFlatA, CompoundModel, Point_Source_Model_Binned_Rates
-from LLH import LLH_webins
-from minimizers import NLLH_ScipyMinimize, NLLH_ScipyMinimize_Wjacob
-from ray_trace_funcs import RayTraces
-from coord_conv_funcs import convert_radec2imxy
-from gti_funcs import add_bti2gti, bti2gti, gti2bti, union_gtis
-from wcs_funcs import world2val
+import config
+
+from ..analysis_seeds.bkg_rate_estimation import get_avg_lin_cub_rate_quad_obs
+#from config import quad_dicts, EBINS0, EBINS1,\
+#                solid_angle_dpi_fname, bright_source_table_fname
+from ..lib.sqlite_funcs import write_rate_fits_from_obj, get_conn
+from ..lib.dbread_funcs import get_info_tab, guess_dbfname, get_files_tab
+from ..lib.event2dpi_funcs import filter_evdata
+from ..models.models import Bkg_Model_wFlatA, CompoundModel, Point_Source_Model_Binned_Rates
+from ..llh_analysis.LLH import LLH_webins
+from ..llh_analysis.minimizers import NLLH_ScipyMinimize, NLLH_ScipyMinimize_Wjacob
+from ..response.ray_trace_funcs import RayTraces
+from ..lib.coord_conv_funcs import convert_radec2imxy
+from ..lib.gti_funcs import add_bti2gti, bti2gti, gti2bti, union_gtis
+from ..lib.wcs_funcs import world2val
 
 
 def cli():
@@ -94,7 +96,7 @@ def add_imxy2src_tab(src_tab, attfile, t0):
 
 def get_srcs_infov(attfile, t0, pcfname=None, pcmin=5e-2):
 
-    brt_src_tab = Table.read(bright_source_table_fname)
+    brt_src_tab = Table.read(config.bright_source_table_fname)
     add_imxy2src_tab(brt_src_tab, attfile, t0)
     bl_infov = (np.abs(brt_src_tab['imy'])<.95)&(np.abs(brt_src_tab['imx'])<1.75)
     if pcfname is not None:
@@ -557,15 +559,15 @@ def main(args):
 
 
 
-    ebins0 = np.array(EBINS0)
-    ebins1 = np.array(EBINS1)
+    ebins0 = np.array(config.EBINS0)
+    ebins1 = np.array(config.EBINS1)
     nebins = len(ebins0)
     logging.debug("ebins0")
     logging.debug(ebins0)
     logging.debug("ebins1")
     logging.debug(ebins1)
 
-    solid_angle_dpi = np.load(solid_angle_dpi_fname)
+    solid_angle_dpi = np.load(config.solid_angle_dpi_fname)
 
     src_tab = get_srcs_infov(attfile, trigtime, pcfname=args.pcfname)
     Nsrcs = len(src_tab)
