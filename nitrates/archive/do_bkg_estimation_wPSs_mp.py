@@ -9,19 +9,21 @@ import pandas as pd
 from copy import copy, deepcopy
 import multiprocessing as mp
 
-from bkg_rate_estimation import get_avg_lin_cub_rate_quad_obs
-from config import quad_dicts, EBINS0, EBINS1,\
+import config
+
+from ..analysis_seeds.bkg_rate_estimation import get_avg_lin_cub_rate_quad_obs
+#from config import quad_dicts, EBINS0, EBINS1,\
                 solid_angle_dpi_fname, bright_source_table_fname
-from sqlite_funcs import write_rate_fits_from_obj, get_conn
-from dbread_funcs import get_info_tab, guess_dbfname, get_files_tab
-from event2dpi_funcs import filter_evdata
-from models import Bkg_Model_wFlatA, CompoundModel, Point_Source_Model_Binned_Rates
-from LLH import LLH_webins
-from minimizers import NLLH_ScipyMinimize, NLLH_ScipyMinimize_Wjacob
-from ray_trace_funcs import RayTraces
-from coord_conv_funcs import convert_radec2imxy
-from gti_funcs import add_bti2gti, bti2gti, gti2bti, union_gtis
-from wcs_funcs import world2val
+from ..lib.sqlite_funcs import write_rate_fits_from_obj, get_conn
+from ..lib.dbread_funcs import get_info_tab, guess_dbfname, get_files_tab
+from ..lib.event2dpi_funcs import filter_evdata
+from ..models.models import Bkg_Model_wFlatA, CompoundModel, Point_Source_Model_Binned_Rates
+from ..llh_analysis.LLH import LLH_webins
+from ..llh_analysis.minimizers import NLLH_ScipyMinimize, NLLH_ScipyMinimize_Wjacob
+from ..response.ray_trace_funcs import RayTraces
+from ..lib.coord_conv_funcs import convert_radec2imxy
+from ..lib.gti_funcs import add_bti2gti, bti2gti, gti2bti, union_gtis
+from ..lib.wcs_funcs import world2val
 
 
 def cli():
