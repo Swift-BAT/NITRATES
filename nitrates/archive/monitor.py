@@ -3,9 +3,9 @@ import argparse
 import logging, traceback
 import time
 
-from dbread_funcs import get_info_tab, guess_dbfname, get_files_tab,\
+from ..lib.dbread_funcs import get_info_tab, guess_dbfname, get_files_tab,\
                             get_twinds_tab
-from sqlite_funcs import get_conn
+from ..lib.sqlite_funcs import get_conn
 from dbread import get_files_tab
 from helper_funcs import send_email, send_email_attach
 from plot_funcs import mk_rates_plot

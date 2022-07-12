@@ -4,9 +4,9 @@ import os
 import argparse
 import logging, traceback
 
-from bkg_rate_estimation import rate_obj_from_sqltab
-from sqlite_funcs import get_conn
-from dbread_funcs import get_rate_fits_tab, guess_dbfname
+from ..analysis_seeds.bkg_rate_estimation import rate_obj_from_sqltab
+from ..lib.sqlite_funcs import get_conn
+from ..lib.dbread_funcs import get_rate_fits_tab, guess_dbfname
 from config import EBINS0, EBINS1
 
 # need to read rate fits from DB

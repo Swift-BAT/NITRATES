@@ -7,13 +7,13 @@ import time
 import emcee
 # from corner import corner
 
-from logllh_ebins_funcs import get_cnt_ebins_normed, log_pois_prob
-from ray_trace_funcs import ray_trace_square
-from drm_funcs import get_ebin_ind_edges, DRMs, get_cnts_intp_obj
-from event2dpi_funcs import det2dpis, mask_detxy
+from ..lib.logllh_ebins_funcs import get_cnt_ebins_normed, log_pois_prob
+from ..response.ray_trace_funcs import ray_trace_square
+from ..lib.drm_funcs import get_ebin_ind_edges, DRMs, get_cnts_intp_obj
+from ..lib.event2dpi_funcs import det2dpis, mask_detxy
 from min_nlogl_from_seeds import llh_ebins_square,\
                                         get_abs_cor_rates
-from trans_func import get_pb_absortion
+from ..lib.trans_func import get_pb_absortion
 
 
 def get_sys_err(sys_err_file, ebin_ind_edges):

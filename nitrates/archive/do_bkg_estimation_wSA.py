@@ -5,15 +5,15 @@ import argparse
 import logging, traceback
 import pandas as pd
 
-from bkg_rate_estimation import get_avg_lin_cub_rate_quad_obs
+from ..analysis_seeds.bkg_rate_estimation import get_avg_lin_cub_rate_quad_obs
 from config import quad_dicts, EBINS0, EBINS1,\
                 solid_angle_dpi_fname
-from sqlite_funcs import write_rate_fits_from_obj, get_conn
-from dbread_funcs import get_info_tab, guess_dbfname, get_files_tab
-from event2dpi_funcs import filter_evdata
-from models import Bkg_Model_wSA
-from LLH import LLH_webins
-from minimizers import NLLH_ScipyMinimize, NLLH_ScipyMinimize_Wjacob
+from ..lib.sqlite_funcs import write_rate_fits_from_obj, get_conn
+from ..lib.dbread_funcs import get_info_tab, guess_dbfname, get_files_tab
+from ..lib.event2dpi_funcs import filter_evdata
+from ..models.models import Bkg_Model_wSA
+from ..llh_analysis.LLH import LLH_webins
+from ..llh_analysis.minimizers import NLLH_ScipyMinimize, NLLH_ScipyMinimize_Wjacob
 
 
 def cli():

@@ -5,8 +5,8 @@ import argparse
 import logging, traceback
 
 
-from sqlite_funcs import get_conn, write_seeds
-from dbread_funcs import get_rates_tab, guess_dbfname,\
+from ..lib.sqlite_funcs import get_conn, write_seeds
+from ..lib.dbread_funcs import get_rates_tab, guess_dbfname,\
                     get_top_rate_timeIDs, query_blips_tab,\
                     get_twind_status_tab
 from config import EBINS0, EBINS1, quad_dicts

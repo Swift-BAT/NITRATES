@@ -9,14 +9,14 @@ import argparse
 import logging, traceback, time
 
 from config import EBINS0, EBINS1, solid_angle_dpi_fname, fp_dir, rt_dir
-from sqlite_funcs import get_conn
-from dbread_funcs import get_info_tab, guess_dbfname, get_files_tab,\
+from ..lib.sqlite_funcs import get_conn
+from ..lib.dbread_funcs import get_info_tab, guess_dbfname, get_files_tab,\
                             get_twinds_tab, get_rate_fits_tab
 from wcs_funcs import world2val
-from event2dpi_funcs import det2dpis, mask_detxy
-from models import Bkg_Model_wSA, Bkg_Model_wFlatA, CompoundModel,\
+from ..lib.event2dpi_funcs import det2dpis, mask_detxy
+from ..models.models import Bkg_Model_wSA, Bkg_Model_wFlatA, CompoundModel,\
                     Point_Source_Model_Binned_Rates
-from ray_trace_funcs import RayTraces, FootPrints
+from ..response.ray_trace_funcs import RayTraces, FootPrints
 
 
 

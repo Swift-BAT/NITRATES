@@ -7,8 +7,8 @@ import logging, traceback, time
 from funcs2run_bat_tools import std_grb, do_bkg, do_pc,\
                         mk_sig_imgs_mp, mk_sky_sig_img,\
                         mk_sig_imgs_pix
-from sqlite_funcs import get_conn, timeID2time_dur, write_cat2db
-from dbread_funcs import get_top_rate_timeIDs, get_files_tab,\
+from ..lib.sqlite_funcs import get_conn, timeID2time_dur, write_cat2db
+from ..lib.dbread_funcs import get_top_rate_timeIDs, get_files_tab,\
                             guess_dbfname, get_info_tab
 from config import EBINS0, EBINS1
 

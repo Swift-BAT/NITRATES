@@ -5,10 +5,10 @@ from scipy import optimize, stats
 import argparse
 import time
 
-from logllh_ebins_funcs import get_cnt_ebins_normed, log_pois_prob
-from ray_trace_funcs import ray_trace_square
-from drm_funcs import get_ebin_ind_edges, DRMs
-from event2dpi_funcs import det2dpis
+from ..lib.logllh_ebins_funcs import get_cnt_ebins_normed, log_pois_prob
+from ..response.ray_trace_funcs import ray_trace_square
+from ..lib.drm_funcs import get_ebin_ind_edges, DRMs
+from ..lib.event2dpi_funcs import det2dpis
 
 
 
