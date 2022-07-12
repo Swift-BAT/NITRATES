@@ -10,18 +10,18 @@ import pandas as pd
 import argparse
 import logging, traceback
 
-
-from StructFunc import get_full_struct_manager
-from flux_models import Plaw_Flux, Cutoff_Plaw_Flux, Band_Flux
-from config import rt_dir, fp_dir, solid_angle_dpi_fname, drm_dir, bright_source_table_fname
-from logllh_ebins_funcs import log_pois_prob, get_eflux, get_gammaln
-from event2dpi_funcs import det2dpis, mask_detxy
-from models import Model
-from minimizers import NLLH_DualAnnealingMin, NLLH_ScipyMinimize, NLLH_ScipyMinimize_Wjacob
-from coord_conv_funcs import convert_radec2imxy, convert_imxy2radec,\
+import config
+from ..models.StructFunc import get_full_struct_manager
+from ..models.flux_models import Plaw_Flux, Cutoff_Plaw_Flux, Band_Flux
+#from config import rt_dir, fp_dir, solid_angle_dpi_fname, drm_dir, bright_source_table_fname
+from ..lib.logllh_ebins_funcs import log_pois_prob, get_eflux, get_gammaln
+from ..lib.event2dpi_funcs import det2dpis, mask_detxy
+from ..models.models import Model
+from ..llh_analysis.minimizers import NLLH_DualAnnealingMin, NLLH_ScipyMinimize, NLLH_ScipyMinimize_Wjacob
+from ..lib.coord_conv_funcs import convert_radec2imxy, convert_imxy2radec,\
                     convert_radec2batxyz, convert_radec2thetaphi
-from ray_trace_funcs import RayTraces, FootPrints
-from do_bkg_estimation_wPSs_mp import get_srcs_infov
+from ..response.ray_trace_funcs import RayTraces, FootPrints
+from ..archive.do_bkg_estimation_wPSs_mp import get_srcs_infov
 
 
 
