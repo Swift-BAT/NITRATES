@@ -11,7 +11,7 @@ import multiprocessing as mp
 
 import config
 
-from ..analysis_seeds.bkg_rate_estimation import get_avg_lin_cub_rate_quad_obs
+from ..analysis_seeds.bskg_rate_estimation import get_avg_lin_cub_rate_quad_obs
 #from config import quad_dicts, EBINS0, EBINS1,\
                 solid_angle_dpi_fname, bright_source_table_fname
 from ..lib.sqlite_funcs import write_rate_fits_from_obj, get_conn
