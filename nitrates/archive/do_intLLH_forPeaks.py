@@ -9,20 +9,21 @@ import pandas as pd
 from scipy import optimize
 from copy import copy
 
+import config
 
-from sqlite_funcs import get_conn
-from dbread_funcs import get_rate_fits_tab, guess_dbfname,\
+from ..lib.sqlite_funcs import get_conn
+from ..lib.dbread_funcs import get_rate_fits_tab, guess_dbfname,\
                     get_seeds_tab, get_info_tab, get_files_tab,\
                     get_square_tab, get_full_sqlite_table_as_df
-from drm_funcs import DRMs
-from ray_trace_funcs import RayTraces, FootPrints
-from LLH import LLH_webins
-from flux_models import Plaw_Flux
-from models import Bkg_Model_wFlatA, Point_Source_Model_Wuncoded, im_dist,\
+from ..lib.drm_funcs import DRMs
+from ..response.ray_trace_funcs import RayTraces, FootPrints
+from ..llh_analysis.LLH import LLH_webins
+from ..models.flux_models import Plaw_Flux
+from ..models.models import Bkg_Model_wFlatA, Point_Source_Model_Wuncoded, im_dist,\
                 Point_Source_Model_Binned_Rates,\
                 Bkg_and_Point_Source_Model, CompoundModel, Bkg_and_Point_Source_Model
-from minimizers import NLLH_ScipyMinimize_Wjacob, NLLH_Minimizer
-from config import EBINS0, EBINS1, solid_angle_dpi_fname,\
+from ..llh_analysis.minimizers import NLLH_ScipyMinimize_Wjacob, NLLH_Minimizer
+#from config import EBINS0, EBINS1, solid_angle_dpi_fname,\
                     rt_dir, drm_dir, fp_dir
 
 
@@ -493,8 +494,8 @@ def main(args):
 
     pl_flux = Plaw_Flux()
 
-    ebins0 = np.array(EBINS0)
-    ebins1 = np.array(EBINS1)
+    ebins0 = np.array(config.EBINS0)
+    ebins1 = np.array(config.EBINS1)
     logging.debug("ebins0")
     logging.debug(ebins0)
     logging.debug("ebins1")
@@ -513,7 +514,7 @@ def main(args):
 
     do_analysis(peaks_tab, pl_flux, drm_obj, rt_dir, fp_dir,\
                     bkg_llh_obj, sig_llh_obj, trigtime,\
-                    work_dir, proc_num, args.bkg_fname, solid_angle_dpi_fname)
+                    work_dir, proc_num, args.bkg_fname, config.solid_angle_dpi_fname)
 
 
 if __name__ == "__main__":
