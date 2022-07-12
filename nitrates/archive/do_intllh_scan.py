@@ -11,25 +11,27 @@ import time
 import pandas as pd
 from copy import copy
 
-from bkg_rate_estimation import rate_obj_from_sqltab
-from sqlite_funcs import get_conn, write_result, write_results,\
+import config
+
+from ..analysis_seeds.bkg_rate_estimation import rate_obj_from_sqltab
+from ..lib.sqlite_funcs import get_conn, write_result, write_results,\
                         timeID2time_dur, write_results_fromSigImg,\
                         update_square_stat, write_square_res_line,\
                         write_square_results
-from dbread_funcs import get_rate_fits_tab, guess_dbfname,\
+from ..lib.dbread_funcs import get_rate_fits_tab, guess_dbfname,\
                     get_seeds_tab, get_info_tab, get_files_tab,\
                     get_square_tab, get_full_sqlite_table_as_df
-from config import EBINS0, EBINS1, solid_angle_dpi_fname
-from flux_models import Plaw_Flux
-from minimizers import NLLH_ScipyMinimize_Wjacob, imxy_grid_miner, NLLH_ScipyMinimize
-from ray_trace_funcs import RayTraces, get_rt_arr
-from LLH import LLH_webins
-from models import Bkg_Model_wSA, Point_Source_Model, Model, Flux2Rate
-from drm_funcs import get_ebin_ind_edges, DRMs, get_cnts_intp_obj
-from event2dpi_funcs import det2dpis, mask_detxy
-from trans_func import get_pb_absortion, get_pb_mu
-from response import Response
-from logllh_ebins_funcs import get_gammaln, log_pois_prob
+#from config import EBINS0, EBINS1, solid_angle_dpi_fname
+from ..models.flux_models import Plaw_Flux
+from ..llh_analysis.minimizers import NLLH_ScipyMinimize_Wjacob, imxy_grid_miner, NLLH_ScipyMinimize
+from ..response.ray_trace_funcs import RayTraces, get_rt_arr
+from ..llh_analysis.LLH import LLH_webins
+from ..models.models import Bkg_Model_wSA, Point_Source_Model, Model, Flux2Rate
+from ..lib.drm_funcs import get_ebin_ind_edges, DRMs, get_cnts_intp_obj
+from ..lib.event2dpi_funcs import det2dpis, mask_detxy
+from ..lib.trans_func import get_pb_absortion, get_pb_mu
+from ..response.response import Response
+from ..lib.logllh_ebins_funcs import get_gammaln, log_pois_prob
 
 
 # need to read rate fits from DB
@@ -1554,7 +1556,7 @@ def do_analysis(square_tab, t0s, t1s, pc_imxs, pc_imys,\
 
     Ntbins = len(t0s)
 
-    solid_ang_dpi = np.load(solid_angle_dpi_fname)
+    solid_ang_dpi = np.load(config.solid_angle_dpi_fname)
 
     # bkg_miner = NLLH_ScipyMinimize('')
     sig_miner = NLLH_ScipyMinimize_Wjacob('')
@@ -1772,8 +1774,8 @@ def main(args):
 
     pl_flux = Plaw_Flux()
 
-    ebins0 = np.array(EBINS0)
-    ebins1 = np.array(EBINS1)
+    ebins0 = np.array(config.EBINS0)
+    ebins1 = np.array(config.EBINS1)
     logging.debug("ebins0")
     logging.debug(ebins0)
     logging.debug("ebins1")
