@@ -5,14 +5,14 @@ import argparse
 import logging, traceback
 
 from config import quad_dicts, EBINS0, EBINS1, drm_quad_dir
-from sqlite_funcs import get_conn, append_rate_tab
-from dbread_funcs import get_info_tab, guess_dbfname, get_files_tab,\
+from ..lib.sqlite_funcs import get_conn, append_rate_tab
+from ..lib.dbread_funcs import get_info_tab, guess_dbfname, get_files_tab,\
                             get_twinds_tab
-from bkg_rate_estimation import get_quad_rate_objs_from_db
+from ..analysis_seeds.bkg_rate_estimation import get_quad_rate_objs_from_db
 from mle_rates_for_realtime import do_rate_mle, do_rate_mle_mp, get_abs_cor_rates,\
                             get_cnts_intp_obj, get_quad_cnts_tbins
 from counting_and_quad_funcs import get_quad_cnts_tbins_fast
-from drm_funcs import get_ebin_ind_edges
+from ..lib.drm_funcs import get_ebin_ind_edges
 
 
 

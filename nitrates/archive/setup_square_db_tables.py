@@ -5,9 +5,9 @@ import os
 import argparse
 import logging, traceback, time
 
-from sqlite_funcs import get_conn, write_JobSquare_line,\
+from ..lib.sqlite_funcs import get_conn, write_JobSquare_line,\
                             setup_square_stat
-from dbread_funcs import get_full_sqlite_table_as_df,\
+from ..lib.dbread_funcs import get_full_sqlite_table_as_df,\
                 get_files_tab, get_info_tab, guess_dbfname
 
 

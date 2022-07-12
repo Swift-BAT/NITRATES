@@ -4,11 +4,11 @@ import os
 import argparse
 import logging, traceback
 
-from bkg_rate_estimation import get_avg_lin_cub_rate_quad_obs
+from ..analysis_seeds.bkg_rate_estimation import get_avg_lin_cub_rate_quad_obs
 from config import quad_dicts, EBINS0, EBINS1
-from sqlite_funcs import write_rate_fits_from_obj, get_conn
-from dbread_funcs import get_info_tab, guess_dbfname, get_files_tab
-from event2dpi_funcs import filter_evdata
+from ..lib.sqlite_funcs import write_rate_fits_from_obj, get_conn
+from ..lib.dbread_funcs import get_info_tab, guess_dbfname, get_files_tab
+from ..lib.event2dpi_funcs import filter_evdata
 
 
 def cli():
