@@ -11,22 +11,24 @@ import argparse
 import logging, traceback
 from copy import copy, deepcopy
 
-from StructFunc import get_full_struct_manager
-from flux_models import Plaw_Flux, Cutoff_Plaw_Flux, Band_Flux
-from config import rt_dir, fp_dir, solid_angle_dpi_fname, drm_dir, bright_source_table_fname
-from logllh_ebins_funcs import log_pois_prob, get_eflux, get_gammaln
-from event2dpi_funcs import det2dpis, mask_detxy
-from models import Model
-from minimizers import NLLH_DualAnnealingMin, NLLH_ScipyMinimize, NLLH_ScipyMinimize_Wjacob
-from coord_conv_funcs import convert_radec2imxy, convert_imxy2radec,\
+import ..config
+
+from ..models.StructFunc import get_full_struct_manager
+from ..models.flux_models import Plaw_Flux, Cutoff_Plaw_Flux, Band_Flux
+#from config import rt_dir, fp_dir, solid_angle_dpi_fname, drm_dir, bright_source_table_fname
+from ..lib.logllh_ebins_funcs import log_pois_prob, get_eflux, get_gammaln
+from ..lib.event2dpi_funcs import det2dpis, mask_detxy
+from ..models.models import Model
+from ..llh_analysis.minimizers import NLLH_DualAnnealingMin, NLLH_ScipyMinimize, NLLH_ScipyMinimize_Wjacob
+from ..lib.coord_conv_funcs import convert_radec2imxy, convert_imxy2radec,\
                     convert_radec2batxyz, convert_radec2thetaphi
-from ray_trace_funcs import RayTraces, FootPrints
-from hp_funcs import ang_sep
-from StructClasses import Swift_Structure, Swift_Structure_Manager
-from Materials import PB, TI, Korex, CarbonFibre, Mylar
-from Polygons import Polygon2D, Box_Polygon
-from do_bkg_estimation_wPSs_mp import get_srcs_infov
-from gti_funcs import add_bti2gti, bti2gti
+from ..response.ray_trace_funcs import RayTraces, FootPrints
+from ..lib.hp_funcs import ang_sep
+from ..models.StructClasses import Swift_Structure, Swift_Structure_Manager
+from ..response.Materials import PB, TI, Korex, CarbonFibre, Mylar
+from ..response.Polygons import Polygon2D, Box_Polygon
+from ..archive.do_bkg_estimation_wPSs_mp import get_srcs_infov
+from ..lib.gti_funcs import add_bti2gti, bti2gti
 
 
 
@@ -3517,8 +3519,8 @@ def analysis_for_imxy_square(imx0, imx1, imy0, imy1, bkg_bf_params,\
     Nspec_pnts = len(Epeaks)
     ntbins = len(tbins0)
 
-    rt_obj = RayTraces(rt_dir)
-    # fp_obj = FootPrints(fp_dir)
+    rt_obj = RayTraces(config.rt_dir)
+    # fp_obj = FootPrints(config.fp_dir)
 
     sig_mod = Source_Model_InFoV(flux_mod, [ebins0,ebins1], bl_dmask,\
                                     rt_obj, use_deriv=True)
@@ -3768,7 +3770,7 @@ def main(args):
     att_q = attfile['QPARAM'][att_ind]
     pnt_ra, pnt_dec = attfile['POINTING'][att_ind,:2]
 
-    solid_angle_dpi = np.load(solid_angle_dpi_fname)
+    solid_angle_dpi = np.load(config.solid_angle_dpi_fname)
     bkg_mod = Bkg_Model_wFlatA(bl_dmask, solid_angle_dpi, nebins, use_deriv=True)
     llh_obj = LLH_webins(ev_data0, ebins0, ebins1, bl_dmask, has_err=True)
 
@@ -3794,7 +3796,7 @@ def main(args):
             bkg_bf_params[cname] = pars[0][i]
             i += 1
     else:
-        rt_obj = RayTraces(rt_dir)
+        rt_obj = RayTraces(config.rt_dir)
         GTI = Table.read(args.evfname, hdu='GTI')
         sig_twind = (args.min_dt + trigger_time - 5.0, args.max_dt + trigger_time + 10.0)
         tmin = bkg_t0
