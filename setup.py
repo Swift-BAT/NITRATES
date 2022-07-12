@@ -22,5 +22,5 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 2',
         'Topic :: Scientific/Engineering :: Astronomy', ],
-    python_requires='>=2.7',
+    python_requires='>=3.4',
 )

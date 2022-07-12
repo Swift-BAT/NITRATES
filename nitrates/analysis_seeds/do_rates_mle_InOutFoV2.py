@@ -1,3 +1,5 @@
+import ..config
+
 import numpy as np
 import pandas as pd
 from scipy import optimize, stats, interpolate
@@ -8,15 +10,15 @@ import os
 import argparse
 import logging, traceback, time
 
-from config import EBINS0, EBINS1, solid_angle_dpi_fname, rt_dir
+from ../config import EBINS0, EBINS1, solid_angle_dpi_fname, rt_dir
 from sqlite_funcs import get_conn
 from dbread_funcs import get_info_tab, guess_dbfname, get_files_tab,\
                             get_twinds_tab, get_rate_fits_tab
-from wcs_funcs import world2val
-from event2dpi_funcs import det2dpis, mask_detxy
-from models import Bkg_Model_wSA, Bkg_Model_wFlatA, CompoundModel,\
+from ..lib.wcs_funcs import world2val
+from ..lib.event2dpi_funcs import det2dpis, mask_detxy
+from ..models.models import Bkg_Model_wSA, Bkg_Model_wFlatA, CompoundModel,\
                     Point_Source_Model_Binned_Rates
-from ray_trace_funcs import RayTraces, FootPrints
+from ..lib.ray_trace_funcs import RayTraces, FootPrints
 
 
 
@@ -857,8 +859,8 @@ def main(args):
     bl_dmask = (dmask==0)
     logging.debug('Opened up dmask file')
 
-    ebins0 = np.array(EBINS0)
-    ebins1 = np.array(EBINS1)
+    ebins0 = np.array(config.EBINS0)
+    ebins1 = np.array(config.EBINS1)
     ebins0 = np.array([15.0, 24.0, 35.0, 48.0, 64.0])
     ebins0 = np.append(ebins0, np.logspace(np.log10(84.0), np.log10(500.0), 5+1))[:-1]
     ebins0 = np.round(ebins0, decimals=1)[:-1]
@@ -911,7 +913,7 @@ def main(args):
 
     hp_inds = rate_resp_out_arr['hp_ind']
 
-    solid_angle_dpi = np.load(solid_angle_dpi_fname)
+    solid_angle_dpi = np.load(config.solid_angle_dpi_fname)
 
 
     try:
