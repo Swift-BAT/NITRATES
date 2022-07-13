@@ -1,4 +1,4 @@
-import ..config
+#import ..config
 
 import numpy as np
 import pandas as pd
@@ -10,9 +10,9 @@ import os
 import argparse
 import logging, traceback, time
 
-from ../config import EBINS0, EBINS1, solid_angle_dpi_fname, rt_dir
-from sqlite_funcs import get_conn
-from dbread_funcs import get_info_tab, guess_dbfname, get_files_tab,\
+from ..config import EBINS0, EBINS1, solid_angle_dpi_fname, fp_dir, rt_dir
+from ..lib.sqlite_funcs import get_conn
+from ..lib.dbread_funcs import get_info_tab, guess_dbfname, get_files_tab,\
                             get_twinds_tab, get_rate_fits_tab
 from ..lib.wcs_funcs import world2val
 from ..lib.event2dpi_funcs import det2dpis, mask_detxy

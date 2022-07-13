@@ -15,13 +15,13 @@ try:
 except:
     pass
 
-from helper_funcs import send_email, send_error_email, send_email_attach, send_email_wHTML
+from ..lib.helper_funcs import send_email, send_error_email, send_email_attach, send_email_wHTML
 
-from sqlite_funcs import get_conn
-from dbread_funcs import get_files_tab, get_info_tab, guess_dbfname
-from coord_conv_funcs import convert_radec2imxy, convert_imxy2radec,\
+from ..lib.sqlite_funcs import get_conn
+from ..lib.dbread_funcs import get_files_tab, get_info_tab, guess_dbfname
+from ..lib.coord_conv_funcs import convert_radec2imxy, convert_imxy2radec,\
                         convert_radec2thetaphi, convert_theta_phi2radec
-from hp_funcs import pc_probmap2good_outFoVmap_inds
+from ..lib.hp_funcs import pc_probmap2good_outFoVmap_inds
 
 
 def cli():

@@ -6,11 +6,11 @@ import argparse
 import os
 import multiprocessing as mp
 
-from logllh_ebins_funcs import get_cnt_ebins_normed, log_pois_prob
-from ray_trace_funcs import ray_trace_square
-from drm_funcs import get_ebin_ind_edges, DRMs
-from event2dpi_funcs import det2dpis, mask_detxy
-from trans_func import get_pb_absortion
+from ..lib.logllh_ebins_funcs import get_cnt_ebins_normed, log_pois_prob
+from ..response.ray_trace_funcs import ray_trace_square
+from ..lib.drm_funcs import get_ebin_ind_edges, DRMs
+from ..lib.event2dpi_funcs import det2dpis, mask_detxy
+from ..lib.trans_func import get_pb_absortion
 
 quad_dicts = {'all':{'quads':[0,1,2,3],
                      'drm_fname':'drm_0.200_0.150_.fits',
@@ -482,7 +482,7 @@ def do_rate_mle_mp(cnts_per_tbin, bkg_rate_obj, cnts_intp,\
 
 def main(args):
 
-    from bkg_linear_rates import get_lin_rate_quad_objs
+    from ..analysis_seeds.bkg_linear_rates import  get_lin_rate_quad_objs
 
     ebins0 = np.array([14., 20., 26., 36.3, 51.1, 70.9,
                    91.7, 118.2, 151.4])

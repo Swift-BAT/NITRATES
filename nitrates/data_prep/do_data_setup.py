@@ -10,24 +10,24 @@ import time
 import argparse
 import logging, traceback
 
-from time_funcs import met2astropy, utc2met, met2utc_str, apy_time2met
-from sqlite_funcs import get_conn, setup_tab_info, setup_tab_twinds,\
+from ..lib.time_funcs import met2astropy, utc2met, met2utc_str, apy_time2met
+from ..lib.sqlite_funcs import get_conn, setup_tab_info, setup_tab_twinds,\
                 setup_files_tab, setup_tab_twind_status
-from dbread_funcs import get_info_tab, get_twinds_tab,\
+from ..lib.dbread_funcs import get_info_tab, get_twinds_tab,\
                         get_full_sqlite_table_as_df, guess_dbfname
-from event2dpi_funcs import filter_evdata, mask_detxy
-from dmask_funcs import combine_detmasks, get_hotpix_map, find_rate_spike_dets2mask
-from funcs2run_bat_tools import do_pc
-from coord_conv_funcs import convert_radec2imxy, convert_imxy2radec
-from wcs_funcs import world2val
-from hp_funcs import pc_gwmap2good_pix
-from gti_funcs import add_bti2gti, bti2gti, gti2bti, union_gtis, flags2gti,\
+from ..lib.event2dpi_funcs import filter_evdata, mask_detxy
+from ..lib.dmask_funcs import combine_detmasks, get_hotpix_map, find_rate_spike_dets2mask
+from ..lib.funcs2run_bat_tools import do_pc
+from ..lib.coord_conv_funcs import convert_radec2imxy, convert_imxy2radec
+from ..lib.wcs_funcs import world2val
+from ..lib.hp_funcs import pc_gwmap2good_pix
+from ..lib.gti_funcs import add_bti2gti, bti2gti, gti2bti, union_gtis, flags2gti,\
                         get_btis_for_glitches, check_if_in_GTI,\
                         find_and_remove_cr_glitches
 sys.path.append('/storage/home/jjd330/work/local/bat_data/BatML/data_scraping/')
 sys.path.append('/storage/home/jjd330/work/local/bat_data/BatML/HeasoftTools/')
 from db_ql_funcs import get_gainoff_fname
-from bat_tool_funcs import bateconvert
+from ..HeasoftTools.bat_tool_funcs import bateconvert
 
 def query_data_metslice(conn, met0, met1, table_name='SwiftQLevent'):
 
@@ -654,7 +654,8 @@ def main(args):
     # combine it with the global mask and make a hotpix map to also
     # combine it with
 
-    from config import rt_dir, bat_ml_dir
+
+    from ..config import rt_dir, drm_dir, bat_ml_dir
 
     if args.dbfname is None:
         dbfname = guess_dbfname()

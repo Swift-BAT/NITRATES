@@ -1,9 +1,9 @@
 import numpy as np
 import logging, traceback
 
-from models import Bkg_Model, Point_Source_Model
-from logllh_ebins_funcs import log_pois_prob, get_gammaln
-from event2dpi_funcs import det2dpis
+from ..models.models import Bkg_Model, Point_Source_Model
+from ..lib.logllh_ebins_funcs import log_pois_prob, get_gammaln
+from ..lib.event2dpi_funcs import det2dpis
 from numba import jit, njit, prange
 
 
