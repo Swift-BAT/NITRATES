@@ -8,14 +8,14 @@ import healpy as hp
 import logging, traceback
 from copy import copy, deepcopy
 
-from drm_funcs import get_ebin_ind_edges
-from trans_func import get_pb_absortion
-from StructFunc import get_full_struct_manager
-from StructClasses import Swift_Structure, Swift_Structure_Manager
-from Materials import PB, TI, Korex, CarbonFibre, Mylar
-from Polygons import Polygon2D, Box_Polygon
-from ray_trace_funcs import RayTraces
-from coord_conv_funcs import theta_phi2imxy, imxy2theta_phi
+from ..lib.drm_funcs import get_ebin_ind_edges
+from ..lib.trans_func import get_pb_absortion
+from ..models.StructFunc import get_full_struct_manager
+from ..models.StructClasses import Swift_Structure, Swift_Structure_Manager
+from ..response.Materials import PB, TI, Korex, CarbonFibre, Mylar
+from ..response.Polygons import Polygon2D, Box_Polygon
+from ..response.ray_trace_funcs import RayTraces
+from ..lib.coord_conv_funcs import theta_phi2imxy, imxy2theta_phi
 
 
 class Response(object):

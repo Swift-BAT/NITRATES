@@ -11,18 +11,18 @@ from copy import copy, deepcopy
 
 
 from config import solid_angle_dpi_fname, rt_dir
-from sqlite_funcs import get_conn, make_timeIDs
-from wcs_funcs import world2val
-from event2dpi_funcs import det2dpis, mask_detxy
-from models import Bkg_Model_wFlatA, CompoundModel,\
+from lib.sqlite_funcs import get_conn, make_timeIDs
+from lib.wcs_funcs import world2val
+from lib.event2dpi_funcs import det2dpis, mask_detxy
+from models.models import Bkg_Model_wFlatA, CompoundModel,\
                     im_dist, Point_Source_Model_Binned_Rates, Source_Model_InOutFoV
-from flux_models import Plaw_Flux, Cutoff_Plaw_Flux
-from gti_funcs import add_bti2gti, bti2gti, gti2bti, union_gtis
-from ray_trace_funcs import RayTraces
-from coord_conv_funcs import convert_radec2imxy, convert_imxy2radec, imxy2theta_phi, theta_phi2imxy
-from LLH import LLH_webins
-from minimizers import NLLH_ScipyMinimize_Wjacob, NLLH_ScipyMinimize
-from do_llh_inFoV4realtime2 import do_scan_around_peak, find_peaks2scan, parse_bkg_csv
+from models.flux_models import Plaw_Flux, Cutoff_Plaw_Flux
+from lib.gti_funcs import add_bti2gti, bti2gti, gti2bti, union_gtis
+from response.ray_trace_funcs import RayTraces
+from lib.coord_conv_funcs import convert_radec2imxy, convert_imxy2radec, imxy2theta_phi, theta_phi2imxy
+from llh_analysis.LLH import LLH_webins
+from llh_analysis.minimizers import NLLH_ScipyMinimize_Wjacob, NLLH_ScipyMinimize
+from llh_analysis.do_llh_inFoV4realtime2 import do_scan_around_peak, find_peaks2scan, parse_bkg_csv
 
 
 

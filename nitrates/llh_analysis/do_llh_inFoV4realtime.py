@@ -8,28 +8,28 @@ import logging, traceback
 import time
 import pandas as pd
 
-from bkg_rate_estimation import rate_obj_from_sqltab
-from sqlite_funcs import get_conn, write_result, write_results,\
+from ..analysis_seeds.bkg_rate_estimation import rate_obj_from_sqltab
+from ..lib.sqlite_funcs import get_conn, write_result, write_results,\
                         timeID2time_dur, write_results_fromSigImg,\
                         update_square_stat, write_square_res_line,\
                         write_square_results
-from dbread_funcs import get_rate_fits_tab, guess_dbfname,\
+from ..lib.dbread_funcs import get_rate_fits_tab, guess_dbfname,\
                     get_seeds_tab, get_info_tab, get_files_tab,\
                     get_square_tab, get_full_sqlite_table_as_df
-from config import EBINS0, EBINS1, solid_angle_dpi_fname, fp_dir, rt_dir
-from flux_models import Plaw_Flux, Cutoff_Plaw_Flux
-from minimizers import NLLH_ScipyMinimize_Wjacob, imxy_grid_miner, NLLH_ScipyMinimize
-# from drm_funcs import DRMs
-from ray_trace_funcs import RayTraces, FootPrints
-from LLH import LLH_webins
+from ..config import EBINS0, EBINS1, solid_angle_dpi_fname, fp_dir, rt_dir
+from ..models.flux_models import Plaw_Flux, Cutoff_Plaw_Flux
+from ..llh_analysis.minimizers import NLLH_ScipyMinimize_Wjacob, imxy_grid_miner, NLLH_ScipyMinimize
+# from ..lib.drm_funcs import DRMs
+from ..response.ray_trace_funcs import RayTraces, FootPrints
+from ..llh_analysis.LLH import LLH_webins
 # from do_InFoV_scan3 import Swift_Mask_Interactions, Source_Model_InFoV, Bkg_Model_wFlatA,\
 #                             CompoundModel, Point_Source_Model_Binned_Rates,\
 #                             theta_phi2imxy, bldmask2batxys, imxy2theta_phi,\
 #                             get_fixture_struct, LLH_webins
-from models import CompoundModel, Point_Source_Model_Binned_Rates,\
+from ..models.models import CompoundModel, Point_Source_Model_Binned_Rates,\
                     Bkg_Model_wFlatA, Source_Model_InFoV
-from coord_conv_funcs import theta_phi2imxy, imxy2theta_phi
-from gti_funcs import mk_gti_bl, union_gtis
+from ..lib.coord_conv_funcs import theta_phi2imxy, imxy2theta_phi
+from ..lib.gti_funcs import mk_gti_bl, union_gtis
 
 
 # need to read rate fits from DB
