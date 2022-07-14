@@ -13,8 +13,8 @@ from copy import copy, deepcopy
 
 import ..config
 
-from ..models.StructFunc import get_full_struct_manager
-from ..models.StructClasses import Swift_Structure, Swift_Structure_Manager
+from ..response.StructFunc import get_full_struct_manager
+from ..response.StructClasses import Swift_Structure, Swift_Structure_Manager
 from ..response.Materials import PB, TI
 from ..response.Polygons import Polygon2D, Box_Polygon
 from ..models.flux_models import Plaw_Flux, Cutoff_Plaw_Flux, Band_Flux

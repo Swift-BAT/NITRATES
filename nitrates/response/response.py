@@ -10,8 +10,8 @@ from copy import copy, deepcopy
 
 from ..lib.drm_funcs import get_ebin_ind_edges
 from ..lib.trans_func import get_pb_absortion
-from ..models.StructFunc import get_full_struct_manager
-from ..models.StructClasses import Swift_Structure, Swift_Structure_Manager
+from ..response.StructFunc import get_full_struct_manager
+from ..response.StructClasses import Swift_Structure, Swift_Structure_Manager
 from ..response.Materials import PB, TI, Korex, CarbonFibre, Mylar
 from ..response.Polygons import Polygon2D, Box_Polygon
 from ..response.ray_trace_funcs import RayTraces

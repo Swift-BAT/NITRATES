@@ -6,9 +6,9 @@ from numba import jit, njit, prange
 import argparse
 import healpy as hp
 
-from ..models.StructFunc import get_full_struct_manager
+from ..response.StructFunc import get_full_struct_manager
 from ..response.Materials import PB, TA, SN, CU, CZT
-from ..models.StructClasses import Swift_Structure_Shield, Swift_Structure, Swift_Structure_Mask
+from ..response.StructClasses import Swift_Structure_Shield, Swift_Structure, Swift_Structure_Mask
 from ..response.Polygons import Polygon2D, Box_Polygon
 from ..response.shield_structure import Shield_Interactions, Shield_Structure
 

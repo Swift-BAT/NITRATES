@@ -13,7 +13,7 @@ from copy import copy, deepcopy
 
 import ..config
 
-from ..models.StructFunc import get_full_struct_manager
+from ..response.StructFunc import get_full_struct_manager
 from ..models.flux_models import Plaw_Flux, Cutoff_Plaw_Flux, Band_Flux
 #from ..config import rt_dir, fp_dir, solid_angle_dpi_fname, drm_dir, bright_source_table_fname
 from ..lib.logllh_ebins_funcs import log_pois_prob, get_eflux, get_gammaln
@@ -24,7 +24,7 @@ from ..lib.coord_conv_funcs import convert_radec2imxy, convert_imxy2radec,\
                     convert_radec2batxyz, convert_radec2thetaphi
 from ..response.ray_trace_funcs import RayTraces, FootPrints
 from ..lib.hp_funcs import ang_sep
-from ..models.StructClasses import Swift_Structure, Swift_Structure_Manager
+from ..response.StructClasses import Swift_Structure, Swift_Structure_Manager
 from ..response.Materials import PB, TI, Korex, CarbonFibre, Mylar
 from ..response.Polygons import Polygon2D, Box_Polygon
 from ..archive.do_bkg_estimation_wPSs_mp import get_srcs_infov
