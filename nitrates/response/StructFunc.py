@@ -3,7 +3,7 @@ import numpy as np
 from ..response.Materials import CarbonFibre, SiC, AL, AG,\
                     ElecMix, ElecMixDense, AlHoney1,\
                     AlHoney2, AlHoney3, PB, TA, SN, CU
-from ..models.StructClasses import Swift_Structure, Swift_Structure_Compound,\
+from ..response.StructClasses import Swift_Structure, Swift_Structure_Compound,\
                     Swift_Structure_wEmbededPolys, Swift_Structure_Shield,\
                     Swift_Structure_Sun_Shield, Swift_Structure_Manager
 from ..response.Polygons import Box_Polygon, Cylinder_Polygon, Cylinder_wHoles_Polygon

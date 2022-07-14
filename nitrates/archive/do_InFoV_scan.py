@@ -13,7 +13,7 @@ from copy import copy, deepcopy
 
 #from ..config import solid_angle_dpi_fname, rt_dir, fp_dir
 import ..config
-from ..models.StructFunc import get_full_struct_manager
+from ..response.StructFunc import get_full_struct_manager
 from ..models.flux_models import Plaw_Flux, Cutoff_Plaw_Flux, Band_Flux
 from ..lib.logllh_ebins_funcs import log_pois_prob, get_eflux, get_gammaln
 from ..lib.event2dpi_funcs import det2dpis, mask_detxy
