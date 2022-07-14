@@ -54,7 +54,7 @@ def dmask2ndets_perquad(dmask):
 def quads2drm_imxy():
 
     # bottom left, top left, top right, bottom right
-    quads_imxy = [(1.,.5) (.8,-.4), (-.75,-.45), (-1.1,.5)]
+    quads_imxy = [(1.,.5), (.8,-.4), (-.75,-.45), (-1.1,.5)]
 
     return quads_imxy
 

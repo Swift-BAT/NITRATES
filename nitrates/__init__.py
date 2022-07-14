@@ -1,15 +1,33 @@
+
+__all__ = [
+        'analysis_seeds',
+        'archive',
+        'data_prep',
+        'data_scraping',
+        'HeasoftTools',
+        'imaging',
+        'lib',
+        'listeners',
+        'llh_analysis',
+        'models',
+        'post_process',
+        'response'
+        ]
+
 __version__ = '0.1a1'  # make sure this matches the setup.py
 
-import config
-from .analysis_seeds import *
-from .archive import *
-from .data_prep import *
-from .data_scraping import *
-from .HeasoftTools import *
-from .imaging import *
-from .lib import *
-from .listeners import *
-from .llh_analysis import *
-from .models import *
-from .post_process import *
-from .response import *
+
+from . import config
+from . import analysis_seeds
+from . import archive
+from . import data_prep
+from . import data_scraping
+from . import HeasoftTools
+from . import imaging
+from . import lib
+from . import listeners
+from . import llh_analysis
+from . import models
+from . import post_process
+from . import response
+

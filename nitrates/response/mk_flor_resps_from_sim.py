@@ -1,7 +1,6 @@
 import numpy as np
 from numba import jit, njit, prange
 from scipy import interpolate
-import ROOT
 import os
 from astropy.io import fits
 from astropy.table import Table, vstack
@@ -9,6 +8,13 @@ from math import erf
 import multiprocessing as mp
 import healpy as hp
 import argparse
+
+try:
+    import ROOT
+except ModuleNotFoundError as err:
+    # Error handling
+    print(err)
+    print('Please install the Python ROOT package to be able to run the full forward modeling calculations.')
 
 
 from ..lib.event2dpi_funcs import det2dpis

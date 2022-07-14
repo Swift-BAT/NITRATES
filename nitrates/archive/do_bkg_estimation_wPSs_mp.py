@@ -9,10 +9,10 @@ import pandas as pd
 from copy import copy, deepcopy
 import multiprocessing as mp
 
-import ..config
+#import ..config
 
 from ..analysis_seeds.bskg_rate_estimation import get_avg_lin_cub_rate_quad_obs
-#from ..config import quad_dicts, EBINS0, EBINS1,\
+from ..config import quad_dicts, EBINS0, EBINS1,\
                 solid_angle_dpi_fname, bright_source_table_fname
 from ..lib.sqlite_funcs import write_rate_fits_from_obj, get_conn
 from ..lib.dbread_funcs import get_info_tab, guess_dbfname, get_files_tab
@@ -99,7 +99,7 @@ def add_imxy2src_tab(src_tab, attfile, t0):
 
 def get_srcs_infov(attfile, t0, pcfname=None, pcmin=5e-2):
 
-    brt_src_tab = Table.read(config.bright_source_table_fname)
+    brt_src_tab = Table.read(bright_source_table_fname)
     add_imxy2src_tab(brt_src_tab, attfile, t0)
     bl_infov = (np.abs(brt_src_tab['imy'])<.95)&(np.abs(brt_src_tab['imx'])<1.75)
     if pcfname is not None:
@@ -588,7 +588,7 @@ def main(args):
     logging.debug("ebins1")
     logging.debug(ebins1)
 
-    solid_angle_dpi = np.load(config.solid_angle_dpi_fname)
+    solid_angle_dpi = np.load(solid_angle_dpi_fname)
 
     src_tab = get_srcs_infov(attfile, tmid, pcfname=args.pcfname)
     Nsrcs = len(src_tab)

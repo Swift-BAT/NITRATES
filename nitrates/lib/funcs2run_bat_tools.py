@@ -14,8 +14,8 @@ from astropy.wcs import WCS
 from ..lib.sqlite_funcs import get_conn, write_cats2db, write_sigimg_line
 import logging, traceback
 
-import ..config
-sys.path.append(os.path.join(config.dir, 'HeasoftTools'))
+from ..config import dir as direc
+sys.path.append(os.path.join(direc, 'HeasoftTools'))
 
 
 def do_bkg(bkg_tstart, bkg_tstop, ev_fname, dmask, savedir, e0=14.0, e1=194.9):

@@ -9,7 +9,7 @@ import pandas as pd
 from scipy import optimize
 from copy import copy
 
-import ..config
+#import ..config
 
 from ..lib.sqlite_funcs import get_conn
 from ..lib.dbread_funcs import get_rate_fits_tab, guess_dbfname,\
@@ -23,7 +23,7 @@ from ..models.models import Bkg_Model_wFlatA, Point_Source_Model_Wuncoded, im_di
                 Point_Source_Model_Binned_Rates,\
                 Bkg_and_Point_Source_Model, CompoundModel, Bkg_and_Point_Source_Model
 from ..llh_analysis.minimizers import NLLH_ScipyMinimize_Wjacob, NLLH_Minimizer
-#from ..config import EBINS0, EBINS1, solid_angle_dpi_fname,\
+from ..config import EBINS0, EBINS1, solid_angle_dpi_fname,\
                     rt_dir, drm_dir, fp_dir
 
 
@@ -514,7 +514,7 @@ def main(args):
 
     do_analysis(peaks_tab, pl_flux, drm_obj, rt_dir, fp_dir,\
                     bkg_llh_obj, sig_llh_obj, trigtime,\
-                    work_dir, proc_num, args.bkg_fname, config.solid_angle_dpi_fname)
+                    work_dir, proc_num, args.bkg_fname, solid_angle_dpi_fname)
 
 
 if __name__ == "__main__":

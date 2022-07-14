@@ -4,7 +4,7 @@ from ..HeasoftTools.gen_tools import run_ftool
 import argparse
 import numpy as np
 import time
-import ..config
+from ..config import dir as direc
 
 
 def ev2pha(infile, outfile, tstart, tstop, ebins, detmask):
@@ -84,7 +84,7 @@ def cli():
             help="Detmask File Name")
     parser.add_argument('--ebins', type=str,\
             help="Energy Bins for DRM, Fits file name or CALDB",\
-            default=os.path.join(config.dir, "data", "drm_new_ebins.fits"))
+            default=os.path.join(direc, "data", "drm_new_ebins.fits"))
     parser.add_argument('--t0', type=float,\
             help="Start time in MET seconds",\
             default=555166977.856)

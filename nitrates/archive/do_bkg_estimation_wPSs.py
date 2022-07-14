@@ -8,10 +8,10 @@ import logging, traceback
 import pandas as pd
 from copy import copy
 
-import ..config
+#import ..config
 
 from ..analysis_seeds.bkg_rate_estimation import get_avg_lin_cub_rate_quad_obs
-#from ..config import quad_dicts, EBINS0, EBINS1,\
+from ..config import quad_dicts, EBINS0, EBINS1,\
                 solid_angle_dpi_fname, bright_source_table_fname
 from ..lib.sqlite_funcs import write_rate_fits_from_obj, get_conn
 from ..lib.dbread_funcs import get_info_tab, guess_dbfname, get_files_tab

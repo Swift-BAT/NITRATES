@@ -11,7 +11,7 @@ import time
 import pandas as pd
 from copy import copy
 
-import ..config
+#import ..config
 
 from ..analysis_seeds.bkg_rate_estimation import rate_obj_from_sqltab
 from ..lib.sqlite_funcs import get_conn, write_result, write_results,\
@@ -21,7 +21,7 @@ from ..lib.sqlite_funcs import get_conn, write_result, write_results,\
 from ..lib.dbread_funcs import get_rate_fits_tab, guess_dbfname,\
                     get_seeds_tab, get_info_tab, get_files_tab,\
                     get_square_tab, get_full_sqlite_table_as_df
-#from ..config import EBINS0, EBINS1, solid_angle_dpi_fname
+from ..config import EBINS0, EBINS1, solid_angle_dpi_fname
 from ..models.flux_models import Plaw_Flux
 from ..llh_analysis.minimizers import NLLH_ScipyMinimize_Wjacob, imxy_grid_miner, NLLH_ScipyMinimize
 from ..response.ray_trace_funcs import RayTraces, get_rt_arr
@@ -1556,7 +1556,7 @@ def do_analysis(square_tab, t0s, t1s, pc_imxs, pc_imys,\
 
     Ntbins = len(t0s)
 
-    solid_ang_dpi = np.load(config.solid_angle_dpi_fname)
+    solid_ang_dpi = np.load(solid_angle_dpi_fname)
 
     # bkg_miner = NLLH_ScipyMinimize('')
     sig_miner = NLLH_ScipyMinimize_Wjacob('')

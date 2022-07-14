@@ -8,7 +8,7 @@ import numpy as np
 import multiprocessing as mp
 from astropy.table import Table
 
-import ..config
+#import ..config
 
 sys.path.append(os.path.join(config.dir, 'HeasoftTools'))
 
