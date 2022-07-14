@@ -46,7 +46,7 @@ EBINS1 = [24., 35., 48., 64., 84., 120., 171.5, 245., 350.]
 ftool_wrap='/storage/work/jjd330/local/bat_data/BatML/HeasoftTools/run_ftool.sh' #referenced in gen_tools.py
 
 # rt_dir='/gpfs/scratch/jjd330/bat_data/ray_traces_detapp_npy/'
-# fp_dir = '/gpfs/scratch/jjd330/bat_data/footprints_npy/'
+fp_dir = '/gpfs/scratch/jjd330/bat_data/footprints_npy/'
 # #drm_dir='/gpfs/scratch/jjd330/bat_data/drms/'
 # drm_dir='/storage/work/jjd330/local/bat_data/drms/'
 # drm_quad_dir='/gpfs/scratch/jjd330/bat_data/drms4quads/'
@@ -60,7 +60,7 @@ ftool_wrap='/storage/work/jjd330/local/bat_data/BatML/HeasoftTools/run_ftool.sh'
 
 # EBINS0 = [14., 24., 36.3, 55.4, 80.0, 120.7]
 # EBINS1 = [24., 36.3, 55.4, 80.0, 120.7, 194.9]
-"""
+
 quad_dicts = {'all':{'quads':[0,1,2,3],
                      'drm_fname':'drm_0.200_0.150_.fits',
                     'imx':0.2, 'imy':0.15, 'id':0},
@@ -89,4 +89,4 @@ quad_dicts = {'all':{'quads':[0,1,2,3],
                     'drm_fname':'drm_-1.100_0.500_.fits',
                     'imx':-1.1, 'imy':0.5, 'id':8}
                 }
-"""
+

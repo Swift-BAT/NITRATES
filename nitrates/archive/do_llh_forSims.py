@@ -8,7 +8,7 @@ import logging, traceback
 import time
 import pandas as pd
 
-import ..config
+#import ..config
 
 from ..analysis_seeds.bkg_rate_estimation import rate_obj_from_sqltab
 from ..lib.sqlite_funcs import get_conn, write_result, write_results,\
@@ -18,7 +18,7 @@ from ..lib.sqlite_funcs import get_conn, write_result, write_results,\
 from ..lib.dbread_funcs import get_rate_fits_tab, guess_dbfname, get_twinds_tab,\
                     get_seeds_tab, get_info_tab, get_files_tab,\
                     get_square_tab, get_full_sqlite_table_as_df
-#from ..config import EBINS0, EBINS1, solid_angle_dpi_fname, fp_dir
+from ..config import EBINS0, EBINS1, solid_angle_dpi_fname, fp_dir
 from ..models.flux_models import Plaw_Flux
 from ..llh_analysis.minimizers import NLLH_ScipyMinimize_Wjacob, imxy_grid_miner, NLLH_ScipyMinimize
 from ..lib.drm_funcs import DRMs
@@ -141,7 +141,7 @@ def do_analysis(sim_params_df, sim_tab, twind_df,\
 
     nebins = len(ebins0)
 
-    solid_ang_dpi = np.load(config.solid_angle_dpi_fname)
+    solid_ang_dpi = np.load(solid_angle_dpi_fname)
 
     bkg_miner = NLLH_ScipyMinimize('')
     sig_miner = NLLH_ScipyMinimize_Wjacob('')
@@ -414,7 +414,7 @@ def main(args):
 
 
     do_analysis(sim_params_df, sim_tab, twind_df, pl_flux,\
-                    drm_obj, rt_dir, config.fp_dir,\
+                    drm_obj, rt_dir, fp_dir,\
                     ev_data, bl_dmask, ebins0, ebins1,\
                     conn, db_fname, trigtime,\
                     work_dir, args.sim_dir, args.bkg_fname)

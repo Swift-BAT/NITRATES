@@ -10,10 +10,10 @@ import pandas as pd
 import argparse
 import logging, traceback
 
-import ..config
+#import ..config
 from ..response.StructFunc import get_full_struct_manager
 from ..models.flux_models import Plaw_Flux, Cutoff_Plaw_Flux, Band_Flux
-#from ..config import rt_dir, fp_dir, solid_angle_dpi_fname, drm_dir, bright_source_table_fname
+from ..config import rt_dir, fp_dir, solid_angle_dpi_fname, drm_dir, bright_source_table_fname
 from ..lib.logllh_ebins_funcs import log_pois_prob, get_eflux, get_gammaln
 from ..lib.event2dpi_funcs import det2dpis, mask_detxy
 from ..models.models import Model
