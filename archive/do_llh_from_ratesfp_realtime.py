@@ -160,7 +160,7 @@ def do_analysis(square_tab, rate_res_tab, pc_imxs, pc_imys,\
             bkg_params = {pname:bkg_row[pname] for pname in\
                         bkg_llh_obj.model.param_names}
             # bkg_miner.set_fixed_params(bkg_llh_obj.model.param_names)
-            bkg_miner.set_fixed_params(bkg_params.keys(), values=bkg_params.values())
+            bkg_miner.set_fixed_params(list(bkg_params.keys()), values=list(bkg_params.values()))
 
             # bkg_params = {pname:bkg_llh_obj.model.param_dict[pname]['val'] for\
             #                 pname in bkg_llh_obj.model.param_names}

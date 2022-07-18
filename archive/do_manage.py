@@ -423,7 +423,7 @@ def sub_jobs(njobs, name, pyscript, pbs_fname, queue='open',\
     cmd = ''
     jobids = []
 
-    for i in xrange(njobs):
+    for i in range(njobs):
 
         # cmd_ = 'jobid=%d,workdir=%s,njobs=%d,pyscript=%s' %(i,workdir,njobs,pyscript)
         cmd_ = 'jobid=%d,workdir=%s,njobs=%d,pyscript=%s,extra_args="%s"' %(i,workdir,njobs,pyscript,extra_args)

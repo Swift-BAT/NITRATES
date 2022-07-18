@@ -93,5 +93,5 @@ def run_batcelldetect(infile, cat_fname, snr_thresh=3.5,\
         arg_list.append('signifmap='+sigmap)
     if bkgvar is not None:
         arg_list.append('bkgvarmap='+bkgvar)
-    print arg_list
+    print(arg_list)
     run_ftool(ftool, arg_list)

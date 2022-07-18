@@ -37,15 +37,15 @@ def find_and_write_seeds(args, db_fname, timeIDs2assign,\
     snr_high_break = 8.0
     N_jobs2twinds = 4
 
-    half_names = [name for name in quad_dicts.keys() if\
+    half_names = [name for name in list(quad_dicts.keys()) if\
                     ('quad' not in name) and (name != 'all')]
-    quad_names = [name for name in quad_dicts.keys() if 'quad' in name]
+    quad_names = [name for name in list(quad_dicts.keys()) if 'quad' in name]
 
     job_ids = None
 
     rates_twind_groups = rates_df.groupby('timeID')
 
-    for i in xrange(NtimeIDs):
+    for i in range(NtimeIDs):
 
         #timeID = top_timeIDs[i]
         timeID = timeIDs2assign[i]
@@ -54,7 +54,7 @@ def find_and_write_seeds(args, db_fname, timeIDs2assign,\
 
         job_ids = i*N_jobs2twinds + np.arange(N_jobs2twinds,\
                     dtype=np.int) + job_id_start
-        for ii in xrange(len(job_ids)):
+        for ii in range(len(job_ids)):
             job_ids[ii] = job_ids[ii]%args.njobs
         logging.debug("job_ids: " + str(job_ids))
 
@@ -92,7 +92,7 @@ def find_and_write_seeds(args, db_fname, timeIDs2assign,\
 
         priority[blips_middle] = prior_all
 
-        for name in quad_dicts.keys():
+        for name in list(quad_dicts.keys()):
             if name == 'all':
                 continue
             qid = quad_dicts[name]['id']
@@ -115,7 +115,7 @@ def find_and_write_seeds(args, db_fname, timeIDs2assign,\
                 blips_bl = (np.sign(imy)*blips['imy'] > np.abs(imy)-.2)&\
                             (np.sign(imx)*blips['imx'] > np.abs(imx)-.25)
             Nblips = np.sum(blips_bl)
-            for ii in xrange(Nblips):
+            for ii in range(Nblips):
                 p0 = priority[blips_bl][ii]
                 if prior < p0:
                     priority[blips_bl][ii] = prior
@@ -129,14 +129,14 @@ def find_and_write_seeds(args, db_fname, timeIDs2assign,\
         priority[snr_high_bl] = 1
 
 
-        for ii in xrange(max_priority+1):
+        for ii in range(max_priority+1):
             bl = (priority==(ii+1))
             n_p = np.sum(bl)
             logging.debug("%d seeds with priority %d" %(n_p,ii+1))
             n_per_job = 2 + n_p/N_jobs2twinds
             if n_p > 0:
                 p_inds = np.where(bl)[0]
-                for j in xrange(n_p):
+                for j in range(n_p):
                     proc_group[p_inds[j]] = job_ids[j%N_jobs2twinds]
                 #for j in xrange(N_jobs2twinds):
                 #    j0 = j*n_per_job

@@ -63,7 +63,7 @@ def parse_bkg_csv(bkg_fname, solid_angle_dpi, ebins0, ebins1, bl_dmask, rt_dir):
     for name in col_names:
         if '_imx' in name:
             PSnames.append(name.split('_')[0])
-    print PSnames
+    print(PSnames)
     Nsrcs = len(PSnames)
     if Nsrcs > 0:
         bkg_name = 'Background_'
@@ -141,8 +141,8 @@ class Rates_Resp(object):
         self.ndets_in = np.sum(self.mask_in&self.bl_dmask)
         self.ndets_out = np.sum(self.mask_out&self.bl_dmask)
 
-        print self.npz_file.files
-        print self.npz_file['RatesIn'].shape
+        print(self.npz_file.files)
+        print(self.npz_file['RatesIn'].shape)
         self.nebins = self.npz_file['RatesIn'].shape[1]
 
         self.rates_in_intps = []
@@ -501,9 +501,9 @@ class rates_fp_llh(object):
             try:
                 self.set_rates_resp(imx, imy)
             except Exception as E:
-                print "problem reading npz file for imx, imy"
-                print imx, imy
-                print E
+                print("problem reading npz file for imx, imy")
+                print(imx, imy)
+                print(E)
                 continue
             fp_bl = self.resp_obj.mask_in[self.bl_dmask]
             fpbl = mask_detxy(self.resp_obj.mask_in, self.ev_data)
@@ -682,8 +682,8 @@ class rates_fp_llh_outFoV(object):
             try:
                 self.set_rates_resp(hp_ind)
             except Exception as E:
-                print "problem reading npz file for hp_ind,"
-                print hp_ind
+                print("problem reading npz file for hp_ind,")
+                print(hp_ind)
                 logging.error(E)
                 logging.error(traceback.format_exc())
                 continue

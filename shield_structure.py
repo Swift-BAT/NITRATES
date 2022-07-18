@@ -771,7 +771,7 @@ class Shield_Interactions(object):
         the id (the list index) as an int
         '''
 
-        if isinstance(ident, int) or isinstance(ident, float):
+        if isinstance(ident, int) or isinstance(ident, float) or isinstance(ident, np.integer):
             name = self.shield_struct.shield_names[int(ident)]
         else:
             name = ident
@@ -906,7 +906,7 @@ class Sun_Shield_Interactions(object):
         the id (the list index) as an int
         '''
 
-        if isinstance(ident, int) or isinstance(ident, float):
+        if isinstance(ident, int) or isinstance(ident, float) or isinstance(ident, np.integer):
             name = self.shield_struct.shield_names[int(ident)]
         else:
             name = ident

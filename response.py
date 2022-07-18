@@ -47,7 +47,7 @@ class Response(object):
         self.drm_mat_ebins = [np.sum(self.drm_mat[:,\
                                 self.ebin_ind_edges[i][0]:\
                                 self.ebin_ind_edges[i][1]+1],axis=1)\
-                                for i in xrange(self.nebins)]
+                                for i in range(self.nebins)]
         self.drm_mat_ebins = np.array(self.drm_mat_ebins).T
 
 
@@ -254,9 +254,9 @@ class Comp_Resp_Obj(object):
 
         self.comp_trans[:self.ncomp_pnts] += self.struct_obj.get_trans()
 
-        print(np.shape(self.trans[0]), np.shape(self.wts_list[0]),\
-                np.shape(self.comp_trans[self.inds_list[0],:]))
-        print(np.shape(np.sum(self.comp_trans[self.inds_list[0],:]*self.wts_list[0][:,np.newaxis],axis=0)))
+        print((np.shape(self.trans[0]), np.shape(self.wts_list[0]),\
+                np.shape(self.comp_trans[self.inds_list[0],:])))
+        print((np.shape(np.sum(self.comp_trans[self.inds_list[0],:]*self.wts_list[0][:,np.newaxis],axis=0))))
         for i in range(self.ndets):
             self.trans[i] += np.sum(self.comp_trans[self.inds_list[i],:]*self.wts_list[i][:,np.newaxis],axis=0)
 
@@ -806,7 +806,7 @@ class FlorResponseDPI(object):
         resp_dpi0 = np.zeros((self.orig_ndets,self.NphotonEs,self.Nphabins))
 
         for hp_ind,wt in zip(self.hp_inds2use,self.hp_wts):
-            if not hp_ind in self.resp_dict.keys():
+            if not hp_ind in list(self.resp_dict.keys()):
                 self.open_new_file(hp_ind)
             resp_dpi0 += wt*self.resp_dict[hp_ind]
 
@@ -1089,7 +1089,7 @@ class Swift_Mask_Interactions(object):
             rt = self.rt_obj.get_intp_rt(imx, imy, get_deriv=False)
             self._rt = np.copy(rt[self.bl_dmask])
             self.max_rt = np.max(self._rt)
-            print("max rt: %.4f"%(self.max_rt))
+            print(("max rt: %.4f"%(self.max_rt)))
             self._rt /= self.max_rt
             self._shadow = (1. - self._rt)
 #             self._shadow = (self.max_rt - self._rt)
@@ -1259,7 +1259,7 @@ class ResponseInFoV(object):
 
         for i in range(len(self.wts)):
             k = self.resp_arr['fname'][self.inds4intp[i]]
-            if not k in self.resp_files.keys():
+            if not k in list(self.resp_files.keys()):
                 self.open_resp_file_obj(k)
             self.lines_resp_dpis += self.wts[i]*self.resp_files[k].get_lines_resp_dpis()
             self.comp_resp_dpis += self.wts[i]*self.resp_files[k].get_comp_resp_dpis()
@@ -1329,7 +1329,8 @@ class ResponseInFoV(object):
 
 
     def get_intp_theta_phi_wts(self, theta, phi, eps=0.1):
-
+    #py3
+        #stop
         thetas = np.sort(np.unique(self.resp_arr['theta']))
         phis = np.sort(np.unique(self.resp_arr['phi']))
 
@@ -1338,7 +1339,7 @@ class ResponseInFoV(object):
             th0 -= 1
         theta0 = thetas[th0]
         theta1 = thetas[th0+1]
-        print(theta0, theta1)
+        print((theta0, theta1))
         if np.abs(theta0 - theta) < eps:
             ths = [theta0]
             th_wts = [1.0]
@@ -1351,9 +1352,9 @@ class ResponseInFoV(object):
             th_wts = [(theta1 - theta)/dth, (theta - theta0)/dth]
 
 
-        phi_ = phi - (int(phi)/45)*45.0
+        phi_ = phi - (int(phi)//45)*45.0
         print(phi_)
-        if (int(phi)/45)%2 == 1:
+        if (int(phi)//45)%2 == 1:
             phi_ = 45.0 - phi_
         print(phi_)
         ph0 = np.digitize(phi_, phis) - 1
@@ -1603,7 +1604,7 @@ class CompFlorResponseDPI(object):
         resp_sand_img0 = np.zeros((16,16,self.NphotonEs,self.Nphabins))
 
         for hp_ind,wt in zip(self.hp_inds2use,self.hp_wts):
-            if not hp_ind in self.resp_dict.keys():
+            if not hp_ind in list(self.resp_dict.keys()):
                 if hp_ind >= hp.nside2npix(self.Nside):
                     self.open_new_file(hp_ind, fname='resp_by_sand_theta_180.fits')
                 elif hp_ind < 0:
@@ -1796,7 +1797,7 @@ class ResponseInFoV2(object):
 
         for i in range(len(self.wts)):
             k = self.resp_arr['fname'][self.inds4intp[i]]
-            if not k in self.resp_files.keys():
+            if not k in list(self.resp_files.keys()):
                 self.open_resp_file_obj(k)
             self.lines_resp_dpis += self.wts[i]*self.resp_files[k].get_lines_resp_dpis()
             self.comp_resp_dpis += self.wts[i]*self.resp_files[k].get_comp_resp_dpis()
@@ -1890,7 +1891,8 @@ class ResponseInFoV2(object):
 
 
     def get_intp_theta_phi_wts(self, theta, phi, eps=0.1):
-
+    #py3
+        #stop
         thetas = np.sort(np.unique(self.resp_arr['theta']))
         phis = np.sort(np.unique(self.resp_arr['phi']))
 
@@ -1899,7 +1901,7 @@ class ResponseInFoV2(object):
             th0 -= 1
         theta0 = thetas[th0]
         theta1 = thetas[th0+1]
-        print(theta0, theta1)
+        print((theta0, theta1))
         if np.abs(theta0 - theta) < eps:
             ths = [theta0]
             th_wts = [1.0]
@@ -1912,9 +1914,9 @@ class ResponseInFoV2(object):
             th_wts = [(theta1 - theta)/dth, (theta - theta0)/dth]
 
 
-        phi_ = phi - (int(phi)/45)*45.0
+        phi_ = phi - (int(phi)//45)*45.0
         print(phi_)
-        if (int(phi)/45)%2 == 1:
+        if (int(phi)//45)%2 == 1:
             phi_ = 45.0 - phi_
         print(phi_)
         ph0 = np.digitize(phi_, phis) - 1

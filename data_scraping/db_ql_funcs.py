@@ -34,7 +34,7 @@ def write_new_obsid_line(conn, obsid, data_dict=None, table="SwiftQL"):
     data_dict['obsid'] = obsid
     col_names = []
     values = []
-    for k, val in data_dict.iteritems():
+    for k, val in list(data_dict.items()):
         col_names.append(k)
         values.append(val)
 
@@ -49,11 +49,11 @@ def update_obsid_line(conn, obsid, data_dict, table="SwiftQL"):
     sql = 'UPDATE %s SET ' %(table)
     col_names = []
     values = []
-    for k, val in data_dict.iteritems():
+    for k, val in list(data_dict.items()):
         col_names.append(k)
         values.append(val)
 
-    for i in xrange(len(col_names)):
+    for i in range(len(col_names)):
         if i < (len(col_names)-1):
             sql += '%s = ?,' %(col_names[i])
         else:

@@ -1,6 +1,7 @@
 import numpy as np
 import abc
 from scipy.integrate import quad
+import six
 
 def get_eflux_from_model(flux_mod, params, E0, E1, esteps=1e4):
     Es = np.linspace(E0, E1, int(esteps))
@@ -9,9 +10,9 @@ def get_eflux_from_model(flux_mod, params, E0, E1, esteps=1e4):
     flux = np.sum(flux_mod.spec(Es, params)*Es)*dE*kev2erg
     return flux
 
+@six.add_metaclass(abc.ABCMeta)
 class Flux_Model(object):
-
-    __metaclass__ = abc.ABCMeta
+    #, metaclass=abc.ABCMeta
 
     def __init__(self, name, param_names, param_bounds=None, E0=50.0):
 
@@ -79,7 +80,7 @@ class Flux_Model(object):
         else:
             Npnts = len(Ebins) - 1
             photon_fluxes = np.zeros(Npnts)
-            for i in xrange(Npnts):
+            for i in range(Npnts):
                 photon_fluxes[i] = self.get_photon_flux(Ebins[i],\
                                                         Ebins[i+1],\
                                                         params,\

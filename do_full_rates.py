@@ -90,7 +90,7 @@ class Linear_Rates(object):
         self.gti_tbin_bl = np.zeros(self.n_tbins,dtype=np.bool)
         for i in range(self.n_tbins):
             self.gti_tbin_bl[i] = check_if_in_GTI(GTI, self.t_bins0[i], self.t_bins1[i])
-        print len(self.gti_tbin_bl), np.sum(self.gti_tbin_bl)
+        print(len(self.gti_tbin_bl), np.sum(self.gti_tbin_bl))
 
 
 #         self.t_bins0 = t_bins0
@@ -131,7 +131,7 @@ class Linear_Rates(object):
 
 
     def do_fits(self):
-        for i in xrange(self.n_lin_pnts):
+        for i in range(self.n_lin_pnts):
 
             t_mid = self.t_poly_ax[i]
 
@@ -194,9 +194,9 @@ class Linear_Rates(object):
                                      sigma=np.sqrt(cnts[bl]),\
                                      absolute_sigma=False)
             except Exception as E:
-                print E
-                print "_cnts[:,j].shape: ", cnts.shape
-                print "_t_ax.shape: ", t_ax.shape
+                print(E)
+                print("_cnts[:,j].shape: ", cnts.shape)
+                print("_t_ax.shape: ", t_ax.shape)
                 raise E
 
             tot_cnts = np.sum(cnts[bl])
@@ -242,7 +242,7 @@ def get_cnts_tbins_fast(tbins0, tbins1, evd):
     tstep = tbins0[1] - tbins0[0]
     tbin_size = tbins1[0] - tbins0[0]
     tfreq = int(np.rint(tbin_size/tstep))
-    t_add = [tbins0[-1] + (i+1)*tstep for i in xrange(tfreq)]
+    t_add = [tbins0[-1] + (i+1)*tstep for i in range(tfreq)]
     tbins = np.append(tbins0, t_add)
 #     ebins = np.append(ebins0, [ebins1[-1]])
 #     qbins = np.arange(5) - .5
@@ -255,7 +255,7 @@ def get_cnts_tbins_fast(tbins0, tbins1, evd):
         return h
 #     h2 = np.zeros((h.shape[0]-(tfreq-1),h.shape[1],h.shape[2]))
     h2 = np.zeros(h.size - (tfreq-1))
-    for i in xrange(tfreq):
+    for i in range(tfreq):
         i0 = i
         i1 = -tfreq + 1 + i
         if i1 < 0:

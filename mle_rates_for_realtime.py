@@ -204,7 +204,7 @@ def get_cnts_intp_obj(ind_ax, drm, ebin_ind_edges, abs_cor):
     nebins = len(ebin_ind_edges)
     cnt_ebins_norm_ind_mat = np.zeros((len(ind_ax),nebins))
 
-    for i in xrange(len(ind_ax)):
+    for i in range(len(ind_ax)):
         cnt_ebins_norm_ind_mat[i] =\
                 get_cnt_ebins_normed(ind_ax[i],\
                 drm, ebin_ind_edges, abs_cor=abs_cor)
@@ -221,7 +221,7 @@ def get_cnts_per_tbins(t_bins0, t_bins1,\
     nebins = len(ebins0)
     cnts_per_tbin = np.zeros((ntbins, nebins))
 
-    for i in xrange(ntbins):
+    for i in range(ntbins):
 
         sig_bl = (ev_data['TIME']>=t_bins0[i])&\
                 (ev_data['TIME']<(t_bins1[i]))
@@ -245,13 +245,13 @@ def get_quad_cnts_tbins(tbins0, tbins1, ebins0, ebins1, evd):
 
     cnts_mat = np.zeros((ntbins,nebins,4))
 
-    for i in xrange(ntbins):
+    for i in range(ntbins):
 
         sig_bl = (evd['TIME']>=tbins0[i])&\
                 (evd['TIME']<(tbins1[i]))
         sig_data = evd[sig_bl]
 
-        for j in xrange(nebins):
+        for j in range(nebins):
 
             e_bl = (sig_data['ENERGY']>=ebins0[j])&\
                     (sig_data['ENERGY']<(ebins1[j]))
@@ -268,11 +268,11 @@ def get_cnts(ev, t_bins0, t_bins1, ebin_inds, nebins):
     ntbins = len(t_bins0)
     cnts = np.zeros((ntbins, nebins))
 
-    for i in xrange(ntbins):
+    for i in range(ntbins):
         blt = (ev['TIME']>=t_bins0[i])&(ev['TIME']<t_bins1[i])
         ebin_inds_ = ebin_inds[blt]
 
-        for j in xrange(nebins):
+        for j in range(nebins):
 
             cnts[i,j] = np.sum(ebin_inds_==j)
 
@@ -287,7 +287,7 @@ def get_data_cube(tbins0, tbins1, ebins0, ebins1, evd, dmask_bl):
 
     data_cube = np.zeros((ntbins, nebins, ndets), dtype=np.int)
 
-    for i in xrange(ntbins):
+    for i in range(ntbins):
 
         blt = (evd['TIME']>=tbins0[i])&(evd['TIME']<tbins1[i])
         ev_ = evd[blt]
@@ -350,7 +350,7 @@ def do_rate_mle(cnts_per_tbin, bkg_rate_obj,\
     x0s = [[1., 1.], [2., 1.],
            [1., 2.], [2., 2.]]
 
-    for i in xrange(ntbins):
+    for i in range(ntbins):
 
         bkg_rate, bkg_rate_err = bkg_rate_obj.get_rate(t_ax[i])
 
@@ -442,7 +442,7 @@ def do_rate_mle_mp(cnts_per_tbin, bkg_rate_obj, cnts_intp,\
 
     arg_list = []
 
-    for i in xrange(ntbins):
+    for i in range(ntbins):
 
         bkg_rate, bkg_rate_err = bkg_rate_obj.get_rate(t_ax[i])
 
@@ -466,7 +466,7 @@ def do_rate_mle_mp(cnts_per_tbin, bkg_rate_obj, cnts_intp,\
 
     pool.close()
 
-    for i in xrange(ntbins):
+    for i in range(ntbins):
         res = res_list[i]
 #         bf_nsigs[i] = 10.**res[0][0]
 #         bf_inds[i] = res[0][1]
@@ -524,7 +524,7 @@ def main(args):
     t_bins1 = t_bins0 + bin_size
     t_ax = (t_bins0 + t_bins1)/2.
     ntbins = len(t_bins0)
-    print ntbins
+    print(ntbins)
 
     quad_cnts_mat = get_quad_cnts_tbins(t_bins0, t_bins1,\
                                     ebins0, ebins1, ev_data0)
@@ -547,9 +547,9 @@ def main(args):
 
     tabs = []
 
-    for ii in xrange(N_dbl_dt):
+    for ii in range(N_dbl_dt):
 
-        for direction, quad_dict in quad_dicts.iteritems():
+        for direction, quad_dict in quad_dicts.items():
 
             tab = Table()
 
@@ -565,7 +565,7 @@ def main(args):
             cnts_per_tbin = np.sum( [quad_cnts_mat[:,:,q] for\
                                 q in quad_dict['quads']], axis=0 )
 
-            print imx, imy
+            print(imx, imy)
 
             bkg_llh_tbins, llhs, bf_nsigs, bf_inds =\
                     do_rate_mle(cnts_per_tbin, bkg_lin_rate_dict[direction],\
@@ -589,7 +589,7 @@ def main(args):
         t_bins0 = np.arange(-15.008, 15.008, tstep) + trig_time
         t_bins1 = t_bins0 + bin_size
         ntbins = len(t_bins0)
-        print ntbins
+        print(ntbins)
 
         quad_cnts_mat = get_quad_cnts_tbins(t_bins0, t_bins1,\
                                     ebins0, ebins1, ev_data0)

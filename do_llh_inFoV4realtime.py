@@ -101,7 +101,7 @@ def parse_bkg_csv(bkg_fname, solid_angle_dpi, ebins0, ebins1, bl_dmask, rt_dir):
     for name in col_names:
         if '_imx' in name:
             PSnames.append(name.split('_')[0])
-    print PSnames
+    print(PSnames)
     Nsrcs = len(PSnames)
     if Nsrcs > 0:
         bkg_name = 'Background_'
@@ -209,10 +209,10 @@ def do_scan_around_peak(peak_row, bkg_bf_params, bkg_name, sig_miner,\
     sig_llh_obj.set_time(peak_row['time'], t1)
 
     parss = {}
-    for pname,val in bkg_bf_params.iteritems():
+    for pname,val in bkg_bf_params.items():
         # pars_['Background_'+pname] = val
         parss[bkg_name+'_'+pname] = val
-    sig_miner.set_fixed_params(parss.keys(), values=parss.values())
+    sig_miner.set_fixed_params(list(parss.keys()), values=list(parss.values()))
 
 
     imxax = np.arange(-dimx, dimx+(imstep/2.), imstep) + peak_row['imx']
@@ -250,8 +250,8 @@ def do_scan_around_peak(peak_row, bkg_bf_params, bkg_name, sig_miner,\
 
     for ii in range(N_impnts):
 
-        print imxs[ii], imys[ii]
-        print thetas[ii], phis[ii]
+        print(imxs[ii], imys[ii])
+        print(thetas[ii], phis[ii])
         sig_miner.set_fixed_params(['Signal_theta', 'Signal_phi'],\
                                     values=[thetas[ii],phis[ii]])
 
@@ -327,7 +327,7 @@ def analysis_for_imxy_square(imx0, imx1, imy0, imy1, bkg_bf_params_list,\
     imys = np.ravel(imyg) + imy0
     Npnts = len(imxs)
 
-    print Npnts
+    print(Npnts)
     logging.info("%d imxy points to do" %(Npnts))
 
     thetas, phis = imxy2theta_phi(imxs, imys)
@@ -386,16 +386,16 @@ def analysis_for_imxy_square(imx0, imx1, imy0, imy1, bkg_bf_params_list,\
     pars_ = {}
     pars_['Signal_theta'] = np.mean(thetas)
     pars_['Signal_phi'] = np.mean(phis)
-    for pname,val in bkg_bf_params_list[0].iteritems():
+    for pname,val in bkg_bf_params_list[0].items():
         # pars_['Background_'+pname] = val
         pars_[bkg_name+'_'+pname] = val
-    for pname,val in flux_params.iteritems():
+    for pname,val in flux_params.items():
         pars_['Signal_'+pname] = val
 
     sig_miner.set_llh(sig_llh_obj)
 
-    fixed_pnames = pars_.keys()
-    fixed_vals = pars_.values()
+    fixed_pnames = list(pars_.keys())
+    fixed_vals = list(pars_.values())
     trans = [None for i in range(len(fixed_pnames))]
     sig_miner.set_trans(fixed_pnames, trans)
     sig_miner.set_fixed_params(fixed_pnames, values=fixed_vals)
@@ -408,8 +408,8 @@ def analysis_for_imxy_square(imx0, imx1, imy0, imy1, bkg_bf_params_list,\
 
     for ii in range(Npnts):
 
-        print imxs[ii], imys[ii]
-        print thetas[ii], phis[ii]
+        print(imxs[ii], imys[ii])
+        print(thetas[ii], phis[ii])
         sig_miner.set_fixed_params(['Signal_theta', 'Signal_phi'],\
                                     values=[thetas[ii],phis[ii]])
 
@@ -435,10 +435,10 @@ def analysis_for_imxy_square(imx0, imx1, imy0, imy1, bkg_bf_params_list,\
             for i in range(ntbins):
 
                 parss_ = {}
-                for pname,val in bkg_bf_params_list[i].iteritems():
+                for pname,val in bkg_bf_params_list[i].items():
                     # pars_['Background_'+pname] = val
                     parss_[bkg_name+'_'+pname] = val
-                sig_miner.set_fixed_params(parss_.keys(), values=parss_.values())
+                sig_miner.set_fixed_params(list(parss_.keys()), values=list(parss_.values()))
 
                 t0 = tbins0[i]
                 t1 = tbins1[i]
@@ -486,7 +486,7 @@ def analysis_for_imxy_square(imx0, imx1, imy0, imy1, bkg_bf_params_list,\
             t1 = tbins1[i]
             dt = t1 - t0
             sig_llh_obj.set_time(tbins0[i], tbins1[i])
-            for pname,val in bkg_bf_params_list[i].iteritems():
+            for pname,val in bkg_bf_params_list[i].items():
                 pars_[bkg_name+'_'+pname] = val
             bkg_bf_param_dict[timeIDs[i]] = bkg_bf_params_list[i]
             pars_['Signal_theta'] = thetas[ii]

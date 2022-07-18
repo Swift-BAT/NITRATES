@@ -112,7 +112,7 @@ def get_cnts_intp_obj(ind_ax, drm, ebin_ind_edges, abs_cor):
     nebins = len(ebin_ind_edges)
     cnt_ebins_norm_ind_mat = np.zeros((len(ind_ax),nebins))
 
-    for i in xrange(len(ind_ax)):
+    for i in range(len(ind_ax)):
         cnt_ebins_norm_ind_mat[i] =\
                 get_cnt_ebins_normed(ind_ax[i],\
                 drm, ebin_ind_edges, abs_cor=abs_cor)
@@ -129,7 +129,7 @@ def get_cnts_per_tbins(t_bins0, t_bins1,\
     nebins = len(ebins0)
     cnts_per_tbin = np.zeros((ntbins, nebins))
 
-    for i in xrange(ntbins):
+    for i in range(ntbins):
 
         sig_bl = (ev_data['TIME']>=t_bins0[i])&\
                 (ev_data['TIME']<(t_bins1[i]))
@@ -146,11 +146,11 @@ def get_cnts(ev, t_bins0, t_bins1, ebin_inds, nebins):
     ntbins = len(t_bins0)
     cnts = np.zeros((ntbins, nebins))
 
-    for i in xrange(ntbins):
+    for i in range(ntbins):
         blt = (ev['TIME']>=t_bins0[i])&(ev['TIME']<t_bins1[i])
         ebin_inds_ = ebin_inds[blt]
 
-        for j in xrange(nebins):
+        for j in range(nebins):
 
             cnts[i,j] = np.sum(ebin_inds_==j)
 
@@ -202,8 +202,8 @@ def main(args):
 
     bkg_data_dpis = det2dpis(bkg_data, ebins0, ebins1)
     bkg_cnts = np.array([np.sum(dpi[(dmask==0)]) for dpi in bkg_data_dpis])
-    print bkg_cnts
-    print bkg_cnts/args.bkgdt
+    print(bkg_cnts)
+    print(bkg_cnts/args.bkgdt)
 
     bkg_err = 1.1*np.sqrt(bkg_cnts)
 
@@ -212,7 +212,7 @@ def main(args):
     t_bins0 = np.arange(-15.008, 15.008, tstep) + trig_time
     t_bins1 = t_bins0 + bin_size
     ntbins = len(t_bins0)
-    print ntbins
+    print(ntbins)
 
     #cnts_per_tbin = get_cnts_per_tbins(t_bins0, t_bins1, ebins0, ebins1,\
     #                                  ev_data0, dmask)
@@ -240,14 +240,14 @@ def main(args):
 
     tabs = []
 
-    for ii in xrange(N_dbl_dt):
+    for ii in range(N_dbl_dt):
 
         tab = Table()
 
         bkg_llh_tbins = np.zeros(ntbins)
         bf_bkg_rates = np.zeros((ntbins, nebins))
 
-        for i in xrange(ntbins):
+        for i in range(ntbins):
 
             bkg_llh_tbins[i], bf_bkg_rates[i] = rates_llh(\
                         cnts_per_tbin[i], 0.,\
@@ -258,7 +258,7 @@ def main(args):
         bf_inds = np.zeros(ntbins)
         llhs = np.zeros(ntbins)
 
-        for i in xrange(ntbins):
+        for i in range(ntbins):
 
             x0 = [1., 1.]
             _args = (cnts_per_tbin[i], bkg_cnts, bkg_err,\
@@ -293,7 +293,7 @@ def main(args):
         t_bins0 = np.arange(-15.008, 15.008, tstep) + trig_time
         t_bins1 = t_bins0 + bin_size
         ntbins = len(t_bins0)
-        print ntbins
+        print(ntbins)
 
         cnts_per_tbin = get_cnts(ev_data0, t_bins0, t_bins1, ebin_ind, nebins)
 
@@ -308,7 +308,7 @@ def main(args):
     exps = tab['tstop'] - tab['tstart']
     pvals = stats.chi2.sf(2.*llhrs, 1)
     Nexps = args.ndbl + 1
-    for i in xrange(Nexps):
+    for i in range(Nexps):
         bl_exp = np.isclose(exps, .128*(2**(i)))
         pvals[bl_exp] *= (np.sum(bl_exp)/dt_tot)
     pvals = 1. - np.exp(-pvals)

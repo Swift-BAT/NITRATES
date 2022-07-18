@@ -528,7 +528,7 @@ class Swift_Structure_Manager(object):
 
         name = struct.Name
         if name in self.struct_names:
-            print(name + 'is already added')
+            print((name + 'is already added'))
             return
         if hasattr(self, 'energy'):
             struct.set_energy_arr(self.energy)
@@ -549,7 +549,7 @@ class Swift_Structure_Manager(object):
 
         self.energy = energy
         self.Ne = len(energy)
-        for name, struct in self.struct_dict.iteritems():
+        for name, struct in self.struct_dict.items():
             struct.set_energy_arr(self.energy)
 
 
@@ -559,7 +559,7 @@ class Swift_Structure_Manager(object):
         self.batys = batys
         self.batzs = batzs
         self.ndets = len(batxs)
-        for name, struct in self.struct_dict.iteritems():
+        for name, struct in self.struct_dict.items():
             struct.set_batxyzs(batxs, batys, batzs)
 
 
@@ -567,7 +567,7 @@ class Swift_Structure_Manager(object):
 
         self.theta = theta
         self.phi = phi
-        for name, struct in self.struct_dict.iteritems():
+        for name, struct in self.struct_dict.items():
             struct.set_theta_phi(theta, phi)
 
         if hasattr(self, 'energy'):
@@ -584,7 +584,7 @@ class Swift_Structure_Manager(object):
 
 #         self.tot_rhomu_dists = self.parent_dist*self.tot_rho_mus_list[0]
         self.tot_rhomu_dists = np.zeros((self.ndets,self.Ne))
-        for name, struct in self.struct_dict.iteritems():
+        for name, struct in self.struct_dict.items():
             self.tot_rhomu_dists += struct.get_tot_rhomu_dist()
 
     def get_tot_rhomu_dist(self):

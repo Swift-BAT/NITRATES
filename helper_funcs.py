@@ -1,8 +1,20 @@
 import smtplib
+import sys
 from email.mime.text import MIMEText
-from email.MIMEMultipart import MIMEMultipart
-from email.MIMEBase import MIMEBase
-from email import Encoders
+if sys.version_info < (3, 0):
+    from email.MIMEMultipart import MIMEMultipart
+else:
+    from email.mime.multipart import MIMEMultipart
+    
+if sys.version_info < (3, 0):
+    from email.MIMEBase import MIMEBase
+else:
+    from email.mime.base import MIMEBase
+    
+if sys.version_info < (3, 0):
+    from email import Encoders
+else:
+    from email import encoders
 
 
 pass_fname = 'pass.txt'

@@ -84,7 +84,7 @@ def parse_bkg_csv(bkg_fname, solid_angle_dpi, ebins0, ebins1, bl_dmask, rt_dir):
     for name in col_names:
         if '_imx' in name:
             PSnames.append(name.split('_')[0])
-    print PSnames
+    print(PSnames)
     Nsrcs = len(PSnames)
     if Nsrcs > 0:
         bkg_name = 'Background_'
@@ -220,7 +220,7 @@ def do_analysis(square_tab, rate_res_tab, pc_imxs, pc_imys,\
             bkg_params = {pname:bkg_row[pname] for pname in\
                         bkg_llh_obj.model.param_names}
             # bkg_miner.set_fixed_params(bkg_llh_obj.model.param_names)
-            bkg_miner.set_fixed_params(bkg_params.keys(), values=bkg_params.values())
+            bkg_miner.set_fixed_params(list(bkg_params.keys()), values=list(bkg_params.values()))
 
             # bkg_params = {pname:bkg_llh_obj.model.param_dict[pname]['val'] for\
             #                 pname in bkg_llh_obj.model.param_names}

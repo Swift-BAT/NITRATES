@@ -40,11 +40,11 @@ def mk_comp_ebins(PrimaryE):
 
     comp_E90 = comp_Enew(PrimaryE, np.pi/2.)
     comp_E180 = comp_Enew(PrimaryE, np.pi)
-    print(comp_E90, comp_E180)
+    print((comp_E90, comp_E180))
 
     P_E180 = PrimaryE - comp_E180
     P_E90 = PrimaryE - comp_E90
-    print(P_E90, P_E180)
+    print((P_E90, P_E180))
 
     if PrimaryE - comp_E180 < 1.0:
         N_Esteps = int((PrimaryE - 8.0)/4.0) + 2
@@ -230,8 +230,8 @@ def get_stuff_from_Erun(dname):
 
 #     dname = '/gpfs/scratch/jjd330/dets_only_g4_runs/theta_135.0_phi_0.0/run_30/'
     fnames = [os.path.join(dname, fname) for fname in os.listdir(dname) if '.root' in fname]
-    print len(fnames)
-    print fnames
+    print(len(fnames))
+    print(fnames)
     edeps = np.empty(0)
     zs = np.empty(0)
     pix_ids = np.empty(0, dtype=np.int)
@@ -239,15 +239,15 @@ def get_stuff_from_Erun(dname):
     detys = np.empty(0, dtype=np.int)
     Ngammas = 0
     for i,fname in enumerate(fnames):
-        print i
+        print(i)
         Ngamma = int(fname.split('_')[-4])
         PrimaryE = float(fname.split('_')[-6])
         try:
             edeps_, zs_, pix_ids_, detxs_, detys_ = get_Es_Zs_PixIDs_detxys_from_root_file(fname)
         except Exception as E:
             print(E)
-            print "problem with,"
-            print fname
+            print("problem with,")
+            print(fname)
             continue
         Ngammas += Ngamma
         edeps = np.append(edeps, edeps_)
@@ -316,7 +316,7 @@ def get_dist_dicts(dname):
                 Es, zs, pixids = get_Es_Zs_PixIDs_from_root_file(fname_)
             except Exception as E:
                 print(E)
-                print('bad file: ', fname_)
+                print(('bad file: ', fname_))
                 continue
             Edeps = np.append(Edeps, Es)
             wtd_zs = np.append(wtd_zs, zs)
@@ -336,8 +336,8 @@ def get_dist_dicts(dname):
         bl_bot = np.isin(pix_ids, bot_pixids)
         edge_dets = (bl_bot|bl_top|bl_right|bl_left)
 
-        print np.shape(Edeps), np.shape(wtd_zs), np.shape(pix_ids)
-        print np.shape(edge_dets)
+        print(np.shape(Edeps), np.shape(wtd_zs), np.shape(pix_ids))
+        print(np.shape(edge_dets))
 
 
         bls = [~edge_dets, bl_right, bl_left, bl_top, bl_bot]
@@ -357,9 +357,9 @@ def get_dist_dicts(dname):
         comp_dict['Ehi'] = comp_ebins1
         for ii in range(len(orientation_names)):
             bl = bls[ii]
-            print orientation_names[ii]
-            print np.sum(bl), np.shape(bl)
-            print
+            print(orientation_names[ii])
+            print(np.sum(bl), np.shape(bl))
+            print()
             ndets = Ndets_list[ii]
             zs = wtd_zs[bl]
             Es = Edeps[bl]
@@ -389,7 +389,7 @@ def get_dist_dicts2(dname, theta, phi):
     for i in range(NPrimary_Es):
 
         direc = os.path.join(dname, 'run_'+str(i))
-        print direc
+        print(direc)
         PrimaryE, Ngammas, edeps, zs, pix_ids, detxs, detys = get_stuff_from_Erun(direc)
 
         Primary_Es.append(PrimaryE)
@@ -506,10 +506,10 @@ def get_dist_dicts2(dname, theta, phi):
             Ncols = col1 - col0
             Nrows = row1 - row0
             Nsands = Ncols*Nrows
-            print "col0, col1: ", col0, col1
-            print "row0, row1: ", row0, row1
-            print "Nsands: ", Nsands
-            print
+            print("col0, col1: ", col0, col1)
+            print("row0, row1: ", row0, row1)
+            print("Nsands: ", Nsands)
+            print()
         #     ndets = Nsands*Ndets_per_sand_no_edges
         #     print ndets
         #     bl_cols = np.zeros(len(bl), dtype=np.bool)
@@ -521,18 +521,18 @@ def get_dist_dicts2(dname, theta, phi):
 
                 bl = bls[j]&bl_cr
                 ndets = Ndets_per_sand_ors[j]*Nsands
-                print orientation_names[j]
-                print "ndets: ", ndets
-                print np.sum(bl)
+                print(orientation_names[j])
+                print("ndets: ", ndets)
+                print(np.sum(bl))
 
                 Zs = zs[bl]
                 Es = edeps[bl]
                 k = orientation_names[j] + '_cols_%d_%d_rows_%d_%d_comp_Depth_dE' %(col0,col1,row0,row1)
-                print k
+                print(k)
                 comp_dict[k], zbins = get_depth_dE4comp(comp_ebins0, comp_ebins1,\
                                                         line_ebins0, line_ebins1,\
                                                         Es, Zs, ndets, N_per_cm2, Nzbins=20)
-                print
+                print()
 
 
         if theta > 70.0 and theta < 91.0:
@@ -627,10 +627,10 @@ def get_dist_dicts2(dname, theta, phi):
             Ncols = col1 - col0
             Nrows = row1 - row0
             Nsands = Ncols*Nrows
-            print "col0, col1: ", col0, col1
-            print "row0, row1: ", row0, row1
-            print "Nsands: ", Nsands
-            print
+            print("col0, col1: ", col0, col1)
+            print("row0, row1: ", row0, row1)
+            print("Nsands: ", Nsands)
+            print()
         #     ndets = Nsands*Ndets_per_sand_no_edges
         #     print ndets
         #     bl_cols = np.zeros(len(bl), dtype=np.bool)
@@ -642,14 +642,14 @@ def get_dist_dicts2(dname, theta, phi):
 
                 bl = bls[j]&bl_cr
                 ndets = Ndets_per_sand_ors[j]*Nsands
-                print orientation_names[j]
-                print "ndets: ", ndets
-                print np.sum(bl)
+                print(orientation_names[j])
+                print("ndets: ", ndets)
+                print(np.sum(bl))
 
                 Zs = zs[bl]
                 Es = edeps[bl]
                 k = orientation_names[j] + '_cols_%d_%d_rows_%d_%d' %(col0,col1,row0,row1)
-                print k
+                print(k)
 
                 line_depths = get_depth4lines(line_ebins0, line_ebins1, Es, Zs,\
                               ndets, N_per_cm2, Nzbins=20)
