@@ -285,9 +285,9 @@ class ray_trace_file(object):
         self.a2_grid = np.zeros_like(self.a0_grid)
         self.a3_grid = np.zeros_like(self.a0_grid)
 
-        for i in xrange(len(self.imx_ax)):
+        for i in range(len(self.imx_ax)):
             imx = self.imx_ax[i]
-            for j in xrange(len(self.imy_ax)):
+            for j in range(len(self.imy_ax)):
                 imy = self.imy_ax[j]
                 rts, imxs, imys = self.get_rt_corners2(imx, imy)
                 xs = [min(imxs),max(imxs)]
@@ -546,7 +546,7 @@ class ray_trace_square(object):
         bl = ((ray_trace_arr['imx0']<imx1)&(ray_trace_arr['imx1']>imx0)&\
             (ray_trace_arr['imy0']<imy1)&(ray_trace_arr['imy1']>imy0))
 
-        print(np.sum(bl))
+        print((np.sum(bl)))
 
         self.rt_arr = ray_trace_arr[bl]
 
@@ -554,7 +554,7 @@ class ray_trace_square(object):
 
         self.rt_files = []
 
-        for i in xrange(Nfiles):
+        for i in range(Nfiles):
 
             self.rt_files.append(ray_trace_file(self.rt_arr[i], rt_dir, mmap=mmap))
 
@@ -653,7 +653,7 @@ class RayTraces(object):
 
         fname = rt_arr0['fname']
 
-        if fname not in self.rt_files.keys():
+        if fname not in list(self.rt_files.keys()):
             self.open_rt_file_obj(rt_arr0)
         self.rt_arr['time'][ind] = time.time()
         return self.rt_files[fname]
@@ -860,7 +860,7 @@ class FootPrints(object):
 
         fname = fp_arr0['fname']
 
-        if fname not in self.fp_files.keys():
+        if fname not in list(self.fp_files.keys()):
             self.open_fp_file_obj(fp_arr0)
         self.fp_arr['time'][ind] = time.time()
         return self.fp_files[fname]

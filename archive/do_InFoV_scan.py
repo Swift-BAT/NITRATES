@@ -229,9 +229,9 @@ class Comp_Resp_Obj(object):
 
         self.comp_trans[:self.ncomp_pnts] += self.struct_obj.get_trans()
 
-        print np.shape(self.trans[0]), np.shape(self.wts_list[0]),\
-                np.shape(self.comp_trans[self.inds_list[0],:])
-        print np.shape(np.sum(self.comp_trans[self.inds_list[0],:]*self.wts_list[0][:,np.newaxis],axis=0))
+        print(np.shape(self.trans[0]), np.shape(self.wts_list[0]),\
+                np.shape(self.comp_trans[self.inds_list[0],:]))
+        print(np.shape(np.sum(self.comp_trans[self.inds_list[0],:]*self.wts_list[0][:,np.newaxis],axis=0)))
         for i in range(self.ndets):
             self.trans[i] += np.sum(self.comp_trans[self.inds_list[i],:]*self.wts_list[i][:,np.newaxis],axis=0)
 
@@ -267,7 +267,7 @@ def get_dual_struct_obj(Ephotons):
 
     dual_xs = np.array(dual_xs)
     dual_ys = np.array(dual_ys)
-    print len(dual_xs), len(dual_ys)
+    print(len(dual_xs), len(dual_ys))
 
     BATZ_offset = 35.799
     dual_elec_x_halfwidth = 3.55
@@ -301,7 +301,7 @@ def get_dual_struct_obj(Ephotons):
     batxs4duals = np.array(batxs4duals)
     batys4duals = np.array(batys4duals)
     batzs4duals = np.array(batzs4duals)
-    print len(batxs4duals)
+    print(len(batxs4duals))
 
     dual_struct_obj = get_full_struct_manager(Es=Ephotons)
     dual_struct_obj.set_batxyzs(batxs4duals, batys4duals, batzs4duals)
@@ -311,24 +311,24 @@ def get_dual_struct_obj(Ephotons):
 
 detxs_by_sand0 = np.arange(0, 286-15, 18)
 detxs_by_sand1 = detxs_by_sand0 + 15
-print len(detxs_by_sand0)
+print(len(detxs_by_sand0))
 
 detys_by_sand0 = np.arange(0, 173-7, 11)
 detys_by_sand1 = detys_by_sand0 + 7
-print len(detys_by_sand0)
+print(len(detys_by_sand0))
 
 detxs_in_cols_not_edges = [np.arange(detxs_by_sand0[i]+1, detxs_by_sand1[i], 1, dtype=np.int)\
                            for i in range(16)]
 detys_in_rows_not_edges = [np.arange(detys_by_sand0[i]+1, detys_by_sand1[i], 1, dtype=np.int)\
                            for i in range(16)]
-print detxs_in_cols_not_edges
+print(detxs_in_cols_not_edges)
 
 dpi_shape = (173, 286)
 detxax = np.arange(286, dtype=np.int)
 detyax = np.arange(173, dtype=np.int)
 detx_dpi, dety_dpi = np.meshgrid(detxax, detyax)
-print np.shape(detx_dpi), np.shape(dety_dpi)
-print np.max(detx_dpi), np.max(dety_dpi)
+print(np.shape(detx_dpi), np.shape(dety_dpi))
+print(np.max(detx_dpi), np.max(dety_dpi))
 
 def get_detxys_from_colrows(col0, col1, row0, row1, orientation='NonEdges'):
 
@@ -352,7 +352,7 @@ def get_detxys_from_colrows(col0, col1, row0, row1, orientation='NonEdges'):
         good_detys = np.append(good_detys, np.array(detys_by_sand1[row0:row1]))
         good_detys = np.append(good_detys, np.array(detys_by_sand0[row0:row1]))
     else:
-        print "bad orientation"
+        print("bad orientation")
     blx = np.isin(detx_dpi, good_detxs)
     bly = np.isin(dety_dpi, good_detys)
     bl = blx&bly
@@ -581,8 +581,8 @@ class ResponseDPI(object):
 
     def __init__(self, resp_fname, pha_emins, pha_emaxs, phi0, bl_dmask):
 
-        print "initing ResponseDPI, with fname"
-        print resp_fname
+        print("initing ResponseDPI, with fname")
+        print(resp_fname)
         self.orig_resp_tab = Table.read(resp_fname)
         self.pha_tab = Table.read(resp_fname, hdu='EBOUNDS')
 
@@ -736,7 +736,7 @@ class FlorResponseDPI(object):
         resp_dpi0 = np.zeros((self.orig_ndets,self.NphotonEs,self.Nphabins))
 
         for hp_ind,wt in zip(self.hp_inds2use,self.hp_wts):
-            if not hp_ind in self.resp_dict.keys():
+            if not hp_ind in list(self.resp_dict.keys()):
                 self.open_new_file(hp_ind)
             resp_dpi0 += wt*self.resp_dict[hp_ind]
 
@@ -814,7 +814,7 @@ class FlorResponseDPI(object):
         resp_dpi0 = np.zeros((self.orig_ndets,self.NphotonEs,self.Nphabins))
 
         for hp_ind,wt in zip(self.hp_inds2use,self.hp_wts):
-            if not hp_ind in self.resp_dict.keys():
+            if not hp_ind in list(self.resp_dict.keys()):
                 self.open_new_file(hp_ind)
             resp_dpi0 += wt*self.resp_dict[hp_ind]
 
@@ -938,7 +938,7 @@ class ResponseOutFoV(object):
 
         for i in range(len(self.wts)):
             k = self.resp_arr['fname'][self.inds4intp[i]]
-            if not k in self.resp_files.keys():
+            if not k in list(self.resp_files.keys()):
                 self.open_resp_file_obj(k)
             self.lines_resp_dpis += self.wts[i]*self.resp_files[k].get_lines_resp_dpis()
             self.comp_resp_dpis += self.wts[i]*self.resp_files[k].get_comp_resp_dpis()
@@ -1012,7 +1012,7 @@ class ResponseOutFoV(object):
             th0 -= 1
         theta0 = thetas[th0]
         theta1 = thetas[th0+1]
-        print theta0, theta1
+        print(theta0, theta1)
         if np.abs(theta0 - theta) < eps:
             ths = [theta0]
             th_wts = [1.0]
@@ -1026,10 +1026,10 @@ class ResponseOutFoV(object):
 
 
         phi_ = phi - (int(phi)/45)*45.0
-        print phi_
+        print(phi_)
         if (int(phi)/45)%2 == 1:
             phi_ = 45.0 - phi_
-        print phi_
+        print(phi_)
         ph0 = np.digitize(phi_, phis) - 1
         if phi_ == 45.0:
             ph0 -= 1
@@ -1318,7 +1318,7 @@ class LLH_webins(object):
             dNs_dparam = self.model.get_dr_dps(params)
 
             jacob = [np.sum(fact*dNs_dparam[i])*self.dt for i\
-                    in xrange(len(dNs_dparam))]
+                    in range(len(dNs_dparam))]
 
         else:
 
@@ -1336,7 +1336,7 @@ class LLH_webins(object):
                 dNLP_dparams = np.zeros(len(dR_dparams))
 
             jacob = [dNLP_dparams[i] + np.sum(fact*dR_dparams[i])*self.dt\
-                     for i in xrange(len(dR_dparams))]
+                     for i in range(len(dR_dparams))]
 
         return jacob
 
@@ -1391,10 +1391,10 @@ class Bkg_Model_wFlatA(Model):
         self.solid_ang_mean = np.mean(self.solid_angs)
 
         self.rate_names = ['bkg_rate_' + str(i) for i\
-                       in xrange(nebins)]
+                       in range(nebins)]
 
         self.flat_names = ['flat_' + str(i) for i\
-                           in xrange(nebins)]
+                           in range(nebins)]
 
 #         self.rat_names = ['diff_flat_' + str(i) for i\
 #                                in xrange(nebins)]
@@ -2473,15 +2473,15 @@ def analysis_for_imxy_square(imx0, imx1, imy0, imy1, bkg_bf_params,\
     pars_ = {}
     pars_['Signal_theta'] = np.mean(thetas)
     pars_['Signal_phi'] = np.mean(phis)
-    for pname,val in bkg_bf_params.iteritems():
+    for pname,val in bkg_bf_params.items():
         pars_['Background_'+pname] = val
-    for pname,val in flux_params.iteritems():
+    for pname,val in flux_params.items():
         pars_['Signal_'+pname] = val
 
     sig_miner.set_llh(sig_llh_obj)
 
-    fixed_pnames = pars_.keys()
-    fixed_vals = pars_.values()
+    fixed_pnames = list(pars_.keys())
+    fixed_vals = list(pars_.values())
     trans = [None for i in range(len(fixed_pnames))]
     sig_miner.set_trans(fixed_pnames, trans)
     sig_miner.set_fixed_params(fixed_pnames, values=fixed_vals)
@@ -2564,7 +2564,7 @@ def analysis_at_theta_phi(theta, phi, bkg_bf_params, bkg_mod, flux_mod, ev_data,
 
     sig_mod = Source_Model_OutFoV(flux_mod, [ebins0,ebins1], bl_dmask, use_deriv=True)
     sig_mod.set_theta_phi(theta, phi)
-    print "theta, phi set"
+    print("theta, phi set")
 
     comp_mod = CompoundModel([bkg_mod, sig_mod])
     sig_miner = NLLH_ScipyMinimize_Wjacob('')
@@ -2577,15 +2577,15 @@ def analysis_at_theta_phi(theta, phi, bkg_bf_params, bkg_mod, flux_mod, ev_data,
     pars_ = {}
     pars_['Signal_theta'] = theta
     pars_['Signal_phi'] = phi
-    for pname,val in bkg_bf_params.iteritems():
+    for pname,val in bkg_bf_params.items():
         pars_['Background_'+pname] = val
-    for pname,val in flux_params.iteritems():
+    for pname,val in flux_params.items():
         pars_['Signal_'+pname] = val
 
     sig_miner.set_llh(sig_llh_obj)
 
-    fixed_pnames = pars_.keys()
-    fixed_vals = pars_.values()
+    fixed_pnames = list(pars_.keys())
+    fixed_vals = list(pars_.values())
     trans = [None for i in range(len(fixed_pnames))]
     sig_miner.set_trans(fixed_pnames, trans)
     sig_miner.set_fixed_params(fixed_pnames, values=fixed_vals)
@@ -2628,7 +2628,7 @@ def analysis_at_theta_phi(theta, phi, bkg_bf_params, bkg_mod, flux_mod, ev_data,
         res_dict['bkg_nllh'] = bkg_nllh
 
         res_dfs.append(pd.DataFrame(res_dict))
-        print "done with %d of %d tbins"%(i+1,ntbins)
+        print("done with %d of %d tbins"%(i+1,ntbins))
     return pd.concat(res_dfs, ignore_index=True)
 
 

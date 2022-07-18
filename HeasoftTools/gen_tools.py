@@ -8,7 +8,7 @@ import signal
 import time
 import sys
 import shutil
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 from astropy.table import Table
 import os
 sys.path.append('../')
@@ -33,7 +33,7 @@ def run_ftool(ftool, arg_list):
     cmd_list.append(ftool)
     #cmd_list.append(arg_list)
     cmd_list += arg_list
-    print cmd_list
+    print(cmd_list)
     subprocess.call(cmd_list)
 
 def run_ftool2(ftool, arg_list):
@@ -44,7 +44,7 @@ def run_ftool2(ftool, arg_list):
     cmd_list.append(ftool_path)
     #cmd_list.append(arg_list)
     cmd_list += arg_list
-    print cmd_list
+    print(cmd_list)
     subprocess.call(cmd_list)
 
 
@@ -75,40 +75,40 @@ class cd:
     def __enter__(self):
         self.savedPath = os.getcwd()
         os.chdir(self.newPath)
-        print "changed to dir: ", self.newPath
+        print("changed to dir: ", self.newPath)
 
     def __exit__(self, etype, value, traceback):
         os.chdir(self.savedPath)
-        print "changed to dir: ", self.savedPath
+        print("changed to dir: ", self.savedPath)
 
 
 def ftool_mp(nproc, arg_lists, chunksize=10):
 
-    print "Opening pool of %d workers" %(nproc)
+    print("Opening pool of %d workers" %(nproc))
     t0 = time.time()
 
     p = mp.Pool(nproc, init_worker)
 
-    print os.getpid()
-    print "active children: ", mp.active_children()
+    print(os.getpid())
+    print("active children: ", mp.active_children())
 
     try:
         p.map(run_ftool_mp, arg_lists, chunksize=chunksize)
     except KeyboardInterrupt:
-        print "active children: ", mp.active_children()
+        print("active children: ", mp.active_children())
         p.terminate()
         p.join()
-        print "terminate, join"
-        print "active children: ", mp.active_children()
+        print("terminate, join")
+        print("active children: ", mp.active_children())
         sys.exit()
 
-    print "active children: ", mp.active_children()
+    print("active children: ", mp.active_children())
     p.close()
     p.join()
-    print "close, join"
-    print "active children: ", mp.active_children()
+    print("close, join")
+    print("active children: ", mp.active_children())
 
-    print "Finished in %.3f seconds" %(time.time()-t0)
+    print("Finished in %.3f seconds" %(time.time()-t0))
 
 
 def mk_yr_mon(year, month):
@@ -175,38 +175,38 @@ def down_file(yr_mon, obsid, kind, m_dir):
 
     kinds = ['pat', 'sat', 'bittb', 'mkf', 'brt']
     if kind not in kinds:
-        print "bad kind"
+        print("bad kind")
         return
     url = mk_url(yr_mon, obsid, kind)
     fn = url.split('/')[-1]
     fname = os.path.join(m_dir, yr_mon, obsid, fn)
 
     try:
-        resp = urllib2.urlopen(url)
+        resp = urllib.request.urlopen(url)
         data = resp.read()
-        print "Downloading " + url + " to " + fname
+        print("Downloading " + url + " to " + fname)
         with open(fname, 'w') as f:
             f.write(data)
-        print "Download success"
+        print("Download success")
     except Exception as e:
-        print e
-        print obsid, fname
+        print(e)
+        print(obsid, fname)
         if kind == 'pat':
             try:
-                print "Trying sat"
+                print("Trying sat")
                 kind = 'sat'
                 url = mk_url(yr_mon, obsid, kind)
                 fn = url.split('/')[-1]
                 fname = os.path.join(m_dir, yr_mon, obsid, fn)
-                resp = urllib2.urlopen(url)
+                resp = urllib.request.urlopen(url)
                 data = resp.read()
-                print "Downloading " + url + " to " + fname
+                print("Downloading " + url + " to " + fname)
                 with open(fname, 'w') as f:
                     f.write(data)
-                print "Download success"
+                print("Download success")
             except Exception as e:
-                print e
-                print obsid, fname
+                print(e)
+                print(obsid, fname)
 
     return
 
@@ -258,7 +258,7 @@ def open_tables(fnames, dname, ks='all', k_nos=None):
                 tab = Table.read(fname, hdu=hdu)
             tab_dict[kind] = tab
         except Exception as E:
-            print E
-            print kind
+            print(E)
+            print(kind)
 
     return tab_dict

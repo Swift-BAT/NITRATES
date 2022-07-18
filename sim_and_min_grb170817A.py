@@ -148,7 +148,7 @@ def analysis_for_imxy_square(imx0, imx1, imy0, imy1, bkg_bf_params_list,\
     imys = np.ravel(imyg) + imy0
     Npnts = len(imxs)
 
-    print Npnts
+    print(Npnts)
     logging.info("%d imxy points to do" %(Npnts))
 
     thetas, phis = imxy2theta_phi(imxs, imys)
@@ -207,16 +207,16 @@ def analysis_for_imxy_square(imx0, imx1, imy0, imy1, bkg_bf_params_list,\
     pars_ = {}
     pars_['Signal_theta'] = np.mean(thetas)
     pars_['Signal_phi'] = np.mean(phis)
-    for pname,val in bkg_bf_params_list[0].iteritems():
+    for pname,val in bkg_bf_params_list[0].items():
         # pars_['Background_'+pname] = val
         pars_[bkg_name+'_'+pname] = val
-    for pname,val in flux_params.iteritems():
+    for pname,val in flux_params.items():
         pars_['Signal_'+pname] = val
 
     sig_miner.set_llh(sig_llh_obj)
 
-    fixed_pnames = pars_.keys()
-    fixed_vals = pars_.values()
+    fixed_pnames = list(pars_.keys())
+    fixed_vals = list(pars_.values())
     trans = [None for i in range(len(fixed_pnames))]
     sig_miner.set_trans(fixed_pnames, trans)
     sig_miner.set_fixed_params(fixed_pnames, values=fixed_vals)
@@ -229,8 +229,8 @@ def analysis_for_imxy_square(imx0, imx1, imy0, imy1, bkg_bf_params_list,\
 
     for ii in range(Npnts):
 
-        print imxs[ii], imys[ii]
-        print thetas[ii], phis[ii]
+        print(imxs[ii], imys[ii])
+        print(thetas[ii], phis[ii])
         sig_miner.set_fixed_params(['Signal_theta', 'Signal_phi'],\
                                     values=[thetas[ii],phis[ii]])
 
@@ -256,10 +256,10 @@ def analysis_for_imxy_square(imx0, imx1, imy0, imy1, bkg_bf_params_list,\
             for i in range(ntbins):
 
                 parss_ = {}
-                for pname,val in bkg_bf_params_list[i].iteritems():
+                for pname,val in bkg_bf_params_list[i].items():
                     # pars_['Background_'+pname] = val
                     parss_[bkg_name+'_'+pname] = val
-                sig_miner.set_fixed_params(parss_.keys(), values=parss_.values())
+                sig_miner.set_fixed_params(list(parss_.keys()), values=list(parss_.values()))
 
                 t0 = tbins0[i]
                 t1 = tbins1[i]
@@ -307,7 +307,7 @@ def analysis_for_imxy_square(imx0, imx1, imy0, imy1, bkg_bf_params_list,\
             t1 = tbins1[i]
             dt = t1 - t0
             sig_llh_obj.set_time(tbins0[i], tbins1[i])
-            for pname,val in bkg_bf_params_list[i].iteritems():
+            for pname,val in bkg_bf_params_list[i].items():
                 pars_[bkg_name+'_'+pname] = val
             bkg_bf_param_dict[timeIDs[i]] = bkg_bf_params_list[i]
             pars_['Signal_theta'] = thetas[ii]
@@ -350,7 +350,7 @@ def analysis_for_imxy_square(imx0, imx1, imy0, imy1, bkg_bf_params_list,\
         Npeaks2scan = 0
     logging.info("%d peaks to scan"%(Npeaks2scan))
 
-    print bkg_bf_param_dict.keys()
+    print(list(bkg_bf_param_dict.keys()))
 
     if Npeaks2scan > 0:
         peak_res_dfs = []
@@ -402,8 +402,8 @@ def min_sim_llhs(ev_data, sim_evdata, sim_params, sim_tstart, sim_tstop,\
 
 
     evdata_ = ev_data.copy()
-    print(type(evdata_))
-    print(type(sim_evdata))
+    print((type(evdata_)))
+    print((type(sim_evdata)))
     evdata = vstack([evdata_, sim_evdata])
     evdata.sort('TIME')
 
@@ -441,7 +441,7 @@ def min_sim_llhs(ev_data, sim_evdata, sim_params, sim_tstart, sim_tstop,\
         tbins0 = tbins0[bl]
         tbins1 = tbins1[bl]
         ntbins = np.sum(bl)
-        print(ntbins, " tbins to do for dur",dur)
+        print((ntbins, " tbins to do for dur",dur))
 
         for i in range(ntbins):
 
@@ -487,7 +487,7 @@ def sim_and_min(trigtime, lc_tab, sim_mod, sim_params, Afact,\
     sim_params['imx0'] = imx_sim
     sim_params['imy0'] = imy_sim
     for i in range(Ntrials):
-        print("starting trial %d of %d"%(i+1,Ntrials))
+        print(("starting trial %d of %d"%(i+1,Ntrials)))
         tstart = trigtime + (np.random.random() - 0.5)*20.0
 
         imx0 = imx_sim + 2e-2*(np.random.random() - 0.5)*2
@@ -497,7 +497,7 @@ def sim_and_min(trigtime, lc_tab, sim_mod, sim_params, Afact,\
         sim_params['theta'], sim_params['phi'] = imxy2theta_phi(imx0, imy0)
 
         sim_tab = mk_sim_from_lc(lc_tab, sim_mod, sim_params, tstart, Afact=Afact)
-        print(len(sim_tab), "sim events")
+        print((len(sim_tab), "sim events"))
         sim_tstart = tstart + lc_tab['time'][0]
         sim_tstop = sim_tstart + (lc_tab['time'][-1] - lc_tab['time'][0])
 #         print("tstart - trigtime: ", tstart - trigtime)
@@ -511,7 +511,7 @@ def sim_and_min(trigtime, lc_tab, sim_mod, sim_params, Afact,\
         if not res_peak_df is None:
             idx = res_peak_df.TS.argmax()
             max_row = res_peak_df.loc[idx]
-            for k, val in max_row.iteritems():
+            for k, val in max_row.items():
                 res_dict[k] = val
             res_dict['dt'] = max_row['time'] - sim_tstart
         else:
@@ -522,7 +522,7 @@ def sim_and_min(trigtime, lc_tab, sim_mod, sim_params, Afact,\
 
     res_df = pd.DataFrame(res_list)
 #         print(len(res_df), " result rows")
-    print("max TS: ", np.nanmax(res_df['TS']))
+    print(("max TS: ", np.nanmax(res_df['TS'])))
     return res_df
 
 
@@ -580,7 +580,7 @@ def main(args):
     ebins0 = np.round(ebins0, decimals=1)[:-1]
     ebins1 = np.append(ebins0[1:], [350.0])
     nebins = len(ebins0)
-    print nebins
+    print(nebins)
 
 
     ev_data = Table.read(args.evfname)
@@ -596,7 +596,7 @@ def main(args):
             (mask_vals==0.)&(ev_data['TIME']<=t_end)&\
             (ev_data['TIME']>=t_start)
 
-    print np.sum(bl_ev)
+    print(np.sum(bl_ev))
     ev_data0 = ev_data[bl_ev]
 
     solid_ang_dpi = np.load(solid_angle_dpi_fname)
@@ -604,7 +604,7 @@ def main(args):
     theta = args.theta
     phi = args.phi
     imx, imy = theta_phi2imxy(theta, phi)
-    print imx, imy
+    print(imx, imy)
     sim_flux_mod = Cutoff_Plaw_Flux(E0=100.0)
     rt_obj = RayTraces(rt_dir)
 
@@ -619,8 +619,8 @@ def main(args):
                        'gamma':0.62, 'Epeak':185.0, 'imx':imx, 'imy':imy}
 
 
-    sim_params = {pname:val['val'] for pname, val in sim_mod.param_dict.iteritems()}
-    for pname, val in sim_flux_params.iteritems():
+    sim_params = {pname:val['val'] for pname, val in sim_mod.param_dict.items()}
+    for pname, val in sim_flux_params.items():
         sim_params[pname] = val
 
 

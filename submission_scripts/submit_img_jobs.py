@@ -56,7 +56,7 @@ def main(args):
     cmd = ''
 
     dts = np.linspace(args.dt0, args.dt1, njobs+1)
-    for i in xrange(njobs):
+    for i in range(njobs):
         cmd_ = 'workdir=%s,dt0=%.3f,dt1=%.3f,dbfname=%s'\
                 %(workdir,dts[i],dts[i+1],args.dbfname)
         if args.ssh:

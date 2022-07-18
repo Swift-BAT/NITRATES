@@ -63,7 +63,7 @@ def parse_bkg_csv(bkg_fname, solid_angle_dpi, ebins0, ebins1, bl_dmask, rt_dir):
     for name in col_names:
         if '_imx' in name:
             PSnames.append(name.split('_')[0])
-    print PSnames
+    print(PSnames)
     Nsrcs = len(PSnames)
     if Nsrcs > 0:
         bkg_name = 'Background_'
@@ -141,8 +141,8 @@ class Rates_Resp(object):
         self.ndets_in = np.sum(self.mask_in&self.bl_dmask)
         self.ndets_out = np.sum(self.mask_out&self.bl_dmask)
 
-        print self.npz_file.files
-        print self.npz_file['RatesIn'].shape
+        print(self.npz_file.files)
+        print(self.npz_file['RatesIn'].shape)
         self.nebins = self.npz_file['RatesIn'].shape[1]
 
         self.rates_in_intps = []
@@ -700,8 +700,8 @@ class rates_fp_llh_outFoV(object):
             try:
                 self.set_rates_resp(hp_ind)
             except Exception as E:
-                print "problem reading npz file for hp_ind,"
-                print hp_ind
+                print("problem reading npz file for hp_ind,")
+                print(hp_ind)
                 logging.error(E)
                 logging.error(traceback.format_exc())
                 continue
@@ -966,7 +966,7 @@ def main(args):
             save_fname = 'rates_llh_res_%d_.csv' %(args.job_id)
 
         elif i0 >= Nim_pnts:
-            i0_ = Nper_job*(int(i0-Nim_pnts)/Nper_job)
+            i0_ = Nper_job*(int(i0-Nim_pnts)//Nper_job)
             i1_ = i0_ + Nper_job
             hp_inds = hp_inds[i0_:i1_]
             logging.info('hp_inds: ')

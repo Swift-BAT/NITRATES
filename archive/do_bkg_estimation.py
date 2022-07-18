@@ -81,11 +81,11 @@ def main(args):
 
     logging.info("Now writing rate fit results to DB")
 
-    for k, obj in avg_quad_obj.iteritems():
+    for k, obj in avg_quad_obj.items():
 
         write_rate_fits_from_obj(conn, obj, quad_dicts[k]['id'])
 
-    for k, obj in lin_quad_obj.iteritems():
+    for k, obj in lin_quad_obj.items():
 
         write_rate_fits_from_obj(conn, obj, quad_dicts[k]['id'])
 

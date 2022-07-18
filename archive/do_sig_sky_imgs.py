@@ -119,7 +119,7 @@ def main(args):
     dts = np.zeros(Nimgs)
 
     logging.info("Getting times and exposures")
-    for i in xrange(Nimgs):
+    for i in range(Nimgs):
         times[i], dts[i] = timeID2time_dur(timeIDs[i], trig_time)
 
 

@@ -51,8 +51,8 @@ class llh_ebins_square(object):
 
         self.ebin_ind_edges = get_ebin_ind_edges(self.drm,\
                                 self.ebins0, self.ebins1)
-        print "shape(self.ebin_ind_edges): ",\
-                np.shape(self.ebin_ind_edges)
+        print("shape(self.ebin_ind_edges): ",\
+                np.shape(self.ebin_ind_edges))
 
         self.abs_cor = get_abs_cor_rates((imx0+imx1)/2.,\
                                     (imy0+imy1)/2., self.drm)
@@ -77,39 +77,39 @@ class llh_ebins_square(object):
 
     def set_bkg_time(self, t0, dt):
 
-        print "Setting up Bkg calcs"
+        print("Setting up Bkg calcs")
 
         self.bkg_t0 = t0
         self.bkg_dt = dt
 
-        print "bkg_t0, bkg_dt", self.bkg_t0, self.bkg_dt
+        print("bkg_t0, bkg_dt", self.bkg_t0, self.bkg_dt)
 
         #bkg_data = self._all_data
         t_bl = (self._all_data['TIME']>self.bkg_t0)&\
                 (self._all_data['TIME']<(self.bkg_t0+self.bkg_dt))
         self.bkg_data = self._all_data[t_bl]
 
-        print "bkg sum time: ", np.sum(t_bl)
+        print("bkg sum time: ", np.sum(t_bl))
 
         self.bkg_data_dpis = det2dpis(self.bkg_data,\
                                       self.ebins0,\
                                       self.ebins1)
         self.bkg_cnts = np.array([np.sum(bkg_dpi[self.bl_dmask]) for\
                                   bkg_dpi in self.bkg_data_dpis])
-        print "bkg_cnts: ", self.bkg_cnts
+        print("bkg_cnts: ", self.bkg_cnts)
         self.bkg_rates = self.bkg_cnts/self.bkg_dt
         self.bkg_rate_errs = np.sqrt(self.bkg_cnts)/self.bkg_dt
 
-        print "Done with Bkg calcs"
-        print "bkg rates: "
-        print self.bkg_rates
-        print "bkg rate errors: "
-        print self.bkg_rate_errs
+        print("Done with Bkg calcs")
+        print("bkg rates: ")
+        print(self.bkg_rates)
+        print("bkg rate errors: ")
+        print(self.bkg_rate_errs)
 
 
     def set_sig_time(self, t0, dt):
 
-        print "Setting up Signal Data"
+        print("Setting up Signal Data")
 
         self.sig_t0 = t0
         self.sig_dt = dt
@@ -124,8 +124,8 @@ class llh_ebins_square(object):
         self.data_cnts_blm = np.array([dpi[self.bl_dmask] for dpi in\
                               self.data_dpis])
 
-        print 'Data Counts per Ebins: '
-        print [np.sum(self.data_cnts_blm[i]) for i in xrange(self.nebins)]
+        print('Data Counts per Ebins: ')
+        print([np.sum(self.data_cnts_blm[i]) for i in range(self.nebins)])
 
         bkg_rate, bkg_err = self.bkg_obj.get_rate(self.sig_t0)
 
@@ -135,7 +135,7 @@ class llh_ebins_square(object):
         #self.exp_bkg_cnts = self.bkg_rates*self.sig_dt
         #self.bkg_cnt_errs = 5.*self.bkg_rate_errs*self.sig_dt
 
-        print "Done setting up Signal Stuff"
+        print("Done setting up Signal Stuff")
 
 
     def model(self, imx, imy, sig_cnts, index, bkg_cnts):
@@ -167,7 +167,7 @@ class llh_ebins_square(object):
         #                    in sig_cnts_per_ebin])
 
         mod_cnts = np.array([bkg_mod[i] + rt_bl*sig_cnts_per_ebin[i] for\
-                             i in xrange(self.nebins)])
+                             i in range(self.nebins)])
 
 
         #return np.add(bkg_mod, sig_mod)
@@ -250,8 +250,8 @@ class llh_ebins_square(object):
 
             bnds = np.array([lowers, uppers]).T
 
-            print np.shape(bnds)
-            print bnds
+            print(np.shape(bnds))
+            print(bnds)
 
             func2min = self.nllh_normed_params
 
@@ -281,8 +281,8 @@ class llh_ebins_square(object):
 
             bnds = np.array([lowers, uppers]).T
 
-            print np.shape(bnds)
-            print bnds
+            print(np.shape(bnds))
+            print(bnds)
 
             res = optimize.dual_annealing(func2min, bnds)
 
@@ -309,7 +309,7 @@ class llh_ebins_square(object):
 
         nlogprior = -1.*np.sum(self.calc_logprior(bkg_cnts))
 
-        for i in xrange(self.nebins):
+        for i in range(self.nebins):
 
             bcnts = bkg_cnts[i]/self.ndets
             nllhs.append( -1.*log_pois_prob(bcnts,\
@@ -445,14 +445,14 @@ def seeds2mp(seed_tab, args):
 
     mp_dict_list = []
 
-    for i in xrange(nrows):
+    for i in range(nrows):
         mpdict = {'args':args, 'row':seed_tab[i]}
         mp_dict_list.append(mpdict)
 
     if nprocs == 1:
 
         results = []
-        for i in xrange(nrows):
+        for i in range(nrows):
             results.append(min_nlogl_from_seed(mp_dict_list[i]))
 
     else:
@@ -552,7 +552,7 @@ def main(args):
             (seed_tab['snr']>=args.snrcut)&\
             (seed_tab['snr']<args.snrmax)
 
-    print np.sum(bl), " seeds to minimize at"
+    print(np.sum(bl), " seeds to minimize at")
 
     seeds2mp(seed_tab[bl], args)
 

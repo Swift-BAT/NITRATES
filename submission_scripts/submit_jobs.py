@@ -63,7 +63,7 @@ def main(args):
 
     cmd = ''
 
-    for i in xrange(njobs):
+    for i in range(njobs):
 
         cmd_ = 'jobid=%d,workdir=%s,njobs=%d' %(i,workdir,njobs)
         if args.ssh:

@@ -43,7 +43,7 @@ def get_cub_rate_quad_objs(quad_dicts, ev_data, trig_time, ebins0, ebins1,\
 
     rate_quad_dict = {}
 
-    for direc, quad_dict in quad_dicts.iteritems():
+    for direc, quad_dict in quad_dicts.items():
 
         cnts_per_tbin = np.sum( [quad_cnts_mat[:,:,q] for\
                 q in quad_dict['quads']], axis=0)
@@ -70,7 +70,7 @@ def get_lin_rate_quad_objs(quad_dicts, ev_data, trig_time, ebins0, ebins1,\
 
     lin_rate_quad_dict = {}
 
-    for direc, quad_dict in quad_dicts.iteritems():
+    for direc, quad_dict in quad_dicts.items():
 
         cnts_per_tbin = np.sum( [quad_cnts_mat[:,:,q] for\
                 q in quad_dict['quads']], axis=0)
@@ -96,7 +96,7 @@ def get_avg_rate_quad_objs(quad_dicts, ev_data, trig_time, ebins0, ebins1,\
 
     avg_rate_quad_dict = {}
 
-    for direc, quad_dict in quad_dicts.iteritems():
+    for direc, quad_dict in quad_dicts.items():
 
         cnts_per_tbin = np.sum( [quad_cnts_mat[:,:,q] for\
                 q in quad_dict['quads']], axis=0)
@@ -215,7 +215,7 @@ class Cubic_Rates(object):
 
 
     def do_fits(self):
-        for i in xrange(self.n_lin_pnts):
+        for i in range(self.n_lin_pnts):
 
             t_mid = self.t_poly_ax[i]
 
@@ -238,7 +238,7 @@ class Cubic_Rates(object):
             _cnts = np.append(self.cnts_per_tbin[ind0:ind0_sig],\
                                   self.cnts_per_tbin[ind1_sig:ind1], axis=0)
 
-            for j in xrange(self.nebins):
+            for j in range(self.nebins):
 
                 res_ = optimize.curve_fit(cubic_func, _t_ax,\
                                      _cnts[:,j],\
@@ -329,7 +329,7 @@ class Linear_Rates(object):
 
 
     def do_fits(self):
-        for i in xrange(self.n_lin_pnts):
+        for i in range(self.n_lin_pnts):
 
             t_mid = self.t_poly_ax[i]
 
@@ -352,7 +352,7 @@ class Linear_Rates(object):
             _cnts = np.append(self.cnts_per_tbin[ind0:ind0_sig],\
                                   self.cnts_per_tbin[ind1_sig:ind1], axis=0)
 
-            for j in xrange(self.nebins):
+            for j in range(self.nebins):
 
                 try:
                     bl = np.ones(len(_cnts[:,j]), dtype=np.bool)
@@ -377,8 +377,8 @@ class Linear_Rates(object):
                                          absolute_sigma=False)
                 except Exception as E:
                     print(E)
-                    print("_cnts[:,j].shape: ", _cnts[:,j].shape)
-                    print("_t_ax.shape: ", _t_ax.shape)
+                    print(("_cnts[:,j].shape: ", _cnts[:,j].shape))
+                    print(("_t_ax.shape: ", _t_ax.shape))
                     raise E
 
                 tot_cnts = np.sum(_cnts[:,j][bl])
@@ -460,7 +460,7 @@ class Average_Rates(object):
 
 
     def do_fits(self):
-        for i in xrange(self.n_lin_pnts):
+        for i in range(self.n_lin_pnts):
 
             t_mid = self.t_poly_ax[i]
 
@@ -483,7 +483,7 @@ class Average_Rates(object):
             _cnts = np.append(self.cnts_per_tbin[ind0:ind0_sig],\
                                   self.cnts_per_tbin[ind1_sig:ind1], axis=0)
 
-            for j in xrange(self.nebins):
+            for j in range(self.nebins):
 
                 mean = np.mean(_cnts[:,j])
 
@@ -549,12 +549,12 @@ def get_linear_bkg_rates(quad_cnts_mat, t_bins0, t_bins1, trig_time, quad_dicts)
     #lin_cov = np.zeros((nptbins, nebins, 2, 2))
     quads_lin_resdict = {}
     #quads_lin_covdict = {}
-    for k in quad_dicts.keys():
+    for k in list(quad_dicts.keys()):
         quads_lin_resdict[k] = np.copy(lin_params)
         #quads_lin_covdict[k] = np.copy(lin_cov)
 
 
-    for i in xrange(len(t_poly_ax)):
+    for i in range(len(t_poly_ax)):
 
         t_mid = t_poly_ax[i]
 
@@ -579,13 +579,13 @@ def get_linear_bkg_rates(quad_cnts_mat, t_bins0, t_bins1, trig_time, quad_dicts)
 
 
 
-        for direc, quad_dict in quad_dicts.iteritems():
+        for direc, quad_dict in quad_dicts.items():
 
             cnts_per_tbin = np.sum( [quad_cnts[:,:,q] for\
                         q in quad_dict['quads']], axis=0 )
 
 
-            for ii in xrange(nebins):
+            for ii in range(nebins):
                 res_lin = optimize.curve_fit(lin_func, _t_ax,\
                                      cnts_per_tbin[:,ii],\
                                      sigma=np.sqrt(cnts_per_tbin[:,ii]),\
@@ -644,7 +644,7 @@ def get_quad_rate_objs_from_db(conn, quad_dicts):
     lin_rate_quad_obj = {}
     avg_rate_quad_obj = {}
 
-    for direc, quad_dict in quad_dicts.iteritems():
+    for direc, quad_dict in quad_dicts.items():
 
         avg_rate_quad_obj[direc] = rate_obj_from_sqltab(rate_fits_tab, quad_dict['id'], 0)
         lin_rate_quad_obj[direc] = rate_obj_from_sqltab(rate_fits_tab, quad_dict['id'], 1)

@@ -253,7 +253,7 @@ def calc_flor_resp(th, phi, Elines, line_wts, E_edge, material,\
 
     for jj in range(Nlines):
 
-        print "Line %d of %d"%(jj+1,Nlines)
+        print("Line %d of %d"%(jj+1,Nlines))
 
         Eline = Elines[jj]
 
@@ -272,8 +272,8 @@ def calc_flor_resp(th, phi, Elines, line_wts, E_edge, material,\
 
             poly = shield_int_obj.get_poly(i)
             name = shield_int_obj.shield_struct.shield_names[i]
-            print i
-            print name
+            print(i)
+            print(name)
 
             struct_obj = get_full_struct_manager(Es=photonEs, structs2ignore=['Shield'])
             shield_obj = Swift_Structure_Shield()
@@ -301,10 +301,10 @@ def calc_flor_resp(th, phi, Elines, line_wts, E_edge, material,\
             struct_obj.set_theta_phi(th, phi)
 
             trans2shield = struct_obj.get_trans()#[:,0]
-            print np.min(trans2shield), np.max(trans2shield), np.mean(trans2shield)
+            print(np.min(trans2shield), np.max(trans2shield), np.mean(trans2shield))
 
             cos_theta = np.dot(shield_vec,gam_vec)
-            print 'cos(theta): ', cos_theta
+            print('cos(theta): ', cos_theta)
             if np.dot(shield_vec,gam_vec) < 0:
 #                 rho_mud = (SN.get_tot_rhomu(photonEs)*dss[2] + CU.get_tot_rhomu(photonEs)*dss[3])
                 rho_mud = np.zeros_like(photonEs)
@@ -318,7 +318,7 @@ def calc_flor_resp(th, phi, Elines, line_wts, E_edge, material,\
                 for lay in out_layers:
                     rho_mud += materials[lay].get_tot_rhomu(photonEs)*dss[lay]
                 trans = np.exp(-rho_mud/np.abs(cos_theta))
-            print np.min(trans), np.max(trans), np.mean(trans)
+            print(np.min(trans), np.max(trans), np.mean(trans))
 #             d = ds_base[layer][1]/np.abs(cos_theta)
 #             photoE_abs = 1. - np.exp(-TA.get_photoe_rhomu(photonEs)*d)
 #             print np.min(photoE_abs), np.max(photoE_abs), np.mean(photoE_abs)
@@ -326,14 +326,14 @@ def calc_flor_resp(th, phi, Elines, line_wts, E_edge, material,\
 #             int_fluxs[(photonEs<E_edge)] = 0.0
 
 
-            print len(shield_xs), len(shield_xs)*dA
-            print 'min, max shield ys: ', np.min(shield_ys), np.max(shield_ys)
+            print(len(shield_xs), len(shield_xs)*dA)
+            print('min, max shield ys: ', np.min(shield_ys), np.max(shield_ys))
 #             rho_mud = (SN.get_tot_rhomu(ta_lines2use[0])*dss[2] + CU.get_tot_rhomu(ta_lines2use[0])*dss[3])
             rho_mud = 0.0
             for lay in in_layers:
                 rho_mud += materials[lay].get_tot_rhomu(Eline)*dss[lay]
 
-            print np.exp(-rho_mud)
+            print(np.exp(-rho_mud))
 
             line_resp = calc_shield_resp4line(shield_vec, batxs, batys, shield_xs, shield_ys,\
                                    shield_zs, dA, rho_mud, trans2shield,\
@@ -342,8 +342,8 @@ def calc_flor_resp(th, phi, Elines, line_wts, E_edge, material,\
             line_resps += line_wts[jj]*line_resp
             line_resp_list.append(line_resp)
             names.append(shield_int_obj.shield_struct.shield_names[i])
-            print np.sum(line_resp), np.sum(line_resp)/len(batxs), 32768*np.sum(line_resp)/len(batxs)
-            print
+            print(np.sum(line_resp), np.sum(line_resp)/len(batxs), 32768*np.sum(line_resp)/len(batxs))
+            print()
 
     return line_resps
 
