@@ -1,6 +1,6 @@
 import os
 import subprocess
-from ..HeasoftTools.gen_tools import run_ftool, ftool_mp, run_ftool2
+from ..HeasoftTools.gen_tools import run_ftool, ftool_mp
 import argparse
 import numpy as np
 import time
