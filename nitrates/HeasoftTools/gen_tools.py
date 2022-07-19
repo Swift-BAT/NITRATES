@@ -16,10 +16,6 @@ from ..config import ftool_wrap
 
 ftool_sh = ftool_wrap
 
-
-sw_bat_heasoft_dir = "/storage/work/j/jjd330/heasoft/heasoft-6.21/swift/bat/tasks/"
-
-
 def run_ftool(ftool, arg_list):
 
     cmd_list = [ftool_sh]
@@ -30,16 +26,16 @@ def run_ftool(ftool, arg_list):
     print(cmd_list)
     subprocess.call(cmd_list)
 
-def run_ftool2(ftool, arg_list):
-
-    ftool_path = os.path.join(sw_bat_heasoft_dir, ftool, ftool)
-
-    cmd_list = [ftool_sh]
-    cmd_list.append(ftool_path)
-    #cmd_list.append(arg_list)
-    cmd_list += arg_list
-    print(cmd_list)
-    subprocess.call(cmd_list)
+#def run_ftool2(ftool, arg_list):
+#
+#    ftool_path = os.path.join(sw_bat_heasoft_dir, ftool, ftool)
+#
+#    cmd_list = [ftool_sh]
+#    cmd_list.append(ftool_path)
+#    #cmd_list.append(arg_list)
+#    cmd_list += arg_list
+#    print(cmd_list)
+#    subprocess.call(cmd_list)
 
 
 
