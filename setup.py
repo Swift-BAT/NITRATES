@@ -5,6 +5,9 @@ try:
         long_description = f.read()
 except FileNotFoundError:
     long_description = ''
+    
+with open('requirements.txt') as f:
+    required = f.read().splitlines()
 
 setup(
     name='nitrates',
@@ -17,10 +20,11 @@ setup(
     description='Analysis of GUANO-ed data from the Neil Gehrels Swift Observatory Burst Alert Telescope',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    install_requires = ['astropy', 'bs4', 'healpy', 'matplotlib', 'numpy', 'pandas', 'requests', 'scipy'],
+    install_requires = required,
     classifiers=['Development Status :: 3 - Alpha', 'Intended Audience :: Science/Research', 'Programming Language :: Python',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 2',
         'Topic :: Scientific/Engineering :: Astronomy', ],
+    package_data={'nitrates': ['data/*']},
     python_requires='>=3.4',
 )

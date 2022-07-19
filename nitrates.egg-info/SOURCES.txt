@@ -1,0 +1,14 @@
+LICENSE
+README.md
+setup.py
+nitrates/__init__.py
+nitrates/config.py
+nitrates/sim_and_min_grb170817A.py
+nitrates.egg-info/PKG-INFO
+nitrates.egg-info/SOURCES.txt
+nitrates.egg-info/dependency_links.txt
+nitrates.egg-info/requires.txt
+nitrates.egg-info/top_level.txt
+nitrates/data/F646018360_results.tar.gz
+nitrates/data/bright_src_cat.fits
+nitrates/data/drm_new_ebins.fits

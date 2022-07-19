@@ -1,10 +1,10 @@
-astropy == 4.1
-bs4 == 0.0.1
-healpy == 1.14.0
-matplotlib == 3.2.2
-numpy == 1.19.2
-pandas == 1.1.5
-requests == 2.18.4
-scipy == 1.5.2
-pygcn>=1.2.2
+astropy >= 4.1
+bs4 >= 0.0.1
+healpy >= 1.14.0
+matplotlib >= 3.2.2
+numpy >= 1.19.2
+pandas >= 1.1.5
+requests >= 2.18.4
+scipy >= 1.5.2
+pygcn>=1.1.2
 voevent-parse>=1.0.3
