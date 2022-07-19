@@ -14,14 +14,8 @@ import os
 sys.path.append('../')
 from ..config import ftool_wrap
 
-ftool_sh = "/storage/work/jjd330/local/run_ftool.sh"
 ftool_sh = ftool_wrap
-#ftool_sh = "run_ftool.sh"
-bdname = "/storage/work/jjd330/local/bat_data/"
-TLE_file = bdname + "SWIFT_TLE_ARCHIVE.txt.18129.95085084"
-leap_fname = bdname + "auxil_stuff/leapsec_010117.fits"
-rig_fname = bdname + "auxil_stuff/rigidity_20060421.fits"
-cols_fname = bdname + "sao_cols.txt"
+
 
 sw_bat_heasoft_dir = "/storage/work/j/jjd330/heasoft/heasoft-6.21/swift/bat/tasks/"
 
