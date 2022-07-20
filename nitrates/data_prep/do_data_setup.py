@@ -24,8 +24,7 @@ from ..lib.hp_funcs import pc_gwmap2good_pix
 from ..lib.gti_funcs import add_bti2gti, bti2gti, gti2bti, union_gtis, flags2gti,\
                         get_btis_for_glitches, check_if_in_GTI,\
                         find_and_remove_cr_glitches
-sys.path.append('/storage/home/jjd330/work/local/bat_data/BatML/data_scraping/')
-sys.path.append('/storage/home/jjd330/work/local/bat_data/BatML/HeasoftTools/')
+                        
 from db_ql_funcs import get_gainoff_fname
 from ..HeasoftTools.bat_tool_funcs import bateconvert
 
