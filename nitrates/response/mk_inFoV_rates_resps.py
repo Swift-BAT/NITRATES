@@ -7,7 +7,7 @@ import argparse
 import logging, traceback
 
 
-from ..config import rt_dir
+from ..config import rt_dir, rates_resp_dir
 from ..response.ray_trace_funcs import RayTraces
 from ..lib.event2dpi_funcs import det2dpis, mask_detxy
 from ..models.models import Source_Model_InFoV, Source_Model_InOutFoV
@@ -113,7 +113,7 @@ def mk_in_out_rates_tab_masks(sig_mod, theta, phi):
 
 def mk_npz_file_in_out_rates(sig_mod, theta, phi):
 
-    dname = '/gpfs/scratch/jjd330/bat_data/rates_resps/'
+    dname = rates_resp_dir
     tab, mask_in, mask_out = mk_in_out_rates_tab_masks(sig_mod, theta, phi)
     if tab is None:
         return
@@ -189,7 +189,6 @@ def main(args):
 
     bl_alldets = get_bldmask_alldets()
     # sig_mod = Source_Model_InFoV(flux_mod, [ebins0,ebins1], bl_alldets, rt_obj)
-    # sig_mod.flor_resp_dname = '/gpfs/scratch/jjd330/bat_data/flor_resps_ebins/'
 
     Ntot_pnts = len(xs)
     Npnts2do = 1 + int(Ntot_pnts / args.Njobs)
@@ -204,7 +203,6 @@ def main(args):
         logging.info("theta, phi: %.3f, %.3f"%(theta, phi))
 
         sig_mod = Source_Model_InOutFoV(flux_mod, [ebins0,ebins1], bl_alldets, rt_obj)
-        # sig_mod.flor_resp_dname = '/gpfs/scratch/jjd330/bat_data/flor_resps_ebins/'
 
         mk_npz_file_in_out_rates(sig_mod, theta, phi)
 
