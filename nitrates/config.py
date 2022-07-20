@@ -4,6 +4,17 @@ This fine allows the user to configure where the data is located on their system
 
 import os
 
+#variable to specify where the bat data will be downloaded to
+bat_data_dir=None
+if bat_data_dir is None:
+    bat_data_dir=os.getenv('NITRATES_BAT_DATA_DIR')
+if bat_data_dir is None:
+    # if bat_data_dir is not set here or as an env var then
+    # it's assumed to be in the current working direc
+    bat_data_dir='.'
+
+
+
 
 NITRATES_RESP_DIR="/Users/tparsota/Documents/BAT_SCRIPTS/NITRATES_BAT_RSP_FILES/" # env variable can be used or this can be set
 if NITRATES_RESP_DIR is None:
