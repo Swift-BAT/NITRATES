@@ -7,7 +7,7 @@ import argparse
 import logging, traceback
 import healpy as hp
 
-from ..config import rt_dir
+from ..config import rt_dir, rates_resp_out_dir
 from ..response.ray_trace_funcs import RayTraces
 from ..lib.event2dpi_funcs import det2dpis, mask_detxy
 from ..models.models import Source_Model_InFoV, Source_Model_InOutFoV
@@ -113,7 +113,7 @@ def mk_in_out_rates_tab_masks(sig_mod, theta, phi):
 
 def mk_npz_file_in_out_rates(sig_mod, hp_ind):
 
-    dname = '/gpfs/scratch/jjd330/bat_data/rates_resps_outFoV2/'
+    dname = rates_resp_out_dir
     phi, lat = hp.pix2ang(2**2, hp_ind, lonlat=True, nest=True)
     theta = 90.0 - lat
     tab, mask_in, mask_out = mk_in_out_rates_tab_masks(sig_mod, theta, phi)
@@ -192,7 +192,6 @@ def main(args):
 
     bl_alldets = get_bldmask_alldets()
     # sig_mod = Source_Model_InFoV(flux_mod, [ebins0,ebins1], bl_alldets, rt_obj)
-    # sig_mod.flor_resp_dname = '/gpfs/scratch/jjd330/bat_data/flor_resps_ebins/'
 
     hpinds = np.arange(hp.nside2npix(2**2), dtype=np.int)
     phis, lats = hp.pix2ang(2**2, hpinds, lonlat=True, nest=True)
@@ -215,7 +214,6 @@ def main(args):
         logging.info("theta, phi: %.3f, %.3f"%(thetas[i], phis[i]))
 
         sig_mod = Source_Model_InOutFoV(flux_mod, [ebins0,ebins1], bl_alldets, rt_obj)
-        # sig_mod.flor_resp_dname = '/gpfs/scratch/jjd330/bat_data/flor_resps_ebins/'
 
         mk_npz_file_in_out_rates(sig_mod, hp_inds[i])
 
