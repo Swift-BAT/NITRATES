@@ -24,6 +24,12 @@ HP_FLOR_RESP_DNAME = os.path.join(NITRATES_RESP_DIR,'hp_flor_resps')
 # DPI with st per det exposed to sky
 solid_angle_dpi_fname = os.path.join(NITRATES_RESP_DIR,'solid_angle_dpi.npy')
 
+#a grid of spectral models folded through the response for the split rates analysis for a spectral norm of 1. This is for a grid of points in imx and imy.
+# this is for in FOV
+rates_resp_dir=os.path.join(NITRATES_RESP_DIR,'rates_resps')
+#this is for out of FOV
+rates_resp_out_dir=os.path.join(NITRATES_RESP_DIR,'rates_resps_outFoV2')
+
 
 #get the directory that the data directory is located in
 dir = os.path.split(__file__)[0]
