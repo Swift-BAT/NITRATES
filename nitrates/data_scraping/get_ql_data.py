@@ -10,7 +10,6 @@ from astropy.time import Time
 from astropy.table import Table, vstack, unique
 import sys
 
-sys.path.append("/storage/work/jjd330/local/bat_data/BatML/data_scraping/")
 from db_ql_funcs import get_conn, get_ql_db_tab, write_new_obsid_line,\
                     update_obsid_line
 
