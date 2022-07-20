@@ -228,7 +228,6 @@ def get_Es_Zs_PixIDs_detxys_from_root_file(fname):
 
 def get_stuff_from_Erun(dname):
 
-#     dname = '/gpfs/scratch/jjd330/dets_only_g4_runs/theta_135.0_phi_0.0/run_30/'
     fnames = [os.path.join(dname, fname) for fname in os.listdir(dname) if '.root' in fname]
     print(len(fnames))
     print(fnames)
