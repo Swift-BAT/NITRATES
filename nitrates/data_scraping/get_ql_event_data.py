@@ -9,7 +9,6 @@ from astropy.time import Time
 import numpy as np
 import sys
 import pandas as pd
-sys.path.append("/storage/work/jjd330/local/bat_data/BatML/data_scraping/")
 
 from db_ql_funcs import get_conn, get_qlevent_db_tab, write_new_obsid_line,\
                     update_obsid_line, get_db_tab, write_event_files2db
