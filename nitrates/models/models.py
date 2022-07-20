@@ -10,7 +10,10 @@ from ..lib.trans_func import get_pb_absortion, get_pb_mu
 from ..lib.stat_funcs import Norm_1D, Norm_2D, Norm_3D
 from ..lib.hp_funcs import ang_sep
 from ..lib.coord_conv_funcs import imxy2theta_phi, theta_phi2imxy
+from ..config import RESP_TAB_DNAME,HP_FLOR_RESP_DNAME, COMP_FLOR_RESP_DNAME
+
 import six
+
 
 
 
@@ -3211,26 +3214,23 @@ class Source_Model_InOutFoV(Model):
         nebins = len(self.ebins0)
 
         if resp_tab_dname is None:
-            from ..config import RESP_TAB_DNAME
+            #from ..config import RESP_TAB_DNAME
             self.resp_dname = RESP_TAB_DNAME
         else:
             self.resp_dname = resp_tab_dname
 
         if hp_flor_resp_dname is None:
-            from ..config import HP_FLOR_RESP_DNAME
+            #from ..config import HP_FLOR_RESP_DNAME
             self.flor_resp_dname = HP_FLOR_RESP_DNAME
         else:
             self.flor_resp_dname = hp_flor_resp_dname
 
         if comp_flor_resp_dname is None:
-            from ..config import COMP_FLOR_RESP_DNAME
+            #from ..config import COMP_FLOR_RESP_DNAME
             self.comp_flor_resp_dname = COMP_FLOR_RESP_DNAME
         else:
             self.comp_flor_resp_dname = comp_flor_resp_dname
 
-        # self.resp_dname = '/storage/work/jjd330/local/bat_data/resp_tabs_ebins/'
-        # self.flor_resp_dname = '/gpfs/scratch/jjd330/bat_data/flor_resps_ebins/'
-        # self.flor_resp_dname2 = '/gpfs/scratch/jjd330/bat_data/hp_flor_resps/'
 
         param_names = ['theta', 'phi']
         param_names += self.fmodel.param_names
