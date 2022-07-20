@@ -13,7 +13,7 @@ class Element(object):
             self.dname = ELEMENT_CROSS_SECTION_DNAME
         else:
             self.dname = cross_section_dname
-        # self.dname = '/storage/work/jjd330/local/bat_data/element_cross_sections/'
+
         self.tab_fname = os.path.join(self.dname, name+'.txt')
         self.tab = Table.read(self.tab_fname, format='ascii')
 
