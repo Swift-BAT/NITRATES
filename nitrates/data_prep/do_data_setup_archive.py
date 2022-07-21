@@ -313,7 +313,7 @@ def get_event(args):
         # return better_ev_fnames[best_ev_ind]
 
 
-def get_dmask(args, evdata, use_glob=False):
+def get_dmask(args, evdata):
     """
     Combine the global detmask with the detector enable/disable
     map and then make the hotpix map and combine it with that too
@@ -370,13 +370,7 @@ def get_dmask(args, evdata, use_glob=False):
         if np.abs(mid_ev_time - enb_tab['TIME'][best_ind]) > max_dt0:
             logging.warn("Using enb/disb map that's from more than half an hour off of trigtime")
             
-    if not use_glob:
-        dmask_enb_glob = det_enb_mask
-    else:
-        #this should never be used
-        glob_dmask_fname = "/storage/work/j/jjd330/local/bat_data/swbbadpix20041120v008.fits.gz"
-        global_dmask = fits.open(glob_dmask_fname)[-2].data
-        dmask_enb_glob = combine_detmasks([det_enb_mask, global_dmask])
+    dmask_enb_glob = det_enb_mask
 
     bl_dmask_enb_glob = (dmask_enb_glob==0)
     ndets_enb_glob = np.sum(bl_dmask_enb_glob)
