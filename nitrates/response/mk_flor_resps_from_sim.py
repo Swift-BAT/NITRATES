@@ -19,8 +19,6 @@ except ModuleNotFoundError as err:
 
 from ..lib.event2dpi_funcs import det2dpis
 
-
-
 def cli():
     parser = argparse.ArgumentParser()
     parser.add_argument('--hp_ind', type=int,\
