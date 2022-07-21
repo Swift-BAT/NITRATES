@@ -1,5 +1,5 @@
 """
-This fine allows the user to configure where the data is located on their system and keeps the changes persistent through the whole code.
+This file allows the user to configure where the data is located on their system and keeps the changes persistent through the whole code.
 """
 
 import os
@@ -12,8 +12,6 @@ if bat_data_dir is None:
     # if bat_data_dir is not set here or as an env var then
     # it's assumed to be in the current working direc
     bat_data_dir='.'
-
-
 
 
 NITRATES_RESP_DIR="/Users/tparsota/Documents/BAT_SCRIPTS/NITRATES_BAT_RSP_FILES/" # env variable can be used or this can be set
@@ -55,17 +53,37 @@ EBINS0 = [15., 24., 35., 48., 64., 84., 120., 171.5, 245.]
 EBINS1 = [24., 35., 48., 64., 84., 120., 171.5, 245., 350.]
 
 
+HEADAS=None # env variable can be used or this can be set
+if HEADAS is None:
+    HEADAS=os.getenv('HEADAS')
+if HEADAS is None:
+    print('Could not get the $HEADAS system variable. Please ensure that this is set and points to the HEASOFT directory.')
+else:
+    os.system(". %s"%(os.path.join(HEADAS, "headas-init.sh")))
+    
+CALDB=None # env variable can be used or this can be set
+if CALDB is None:
+    CALDB=os.getenv('CALDB')
+if CALDB is None:
+    print('Could not get the $CALDB system variable. Please ensure that this is set and points to the CALDB directory.')
+else:
+    os.system(". %s"%(os.path.join(CALDB, "caldbinit.sh")))
+
+    
+ftool_wrap= os.path.join(dir, "HeasoftTools", 'run_ftool.sh')
+
+fp_dir = '/gpfs/scratch/jjd330/bat_data/footprints_npy/'
+
+
 ###########################
 ###   Old Stuff ###
 ###########################
 
 #bat_ml_dir='/storage/work/jjd330/local/bat_data/BatML/'
 #this has alot of hardcoded paths
-ftool_wrap= os.path.join(dir, "HeasoftTools", 'run_ftool.sh')
 #'/storage/work/jjd330/local/bat_data/BatML/HeasoftTools/run_ftool.sh' #referenced in gen_tools.py
 
 # rt_dir='/gpfs/scratch/jjd330/bat_data/ray_traces_detapp_npy/'
-fp_dir = '/gpfs/scratch/jjd330/bat_data/footprints_npy/'
 # #drm_dir='/gpfs/scratch/jjd330/bat_data/drms/'
 # drm_dir='/storage/work/jjd330/local/bat_data/drms/'
 # drm_quad_dir='/gpfs/scratch/jjd330/bat_data/drms4quads/'
