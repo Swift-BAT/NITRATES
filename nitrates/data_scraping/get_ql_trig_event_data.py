@@ -10,7 +10,7 @@ import numpy as np
 import sys
 import pandas as pd
 
-from db_ql_funcs import get_conn, get_qlevent_db_tab, write_new_obsid_line,\
+from .db_ql_funcs import get_conn, get_qlevent_db_tab, write_new_obsid_line,\
                     update_obsid_line, get_db_tab, write_event_files2db
 
 # Meant to be run as a cronjob

@@ -1,9 +1,16 @@
 import numpy as np
-import ROOT
 import os
 from astropy.table import Table
 from astropy.io import fits
 import argparse
+
+try:
+    import ROOT
+except ModuleNotFoundError as err:
+    # Error handling
+    print(err)
+    print('Please install the Python ROOT package to be able to run the full forward modeling calculations.')
+
 
 
 def cli():

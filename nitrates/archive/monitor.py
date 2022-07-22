@@ -86,7 +86,7 @@ def main(args):
 
         if not isev:
             isev = is_there_event_data(conn)
-            if isev:
+            #if isev: should this be deleted? incomplete code
 
 
         fnames = os.listdir('.')

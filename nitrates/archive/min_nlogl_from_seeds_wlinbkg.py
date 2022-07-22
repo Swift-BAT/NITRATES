@@ -14,6 +14,7 @@ from ..lib.drm_funcs import get_ebin_ind_edges, DRMs, get_cnts_intp_obj
 from ..lib.event2dpi_funcs import det2dpis, mask_detxy
 from ..lib.trans_func import get_pb_absortion
 from ..analysis_seeds.bkg_linear_rates import  get_lin_rate_obj
+#import ..analysis_seeds.bkg_linear_rates as a_s_blr
 
 def get_abs_cor_rates(imx, imy, drm):
 
@@ -63,7 +64,7 @@ class llh_ebins_square(object):
                                         self.ebin_ind_edges,\
                                         self.abs_cor)
 
-        self.bkg_obj = get_lin_rate_obj(self._all_data,\
+        self.bkg_obj = a_s_blr.get_lin_rate_obj(self._all_data,\
                                 self.t0, self.ebins0,
                                 self.ebins1, trng=4)
 

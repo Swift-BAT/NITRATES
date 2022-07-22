@@ -137,7 +137,7 @@ class llh_ebins_square(object):
 
 
     def brt_src_model(self, imx, imy, cnts, index):
-
+        return None #can this be deleted? 
 
 
 

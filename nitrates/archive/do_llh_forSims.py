@@ -26,7 +26,7 @@ from ..response.ray_trace_funcs import RayTraces, FootPrints
 from ..llh_analysis.LLH import LLH_webins
 from ..models.models import Bkg_Model_wSA, Point_Source_Model, Point_Source_Model_Wuncoded,\
             CompoundModel, Bkg_Model_wFlatA, Point_Source_Model_Binned_Rates
-from do_intllh_scan import kum_mode, kum_pdf, kum_logpdf, kum_deriv_logpdf, deriv2_kum_logpdf
+from .do_intllh_scan import kum_mode, kum_pdf, kum_logpdf, kum_deriv_logpdf, deriv2_kum_logpdf
 
 # need to read rate fits from DB
 # and read twinds
