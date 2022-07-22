@@ -19,43 +19,43 @@ def cli():
 
 
 
-cal_resp_fname = '/storage/work/jjd330/caldb_files/data/swift/bat/cpf/swbresponse20030101v007.rsp'
-resp_ebins_tab = Table.read(cal_resp_fname, hdu='EBOUNDS')
-print(resp_ebins_tab.colnames)
+#cal_resp_fname = '/storage/work/jjd330/caldb_files/data/swift/bat/cpf/swbresponse20030101v007.rsp'
+#resp_ebins_tab = Table.read(cal_resp_fname, hdu='EBOUNDS')
+#print(resp_ebins_tab.colnames)
 
-params_fname = '/storage/work/jjd330/caldb_files/data/swift/bat/bcf/swbparams20030101v009.fits'
-mt_tab = Table.read(params_fname, hdu=2)
-params_tab = Table.read(params_fname)
-print(mt_tab.colnames)
-print(params_tab.colnames)
+#params_fname = '/storage/work/jjd330/caldb_files/data/swift/bat/bcf/swbparams20030101v009.fits'
+#mt_tab = Table.read(params_fname, hdu=2)
+##params_tab = Table.read(params_fname)
+#print(mt_tab.colnames)
+#print(params_tab.colnames)
 
-params_header = fits.open(params_fname)[1].header
+#params_header = fits.open(params_fname)[1].header
 
-psv = []
-for i in range(14):
-    psv.append(float(params_header['PSV_'+str(i)]))
-print(psv)
+#psv = []
+#for i in range(14):
+#    psv.append(float(params_header['PSV_'+str(i)]))
+#print(psv)
 
-depth_fname = '/storage/work/jjd330/caldb_files/data/swift/bat/bcf/swbdepthdis20030101v003.fits'
-dtab = Table.read(depth_fname)
-print(dtab.colnames)
+#depth_fname = '/storage/work/jjd330/caldb_files/data/swift/bat/bcf/swbdepthdis20030101v003.fits'
+#dtab = Table.read(depth_fname)
+#print(dtab.colnames)
 
 
-pha_emins = resp_ebins_tab['E_MIN']
-pha_emaxs = resp_ebins_tab['E_MAX']
-pha_emins = np.round(pha_emins.astype(np.float)[:-1], decimals=1)
-pha_emaxs = np.round(pha_emaxs.astype(np.float)[:-1], decimals=1)
-pha_extras = np.round(np.logspace(np.log10(194.9), np.log10(500.0), 24+1), decimals=1)
-pha_extras = np.append(pha_extras, [1e5])
-pha_emins = np.append(pha_emins, pha_extras[:-1])
-pha_emaxs = np.append(pha_emaxs, pha_extras[1:])
-Npha_bins = len(pha_emins)
-print(Npha_bins)
-
-Ephotons = np.linspace(10.0, 100.0, 90+1)[:-1] + 0.5
-Ephotons = np.append(Ephotons, np.linspace(100.5, 200.5, 50+1)[:-1])
-Ephotons = np.append(Ephotons, np.logspace(np.log10(200.5), 2.75, 40+1))
-Ephotons = np.append(Ephotons, [600.0, 700.0, 900.0, 1.5e3, 3e3, 6e3])
+#pha_emins = resp_ebins_tab['E_MIN']
+#pha_emaxs = resp_ebins_tab['E_MAX']
+#pha_emins = np.round(pha_emins.astype(np.float)[:-1], decimals=1)
+#pha_emaxs = np.round(pha_emaxs.astype(np.float)[:-1], decimals=1)
+#pha_extras = np.round(np.logspace(np.log10(194.9), np.log10(500.0), 24+1), decimals=1)
+#pha_extras = np.append(pha_extras, [1e5])
+#pha_emins = np.append(pha_emins, pha_extras[:-1])
+#pha_emaxs = np.append(pha_emaxs, pha_extras[1:])
+#Npha_bins = len(pha_emins)
+#print(Npha_bins)
+#
+#Ephotons = np.linspace(10.0, 100.0, 90+1)[:-1] + 0.5
+#Ephotons = np.append(Ephotons, np.linspace(100.5, 200.5, 50+1)[:-1])
+#Ephotons = np.append(Ephotons, np.logspace(np.log10(200.5), 2.75, 40+1))
+#Ephotons = np.append(Ephotons, [600.0, 700.0, 900.0, 1.5e3, 3e3, 6e3])
 
 
 
@@ -358,6 +358,10 @@ def get_resp_dicts(depth_file, Ephotons, pha_emins, pha_emaxs):
         if i < len(Ephotons)-1:
             Elows.append(Ehis[i])
 
+    params_fname = '/storage/work/jjd330/caldb_files/data/swift/bat/bcf/swbparams20030101v009.fits'
+    mt_tab = Table.read(params_fname, hdu=2)
+    print(mt_tab.colnames)
+
 
     res_dicts = []
     orientation_names = ['NonEdges', 'right', 'left', 'top', 'bot']
@@ -478,6 +482,26 @@ def main(args):
 
     theta = float(depth_fname.split('_')[-4])
     phi = float(depth_fname.split('_')[-2])
+    
+    cal_resp_fname = '/storage/work/jjd330/caldb_files/data/swift/bat/cpf/swbresponse20030101v007.rsp'
+    resp_ebins_tab = Table.read(cal_resp_fname, hdu='EBOUNDS')
+    print(resp_ebins_tab.colnames)
+    
+    pha_emins = resp_ebins_tab['E_MIN']
+    pha_emaxs = resp_ebins_tab['E_MAX']
+    pha_emins = np.round(pha_emins.astype(np.float)[:-1], decimals=1)
+    pha_emaxs = np.round(pha_emaxs.astype(np.float)[:-1], decimals=1)
+    pha_extras = np.round(np.logspace(np.log10(194.9), np.log10(500.0), 24+1), decimals=1)
+    pha_extras = np.append(pha_extras, [1e5])
+    pha_emins = np.append(pha_emins, pha_extras[:-1])
+    pha_emaxs = np.append(pha_emaxs, pha_extras[1:])
+    Npha_bins = len(pha_emins)
+    print(Npha_bins)
+
+    Ephotons = np.linspace(10.0, 100.0, 90+1)[:-1] + 0.5
+    Ephotons = np.append(Ephotons, np.linspace(100.5, 200.5, 50+1)[:-1])
+    Ephotons = np.append(Ephotons, np.logspace(np.log10(200.5), 2.75, 40+1))
+    Ephotons = np.append(Ephotons, [600.0, 700.0, 900.0, 1.5e3, 3e3, 6e3])
 
     res_dicts = get_resp_dicts(depth_file, Ephotons, pha_emins, pha_emaxs)
 
