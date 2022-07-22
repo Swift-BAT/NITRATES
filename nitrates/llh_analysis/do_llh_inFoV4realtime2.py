@@ -620,9 +620,10 @@ def analysis_for_imxy_square(imx0, imx1, imy0, imy1, bkg_bf_params_list,\
         del sig_mod
         return res_df, None
 
+
 #@profile
-def do_analysis(proc_num, square_tab, ev_data, flux_mod, rt_dir,\
-               ebins0, ebins1, bl_dmask,\
+def do_analysis(square_tab, ev_data, flux_mod, rt_dir,\
+                ebins0, ebins1, bl_dmask,\
                 trigger_time, work_dir,\
                 bkg_fname, keep_all, TS2keep=4.5,\
                 minTS2scan=6.0):
