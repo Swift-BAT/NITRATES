@@ -10,7 +10,7 @@ from astropy.table import Table
 
 #import ..config
 
-sys.path.append(os.path.join(config.dir, 'HeasoftTools'))
+#sys.path.append(os.path.join(config.dir, 'HeasoftTools'))
 
 
 

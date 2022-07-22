@@ -74,6 +74,10 @@ ftool_wrap= os.path.join(dir, "HeasoftTools", 'run_ftool.sh')
 
 fp_dir = '/gpfs/scratch/jjd330/bat_data/footprints_npy/'
 
+drm_dir='/storage/work/jjd330/local/bat_data/drms/'
+
+drm_quad_dir='/gpfs/scratch/jjd330/bat_data/drms4quads/'
+
 
 ###########################
 ###   Old Stuff ###
@@ -85,8 +89,6 @@ fp_dir = '/gpfs/scratch/jjd330/bat_data/footprints_npy/'
 
 # rt_dir='/gpfs/scratch/jjd330/bat_data/ray_traces_detapp_npy/'
 # #drm_dir='/gpfs/scratch/jjd330/bat_data/drms/'
-# drm_dir='/storage/work/jjd330/local/bat_data/drms/'
-# drm_quad_dir='/gpfs/scratch/jjd330/bat_data/drms4quads/'
 # solid_angle_dpi_fname='/storage/work/jjd330/local/bat_data/solid_angle_dpi.npy'
 # bright_source_table_fname='/storage/work/jjd330/local/bat_data/BatML/bright_src_cat.fits'
 

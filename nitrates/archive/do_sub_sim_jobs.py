@@ -14,7 +14,7 @@ import logging, traceback
 
 # from ..lib.helper_funcs import send_email, send_error_email, send_email_attach, send_email_wHTML
 
-from do_manage import sub_jobs
+from .do_manage import sub_jobs
 
 
 def cli():

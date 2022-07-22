@@ -18,7 +18,6 @@ __version__ = '0.1a1'  # make sure this matches the setup.py
 
 
 from . import config
-from . import analysis_seeds
 from . import archive
 from . import data_prep
 from . import data_scraping
@@ -30,4 +29,6 @@ from . import llh_analysis
 from . import models
 from . import post_process
 from . import response
+from . import analysis_seeds
+
 

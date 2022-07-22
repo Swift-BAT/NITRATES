@@ -10,7 +10,7 @@ from astropy.time import Time
 from astropy.table import Table, vstack, unique
 import sys
 
-from db_ql_funcs import get_conn, get_ql_db_tab, write_new_obsid_line,\
+from .db_ql_funcs import get_conn, get_ql_db_tab, write_new_obsid_line,\
                     update_obsid_line
 
 # Meant to be run as a cronjob

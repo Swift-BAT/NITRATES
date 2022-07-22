@@ -25,7 +25,7 @@ from ..lib.gti_funcs import add_bti2gti, bti2gti, gti2bti, union_gtis, flags2gti
                         get_btis_for_glitches, check_if_in_GTI,\
                         find_and_remove_cr_glitches
                         
-from db_ql_funcs import get_gainoff_fname
+from ..data_scraping.db_ql_funcs import get_gainoff_fname
 from ..HeasoftTools.bat_tool_funcs import bateconvert
 
 def query_data_metslice(conn, met0, met1, table_name='SwiftQLevent'):
