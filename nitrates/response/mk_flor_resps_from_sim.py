@@ -82,31 +82,27 @@ def sand_img2dpi(sand_img):
     return dpi
 
 
-cal_resp_fname = '/storage/work/jjd330/caldb_files/data/swift/bat/cpf/swbresponse20030101v007.rsp'
-resp_ebins_tab = Table.read(cal_resp_fname, hdu='EBOUNDS')
-print(resp_ebins_tab.colnames)
+#cal_resp_fname = '/storage/work/jjd330/caldb_files/data/swift/bat/cpf/swbresponse20030101v007.rsp'
+#resp_ebins_tab = Table.read(cal_resp_fname, hdu='EBOUNDS')
+#print(resp_ebins_tab.colnames)
 
-params_fname = '/storage/work/jjd330/caldb_files/data/swift/bat/bcf/swbparams20030101v009.fits'
-mt_tab = Table.read(params_fname, hdu=2)
-params_tab = Table.read(params_fname)
-print(mt_tab.colnames)
-print(params_tab.colnames)
+#params_fname = '/storage/work/jjd330/caldb_files/data/swift/bat/bcf/swbparams20030101v009.fits'
+#mt_tab = Table.read(params_fname, hdu=2)
+#params_tab = Table.read(params_fname)
+#print(mt_tab.colnames)
+#print(params_tab.colnames)
 
-params_header = fits.open(params_fname)[1].header
+#params_header = fits.open(params_fname)[1].header
 
-psv = []
-for i in range(14):
-    psv.append(float(params_header['PSV_'+str(i)]))
-print(psv)
+#psv = []
+#for i in range(14):
+#    psv.append(float(params_header['PSV_'+str(i)]))
+#print(psv)
 
-depth_fname = '/storage/work/jjd330/caldb_files/data/swift/bat/bcf/swbdepthdis20030101v003.fits'
-dtab = Table.read(depth_fname)
-print(dtab.colnames)
+#depth_fname = '/storage/work/jjd330/caldb_files/data/swift/bat/bcf/swbdepthdis20030101v003.fits'
+#dtab = Table.read(depth_fname)
+#print(dtab.colnames)
 
-drm_fname = '/storage/work/jjd330/caldb_files/data/swift/bat/cpf/swbresponse20030101v007.rsp'
-ebins_tab = Table.read(drm_fname, hdu=2)
-print(ebins_tab.colnames)
-ebins_tab[-1]
 
 
 
@@ -582,7 +578,11 @@ def calc_resp_from_sim_by_sand(dname, pha_emins, pha_emaxs, Nzbins=20):
         bl = bl|bl_
     bl0 = (~bl)
     print("Nevents without PhotoE: ", np.sum(bl0))
-
+    
+    
+    params_fname = '/storage/work/jjd330/caldb_files/data/swift/bat/bcf/swbparams20030101v009.fits'
+    mt_tab = Table.read(params_fname, hdu=2)
+    print(mt_tab.colnames)
 
 
     Npha_bins = len(pha_emins)
@@ -737,7 +737,9 @@ def calc_flor_resp_from_sim_by_sand(dname, pha_emins, pha_emaxs, Nzbins=20):
     bl0 = (bl)
     print("Nevents in Flor lines: ", np.sum(bl0))
 
-
+    params_fname = '/storage/work/jjd330/caldb_files/data/swift/bat/bcf/swbparams20030101v009.fits'
+    mt_tab = Table.read(params_fname, hdu=2)
+    print(mt_tab.colnames)
 
 
     if np.sum(bl0) < (1e3):
@@ -833,15 +835,6 @@ def calc_flor_resp_from_sim_by_sand(dname, pha_emins, pha_emaxs, Nzbins=20):
     return resps_by_sand, PrimaryE
 
 
-pha_emins = ebins_tab['E_MIN']
-pha_emaxs = ebins_tab['E_MAX']
-pha_emins = np.round(pha_emins.astype(np.float)[:-1], decimals=1)
-pha_emaxs = np.round(pha_emaxs.astype(np.float)[:-1], decimals=1)
-pha_extras = np.round(np.logspace(np.log10(194.9), np.log10(500.0), 24+1), decimals=1)
-pha_extras = np.append(pha_extras, [1e5])
-pha_emins = np.append(pha_emins, pha_extras[:-1])
-pha_emaxs = np.append(pha_emaxs, pha_extras[1:])
-Npha_bins = len(pha_emins)
 
 
 def main(args):
@@ -853,6 +846,22 @@ def main(args):
         dname = '/gpfs/scratch/jjd330/g4_runs/hp_ind_order_2_allEs/theta_0/'
     elif args.theta == 180:
         dname = '/gpfs/scratch/jjd330/g4_runs/hp_ind_order_2_allEs/theta_180/'
+
+    drm_fname = '/storage/work/jjd330/caldb_files/data/swift/bat/cpf/swbresponse20030101v007.rsp'
+    ebins_tab = Table.read(drm_fname, hdu=2)
+    print(ebins_tab.colnames)
+    ebins_tab[-1]
+    
+    pha_emins = ebins_tab['E_MIN']
+    pha_emaxs = ebins_tab['E_MAX']
+    pha_emins = np.round(pha_emins.astype(np.float)[:-1], decimals=1)
+    pha_emaxs = np.round(pha_emaxs.astype(np.float)[:-1], decimals=1)
+    pha_extras = np.round(np.logspace(np.log10(194.9), np.log10(500.0), 24+1), decimals=1)
+    pha_extras = np.append(pha_extras, [1e5])
+    pha_emins = np.append(pha_emins, pha_extras[:-1])
+    pha_emaxs = np.append(pha_emaxs, pha_extras[1:])
+    Npha_bins = len(pha_emins)
+
 
 
     Primary_Es = []
