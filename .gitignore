@@ -1,7 +1,4 @@
 *.pyc
 __pycache__/
 .ipynb_checkpoints/
-<<<<<<< HEAD
-=======
 initrates.egg-info/
->>>>>>> pip_installable
