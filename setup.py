@@ -26,5 +26,5 @@ setup(
         'Programming Language :: Python :: 2',
         'Topic :: Scientific/Engineering :: Astronomy', ],
     package_data={'nitrates': ['data/*']},
-    python_requires='>=3.4',
+    python_requires='>=3.8',
 )
