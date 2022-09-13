@@ -11,6 +11,9 @@ def get_rt_arr(rt_dir, ident='fwd_ray_trace'):
 
     ray_trace_fnames = np.array([fn for fn in os.listdir(rt_dir) if\
                     ident in fn])
+                    
+    #code to filterout weird "._*" filenames too
+    ray_trace_fnames = np.array([i for i in ray_trace_fnames if "._"+ident not in i])
 
     i0 = len(ident.split('_'))
 
