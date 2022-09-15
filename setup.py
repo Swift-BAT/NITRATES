@@ -1,4 +1,18 @@
-from setuptools import setup
+from setuptools import setup, find_packages
+import os
+
+#pip install wasnt finding al the submodules so I needed to do the find_packages function
+#any subdirectoies that we dont want excluded need to be excluded via: exclude=
+
+#also need to include all subdirs in the data directory
+def package_files(directory):
+    paths = []
+    for (path, directories, filenames) in os.walk(directory):
+        for filename in filenames:
+            paths.append(os.path.join('..', path, filename))
+    return paths
+
+extra_files = package_files('./nitrates/data')
 
 try:
     with open("README.md", 'r') as f:
@@ -12,7 +26,7 @@ with open('requirements.txt') as f:
 setup(
     name='nitrates',
     version='0.1a1',
-    packages=['nitrates'],
+    packages=find_packages(),
     url='https://github.com/Swift-BAT/NITRATES',
     license='BSD-3-Clause',
     author='Jimmy DeLaunay',
@@ -25,6 +39,7 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 2',
         'Topic :: Scientific/Engineering :: Astronomy', ],
-    package_data={'nitrates': ['data/*']},
+    #package_data={'nitrates': ['data/*']},
+    package_data={'': extra_files},
     python_requires='>=3.8',
 )

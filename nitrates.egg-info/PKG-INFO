@@ -12,7 +12,7 @@ Classifier: Programming Language :: Python
 Classifier: Programming Language :: Python :: 3
 Classifier: Programming Language :: Python :: 2
 Classifier: Topic :: Scientific/Engineering :: Astronomy
-Requires-Python: >=3.4
+Requires-Python: >=3.8
 Description-Content-Type: text/markdown
 License-File: LICENSE
 
