@@ -8,7 +8,7 @@ import sqlite3
 import numpy as np
 import healpy as hp
 
-from hp_funcs import err_circle2prob_map
+from ..lib.hp_funcs import err_circle2prob_map
 
 
 def cli():
