@@ -1,36 +1,25 @@
 import smtplib
-import sys
 from email.mime.text import MIMEText
-if sys.version_info < (3, 0):
-    from email.MIMEMultipart import MIMEMultipart
-else:
-    from email.mime.multipart import MIMEMultipart
-    
-if sys.version_info < (3, 0):
-    from email.MIMEBase import MIMEBase
-else:
-    from email.mime.base import MIMEBase
-    
-if sys.version_info < (3, 0):
-    from email import Encoders
-else:
-    from email import encoders
+from email.MIMEMultipart import MIMEMultipart
+from email.MIMEBase import MIMEBase
+from email import Encoders
 
 
-pass_fname = 'pass.txt'
-try:
-    with open(pass_fname, 'r') as f:
-        pas = f.read().strip()
-except:
-    pas = ''
+#pass_fname = 'pass.txt'
+#try:
+#    with open(pass_fname, 'r') as f:
+#        pas = f.read().strip()
+#except:
+#    pas = ''
 
 def send_error_email(subject, body):
-    to = ['delauj2@gmail.com']
-    me = 'amon.psu@gmail.com'
+    to = ['']
+    me = ''
     msg = MIMEText(body)
     msg['Subject'] = subject
     msg['From'] = me
     msg['To'] = ", ".join(to)
+    pas = ''
     s = smtplib.SMTP('smtp.gmail.com:587')
     s.ehlo()
     s.starttls()
@@ -41,12 +30,13 @@ def send_error_email(subject, body):
     s.quit()
 
 def send_email(subject, body, to):
-    #to = ['delauj2@gmail.com']
-    me = 'amon.psu@gmail.com'
+    to = ['']
+    me = ''
     msg = MIMEText(body)
     msg['Subject'] = subject
     msg['From'] = me
     msg['To'] = ", ".join(to)
+    pas = ''
     s = smtplib.SMTP('smtp.gmail.com:587')
     s.ehlo()
     s.starttls()
@@ -57,14 +47,15 @@ def send_email(subject, body, to):
     s.quit()
 
 def send_email_wHTML(subject, body, to):
-    #to = ['delauj2@gmail.com']
-    me = 'amon.psu@gmail.com'
+    to = ['']
+    me = ''
     msg = MIMEMultipart('alternative')
     msg['Subject'] = subject
     msg['From'] = me
     msg['To'] = ", ".join(to)
     html_body = MIMEText(body, 'html')
     msg.attach(html_body)
+    pas = ''    
     s = smtplib.SMTP('smtp.gmail.com:587')
     s.ehlo()
     s.starttls()
@@ -77,7 +68,7 @@ def send_email_wHTML(subject, body, to):
 
 def send_email_attach(subject, body, to, fname):
 
-    me = 'amon.psu@gmail.com'
+    me = ''
 
     msg = MIMEMultipart()
 
@@ -86,6 +77,7 @@ def send_email_attach(subject, body, to, fname):
     msg['To'] = ", ".join(to)
 
     msg.attach(MIMEText(body))
+    pas = ''
     s = smtplib.SMTP('smtp.gmail.com:587')
     s.ehlo()
     s.starttls()

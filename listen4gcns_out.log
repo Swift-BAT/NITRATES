@@ -1,0 +1,25 @@
+PID:  5236
+2022-01-03 16:09:42,299 INFO: connected to 68.169.57.253:8099
+2022-01-03 16:12:34,506 INFO: received VOEvent
+observation
+2022-01-03T21:03:12.89
+2022-01-03 16:12:34,522 ERROR: [Errno 13] Permission denied: '/storage/work/j/jjd330/local/bat_data/realtime_workdir/F662936597/F662936597_0.xml'
+Traceback (most recent call last):
+  File "listen4notices.py", line 132, in process_gcn
+    with open(fname, 'wb') as f:
+IOError: [Errno 13] Permission denied: '/storage/work/j/jjd330/local/bat_data/realtime_workdir/F662936597/F662936597_0.xml'
+
+2022-01-03 16:12:34,801 ERROR: exception in payload handler
+Traceback (most recent call last):
+  File "/storage/home/gzr5209/.conda/envs/py27new/lib/python2.7/site-packages/gcn/voeventclient.py", line 186, in _ingest_packet
+    handler(payload, root)
+  File "/storage/home/gzr5209/.conda/envs/py27new/lib/python2.7/site-packages/gcn/handlers.py", line 51, in handle
+    handler(payload, root)
+  File "listen4notices.py", line 143, in process_gcn
+    send_error_email(subject, body)
+  File "/storage/work/g/gzr5209/BatML_code_work/NITRATES/helper_funcs.py", line 27, in send_error_email
+    s.login(me, pas)
+  File "/storage/home/gzr5209/.conda/envs/py27new/lib/python2.7/smtplib.py", line 623, in login
+    raise SMTPAuthenticationError(code, resp)
+SMTPAuthenticationError: (535, '5.7.8 Username and Password not accepted. Learn more at\n5.7.8  https://support.google.com/mail/?p=BadCredentials l15sm28866893qkp.16 - gsmtp')
+2022-01-03 16:14:40,783 INFO: closed socket

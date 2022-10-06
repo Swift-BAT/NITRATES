@@ -80,28 +80,28 @@ def sand_img2dpi(sand_img):
 
 cal_resp_fname = '/storage/work/jjd330/caldb_files/data/swift/bat/cpf/swbresponse20030101v007.rsp'
 resp_ebins_tab = Table.read(cal_resp_fname, hdu='EBOUNDS')
-print(resp_ebins_tab.colnames)
+print resp_ebins_tab.colnames
 
 params_fname = '/storage/work/jjd330/caldb_files/data/swift/bat/bcf/swbparams20030101v009.fits'
 mt_tab = Table.read(params_fname, hdu=2)
 params_tab = Table.read(params_fname)
-print(mt_tab.colnames)
-print(params_tab.colnames)
+print mt_tab.colnames
+print params_tab.colnames
 
 params_header = fits.open(params_fname)[1].header
 
 psv = []
 for i in range(14):
     psv.append(float(params_header['PSV_'+str(i)]))
-print(psv)
+print psv
 
 depth_fname = '/storage/work/jjd330/caldb_files/data/swift/bat/bcf/swbdepthdis20030101v003.fits'
 dtab = Table.read(depth_fname)
-print(dtab.colnames)
+print dtab.colnames
 
 drm_fname = '/storage/work/jjd330/caldb_files/data/swift/bat/cpf/swbresponse20030101v007.rsp'
 ebins_tab = Table.read(drm_fname, hdu=2)
-print(ebins_tab.colnames)
+print ebins_tab.colnames
 ebins_tab[-1]
 
 
@@ -347,7 +347,7 @@ def multi_mutau_func(Es, nphabins, mt_tab, voltage, dist, zbins0, zbins1,\
     dist_eff_area = 0.0
 
     dist_tot = np.sum(dist*dzs)
-    print(dist_tot)
+    print dist_tot
 
 #     dE_max = E - comp_Enew(E, np.pi)
 #     comp_dE = 1.0
@@ -439,7 +439,7 @@ def get_Es_Zs_Ngammas_PrimaryE_from_direc_root_files(dname):
             es, zs = get_Es_Zs_from_root_file(fname)
         except Exception as E:
             print(E)
-            print(("messed up with file, ", fname))
+            print("messed up with file, ", fname)
             continue
         Edeps = np.append(Edeps, es)
         wtd_zs = np.append(wtd_zs, zs)
@@ -507,7 +507,7 @@ def get_Es_Zs_detxys_Ngammas_PrimaryE_from_direc_root_files(dname):
             es, zs, pix_ids, detxs_, detys_ = get_Es_Zs_PixIDs_detxys_from_root_file(fname)
         except Exception as E:
             print(E)
-            print(("messed up with file, ", fname))
+            print("messed up with file, ", fname)
             continue
         Edeps = np.append(Edeps, es)
         wtd_zs = np.append(wtd_zs, zs)
@@ -528,7 +528,7 @@ def get_Es_Zs_detxys_Ngammas_PrimaryE_from_direc_root_files_mp(dname, Nprocs=4):
     stuff_list = p.map(get_Es_Zs_PixIDs_detxys_from_root_file, fnames)
     p.close()
     p.join()
-    print("pool closed")
+    print "pool closed"
     for i in range(len(fnames)):
         stuff = stuff_list[i]
         fname = fnames[i]
@@ -566,8 +566,8 @@ def calc_resp_from_sim_by_sand(dname, pha_emins, pha_emaxs, Nzbins=20):
 
 #     Es, Zs, detxs, detys, Ngammas, PrimaryE = get_Es_Zs_detxys_Ngammas_PrimaryE_from_direc_root_files(dname)
     Es, Zs, detxs, detys, Ngammas, PrimaryE = get_Es_Zs_detxys_Ngammas_PrimaryE_from_direc_root_files_mp(dname)
-    print("PrimaryE: ", PrimaryE)
-    print("Tot Nevents: ", len(Es))
+    print "PrimaryE: ", PrimaryE
+    print "Tot Nevents: ", len(Es)
 
     bls = []
     Elines = [PrimaryE, PrimaryE - EK1_CD, PrimaryE - EK1_TE]
@@ -577,7 +577,7 @@ def calc_resp_from_sim_by_sand(dname, pha_emins, pha_emaxs, Nzbins=20):
     for bl_ in bls[1:]:
         bl = bl|bl_
     bl0 = (~bl)
-    print("Nevents without PhotoE: ", np.sum(bl0))
+    print "Nevents without PhotoE: ", np.sum(bl0)
 
 
 
@@ -598,8 +598,8 @@ def calc_resp_from_sim_by_sand(dname, pha_emins, pha_emaxs, Nzbins=20):
         Nebins = int(PrimaryE/2)+1
         ebins = np.logspace(0.95, np.log10(PrimaryE), Nebins)
     Eax = (ebins[1:] + ebins[:-1])/2.
-    print("Nebins: ", Nebins)
-    print("dE: ", ebins[1] - ebins[0])
+    print "Nebins: ", Nebins
+    print "dE: ", ebins[1] - ebins[0]
 
     flux_sim_area = 750.0*750.0
     N_per_cm2 = Ngammas/flux_sim_area
@@ -610,7 +610,7 @@ def calc_resp_from_sim_by_sand(dname, pha_emins, pha_emaxs, Nzbins=20):
 
     if np.sum(bl0) < (5e3):
         # just make resp for all sands together
-        print("Only making one averaged resp")
+        print "Only making one averaged resp"
         Ndets = 32768
 
         zbins0, zbins1 = mk_zbins(Nzbins)
@@ -633,8 +633,8 @@ def calc_resp_from_sim_by_sand(dname, pha_emins, pha_emaxs, Nzbins=20):
         for col_num in range(16):
             sand_bl = mk_sand_bl(detxs, detys, col_num, row_num)
             bl = sand_bl&bl0
-            print("col_num, row_num: ", col_num, row_num)
-            print("Nevents: ", np.sum(bl))
+            print "col_num, row_num: ", col_num, row_num
+            print "Nevents: ", np.sum(bl)
             Ndets = 32768/16.0/16.0
 
 
@@ -653,8 +653,8 @@ def calc_resp_from_sim_by_sand(dname, pha_emins, pha_emaxs, Nzbins=20):
                 Nsands = (1+col_num1-col_num0)*(1+row_num1-row_num0)
                 Ndets = Ndets_per_sand*Nsands
                 bl = sand_bl&bl0
-                print("Nsands: ", Nsands)
-                print("Nevents: ", np.sum(bl))
+                print "Nsands: ", Nsands
+                print "Nevents: ", np.sum(bl)
             elif np.sum(bl) < 1e3:
                 row_num0 = max(0,row_num-1)
                 row_num1 = min(15,row_num+1)
@@ -667,8 +667,8 @@ def calc_resp_from_sim_by_sand(dname, pha_emins, pha_emaxs, Nzbins=20):
                 Nsands = (1+row_num1-row_num0)
                 Ndets = Ndets_per_sand*Nsands
                 bl = sand_bl&bl0
-                print("Nsands: ", Nsands)
-                print("Nevents: ", np.sum(bl))
+                print "Nsands: ", Nsands
+                print "Nevents: ", np.sum(bl)
 
             zbins0, zbins1 = mk_zbins(Nzbins)
             zbins = np.append(zbins0, zbins1[-1])
@@ -698,8 +698,8 @@ def calc_flor_resp_from_sim_by_sand(dname, pha_emins, pha_emaxs, Nzbins=20):
 
 #     Es, Zs, detxs, detys, Ngammas, PrimaryE = get_Es_Zs_detxys_Ngammas_PrimaryE_from_direc_root_files(dname)
     Es, Zs, detxs, detys, Ngammas, PrimaryE = get_Es_Zs_detxys_Ngammas_PrimaryE_from_direc_root_files_mp(dname)
-    print("PrimaryE: ", PrimaryE)
-    print("Tot Nevents: ", len(Es))
+    print "PrimaryE: ", PrimaryE
+    print "Tot Nevents: ", len(Es)
 
     Elines2use = np.empty(0)
     if PrimaryE >= sn_edge:
@@ -731,14 +731,14 @@ def calc_flor_resp_from_sim_by_sand(dname, pha_emins, pha_emaxs, Nzbins=20):
     for bl_ in bls[1:]:
         bl = bl|bl_
     bl0 = (bl)
-    print("Nevents in Flor lines: ", np.sum(bl0))
+    print "Nevents in Flor lines: ", np.sum(bl0)
 
 
 
 
     if np.sum(bl0) < (1e3):
         # just make resp for all sands together
-        print("Only making one averaged resp")
+        print "Only making one averaged resp"
         Ndets = 32768
 
         zbins0, zbins1 = mk_zbins(Nzbins)
@@ -769,8 +769,8 @@ def calc_flor_resp_from_sim_by_sand(dname, pha_emins, pha_emaxs, Nzbins=20):
         for col_num in range(16):
             sand_bl = mk_sand_bl(detxs, detys, col_num, row_num)
             bl = sand_bl&bl0
-            print("col_num, row_num: ", col_num, row_num)
-            print("Nevents: ", np.sum(bl))
+            print "col_num, row_num: ", col_num, row_num
+            print "Nevents: ", np.sum(bl)
             Ndets = 32768/16.0/16.0
 
 
@@ -789,8 +789,8 @@ def calc_flor_resp_from_sim_by_sand(dname, pha_emins, pha_emaxs, Nzbins=20):
                 Nsands = (1+col_num1-col_num0)*(1+row_num1-row_num0)
                 Ndets = Ndets_per_sand*Nsands
                 bl = sand_bl&bl0
-                print("Nsands: ", Nsands)
-                print("Nevents: ", np.sum(bl))
+                print "Nsands: ", Nsands
+                print "Nevents: ", np.sum(bl)
             elif np.sum(bl) < 1e3:
                 row_num0 = max(0,row_num-1)
                 row_num1 = min(15,row_num+1)
@@ -803,8 +803,8 @@ def calc_flor_resp_from_sim_by_sand(dname, pha_emins, pha_emaxs, Nzbins=20):
                 Nsands = (1+row_num1-row_num0)
                 Ndets = Ndets_per_sand*Nsands
                 bl = sand_bl&bl0
-                print("Nsands: ", Nsands)
-                print("Nevents: ", np.sum(bl))
+                print "Nsands: ", Nsands
+                print "Nevents: ", np.sum(bl)
 
             zbins0, zbins1 = mk_zbins(Nzbins)
             zbins = np.append(zbins0, zbins1[-1])
@@ -852,21 +852,21 @@ def main(args):
 
 
     Primary_Es = []
-    print(dname)
+    print dname
     Nprimary_Es = 60
     resps = []
     for i in range(Nprimary_Es):
         direc = os.path.join(dname, 'run_%d'%(i))
-        print()
-        print("***************************************************")
-        print(i)
-        print(direc)
+        print
+        print "***************************************************"
+        print i
+        print direc
         res, PrimaryE = calc_flor_resp_from_sim_by_sand(direc, pha_emins, pha_emaxs)
-        print(np.sum(res))
+        print np.sum(res)
         resps.append(res)
         Primary_Es.append(PrimaryE)
-        print()
-        print("***************************************************")
+        print
+        print "***************************************************"
 
 
     drm_tab = Table(data={'Ephoton':np.array(Primary_Es), 'RESPONSE':np.array(resps)})
@@ -890,8 +890,8 @@ def main(args):
     elif args.theta == 180:
         save_fname = '/gpfs/scratch/jjd330/bat_data/comp_flor_resps/resp_by_sand_theta_180.fits'
 
-    print("save_fname: ")
-    print(save_fname)
+    print "save_fname: "
+    print save_fname
     hdul.writeto(save_fname)#, overwrite=True)
 
 if __name__ == "__main__":

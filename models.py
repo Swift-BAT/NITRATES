@@ -10,8 +10,6 @@ from trans_func import get_pb_absortion, get_pb_mu
 from stat_funcs import Norm_1D, Norm_2D, Norm_3D
 from hp_funcs import ang_sep
 from coord_conv_funcs import imxy2theta_phi, theta_phi2imxy
-import six
-
 
 
 # have model classes for all things that contribute counts
@@ -187,9 +185,10 @@ class Flux2Rate_4PBtrans(object):
 
 
 
-@six.add_metaclass(abc.ABCMeta)
+
 class Model(object):
-    #, metaclass=abc.ABCMeta
+
+    __metaclass__ = abc.ABCMeta
 
     def __init__(self, name, bl_dmask, param_names,\
                  param_dict, nebins,\
@@ -260,7 +259,7 @@ class Bkg_Model(Model):
         self.bkg_obj = bkg_obj
 
         param_names = ['bkg_rate_' + str(i) for i\
-                       in range(nebins)]
+                       in xrange(nebins)]
 
         param_dict = {}
 
@@ -316,7 +315,7 @@ class Bkg_Model(Model):
 
         rate_dpis = []
 
-        for i in range(len(rates)):
+        for i in xrange(len(rates)):
 
             rate_dpis.append(rates[i]*self._rate_ones)
 
@@ -332,7 +331,7 @@ class Bkg_Model(Model):
     def get_log_prior(self, params, t=None):
 
         lp = 0.0
-        for k, val in params.items():
+        for k, val in params.iteritems():
             lp += stats.norm.logpdf(val, loc=self._rates[int(k[-1])],\
                                    scale=self._errs[int(k[-1])])
         return lp
@@ -349,9 +348,9 @@ class Bkg_Model_wSA(Model):
         self.solid_angs = solid_ang_dpi[bl_dmask]
 
         self.dif_names = ['diffuse_' + str(i) for i\
-                       in range(nebins)]
+                       in xrange(nebins)]
         self.flat_names = ['flat_' + str(i) for i\
-                       in range(nebins)]
+                       in xrange(nebins)]
 
         param_names = self.dif_names
         param_names += self.flat_names
@@ -475,10 +474,10 @@ class Bkg_Model_wFlatA(Model):
         self.solid_ang_mean = np.mean(self.solid_angs)
 
         self.rate_names = ['bkg_rate_' + str(i) for i\
-                       in range(nebins)]
+                       in xrange(nebins)]
 
         self.flat_names = ['flat_' + str(i) for i\
-                           in range(nebins)]
+                           in xrange(nebins)]
 
 #         self.rat_names = ['diff_flat_' + str(i) for i\
 #                                in xrange(nebins)]
@@ -694,10 +693,10 @@ class Bkg_Model_wFlatA(Model):
         self.solid_ang_mean = np.mean(self.solid_angs)
 
         self.rate_names = ['bkg_rate_' + str(i) for i\
-                       in range(nebins)]
+                       in xrange(nebins)]
 
         self.flat_names = ['flat_' + str(i) for i\
-                           in range(nebins)]
+                           in xrange(nebins)]
 
 #         self.rat_names = ['diff_flat_' + str(i) for i\
 #                                in xrange(nebins)]
@@ -1761,7 +1760,7 @@ class Point_Source_Model_Binned_Rates(Model):
     def get_log_prior(self, params):
 
         lp = 0.0
-        for k, val in params.items():
+        for k, val in params.iteritems():
             lp += stats.norm.logpdf(val, loc=self._rates[int(k[-1])],\
                                    scale=self._errs[int(k[-1])])
         return lp
@@ -1978,7 +1977,7 @@ class Point_Source_Model_Binned_Rates(Model):
     def get_log_prior(self, params):
 
         lp = 0.0
-        for k, val in params.items():
+        for k, val in params.iteritems():
             lp += stats.norm.logpdf(val, loc=self._rates[int(k[-1])],\
                                    scale=self._errs[int(k[-1])])
         return lp
@@ -2094,7 +2093,7 @@ class Bkg_and_Point_Source_Model(Model):
 
     def set_bkg_row(self, bkg_row):
 
-        col_names = list(bkg_row.keys())
+        col_names = bkg_row.keys()
 
         PSnames = []
         for name in col_names:
@@ -2372,7 +2371,7 @@ class Bkg_and_Point_Source_Model(Model):
                 res_dict[pname] = dnlpdps[i]
 
         for pname in self.param_names:
-            if pname in list(res_dict.keys()):
+            if pname in res_dict.keys():
                 if self.param_dict[pname]['fixed']:
                     continue
                 dnlp_dps.append(res_dict[pname])

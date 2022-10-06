@@ -27,31 +27,31 @@ def run_ftjoin_mp(dname, dname2, fnames, nproc):
 
         arg_lists.append(arg_list)
 
-    print("Opening pool of %d workers" %(nproc))
+    print "Opening pool of %d workers" %(nproc)
     t0 = time.time()
 
     p = mp.Pool(nproc, init_worker)
 
-    print(os.getpid())
-    print("active children: ", mp.active_children())
+    print os.getpid()
+    print "active children: ", mp.active_children()
 
     try:
         p.map(run_ftool_mp, arg_lists, chunksize=10)
     except KeyboardInterrupt:
-        print("active children: ", mp.active_children())
+        print "active children: ", mp.active_children()
         p.terminate()
         p.join()
-        print("terminate, join")
-        print("active children: ", mp.active_children())
+        print "terminate, join"
+        print "active children: ", mp.active_children()
         sys.exit()
 
-    print("active children: ", mp.active_children())
+    print "active children: ", mp.active_children()
     p.close()
     p.join()
-    print("close, join")
-    print("active children: ", mp.active_children())
+    print "close, join"
+    print "active children: ", mp.active_children()
 
-    print("Finished in %.3f seconds" %(time.time()-t0))
+    print "Finished in %.3f seconds" %(time.time()-t0)
 
 
 def do_ray_trace(out_fname, att_fname, ra, dec, time, detmask, infile):
@@ -67,7 +67,7 @@ def do_ray_trace(out_fname, att_fname, ra, dec, time, detmask, infile):
 def do_ray_trace_ra_dec_list(out_fname, att_fname, ras, decs, time, detmask, infile):
 
     ftool = "batmaskwtimg"
-    for i in range(len(ras)):
+    for i in xrange(len(ras)):
         outf = out_fname + '_%.2f_%.2f.img' %(ras[i], decs[i])
         arg_list = [outf, att_fname, str(ras[i]), str(decs[i])]
         arg_list += ["time=%.2f" %(time), "rebalance=NO",
@@ -83,7 +83,7 @@ def do_ray_trace_ra_dec_list(out_fname, att_fname, ras, decs, time, detmask, inf
 def do_ray_trace_imxy_list(out_fname, att_fname, imxs, imys, time, detmask, infile):
 
     ftool = "batmaskwtimg"
-    for i in range(len(imxs)):
+    for i in xrange(len(imxs)):
         outf = out_fname + '_%.5f_%.5f.img' %(imxs[i], imys[i])
         arg_list = [outf, att_fname, str(imxs[i]), str(imys[i])]
         arg_list += ["time=%.2f" %(time), "rebalance=NO",
@@ -100,7 +100,7 @@ def do_footprint_imxy_tab(out_fname, att_fname, imxs, imys,\
     outf = out_fname + '_%.5f_%.5f_%.5f_%.5f_.img'\
             %(np.min(imxs), np.min(imys), np.max(imxs), np.max(imys))
     if os.path.isfile(outf):
-        print("already made")
+        print "already made"
         return
     arg_list = [outf, att_fname, "0.0", "0.0"]
     arg_list += ["outtype=NONZERO",
@@ -119,7 +119,7 @@ def do_ray_trace_imxy_tab(out_fname, att_fname, imxs, imys,\
     outf = out_fname + '_%.5f_%.5f_%.5f_%.5f_.img'\
             %(np.min(imxs), np.min(imys), np.max(imxs), np.max(imys))
     if os.path.isfile(outf):
-        print("already made")
+        print "already made"
         return
     arg_list = [outf, att_fname, "0.0", "0.0"]
     arg_list += ["rebalance=NO",
@@ -138,9 +138,9 @@ def mk_imxy_tab(imxs, imys, fname):
     tab = Table()
     tab['IMX'] = grid_x.ravel()
     tab['IMY'] = grid_y.ravel()
-    names = np.array(['%.5f %.5f' %(tab['IMX'][i], tab['IMY'][i]) for i in range(len(tab))])
+    names = np.array(['%.5f %.5f' %(tab['IMX'][i], tab['IMY'][i]) for i in xrange(len(tab))])
     tab['NAME'] = names
-    print(len(tab), " positions to do")
+    print len(tab), " positions to do"
     tab.write(fname, overwrite=True)
 
 
@@ -281,8 +281,8 @@ def main(args):
             i0 = 0
             i1 = Npnts
             Npnts2do = Npnts
-        print("%d total to do" %(Npnts))
-        print("doing %d here" %(Npnts2do))
+        print "%d total to do" %(Npnts)
+        print "doing %d here" %(Npnts2do)
         df = df_imxy[i0:i1]
         i=0
 
@@ -304,10 +304,10 @@ def main(args):
                 imys = np.append(imys, [imy1])
 
 
-            print("imxs")
-            print(imxs)
-            print("imys")
-            print(imys)
+            print "imxs"
+            print imxs
+            print "imys"
+            print imys
 
 
             tab_fn = 'tab_%.5f_%.5f_%.5f_%.5f_.fits'\
@@ -330,8 +330,8 @@ def main(args):
                                 "NONE", args.infile, tab_fname, detapp=args.detapp)
 
 
-            print("Took %.2f seconds, %.2f minutes so far, done with %d of %d" %(time.time()-t_0,\
-                (time.time()-t_0)/60., i+1, Npnts2do))
+            print "Took %.2f seconds, %.2f minutes so far, done with %d of %d" %(time.time()-t_0,\
+                (time.time()-t_0)/60., i+1, Npnts2do)
             i+=1
 
 
@@ -340,17 +340,17 @@ def main(args):
         nx_steps = int((args.imx1 - args.imx0)/rng) + 1
         ny_steps = int((args.imy1 - args.imy0)/rng) + 1
 
-        print(nx_steps*ny_steps, " ray traces to make")
+        print nx_steps*ny_steps, " ray traces to make"
 
         if not os.path.exists(args.rtdir):
             os.makedirs(args.rtdir)
 
-        for i in range(nx_steps):
+        for i in xrange(nx_steps):
 
             imx0 = args.imx0 + i*rng
             imx1 = imx0 + rng
 
-            for j in range(ny_steps):
+            for j in xrange(ny_steps):
 
                 imy0 = args.imy0 + j*rng
                 imy1 = imy0 + rng
@@ -367,10 +367,10 @@ def main(args):
                     imys = np.append(imys, [imy1])
 
 
-                print("imxs")
-                print(imxs)
-                print("imys")
-                print(imys)
+                print "imxs"
+                print imxs
+                print "imys"
+                print imys
 
                 tab_fn = 'tab_%.5f_%.5f_%.5f_%.5f_.fits'\
                     %(np.min(imxs), np.min(imys), np.max(imxs), np.max(imys))
@@ -392,11 +392,11 @@ def main(args):
                                     "NONE", args.infile, tab_fname, detapp=args.detapp)
 
 
-                print("Took %.2f seconds, %.2f minutes so far, done with %d of %d" %(time.time()-t_0,\
-                    (time.time()-t_0)/60., (i*ny_steps + j + 1), (nx_steps*ny_steps)))
+                print "Took %.2f seconds, %.2f minutes so far, done with %d of %d" %(time.time()-t_0,\
+                    (time.time()-t_0)/60., (i*ny_steps + j + 1), (nx_steps*ny_steps))
 
 
-    print("Took %.2f seconds, %.2f minutes to do everything" %(time.time()-t_0, (time.time()-t_0)/60.))
+    print "Took %.2f seconds, %.2f minutes to do everything" %(time.time()-t_0, (time.time()-t_0)/60.)
 
 if __name__ == '__main__':
 

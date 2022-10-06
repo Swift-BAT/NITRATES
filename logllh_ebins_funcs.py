@@ -16,7 +16,7 @@ def plaw_flux(A, ind, E0, E1, esteps=10, E_0=50.0):
 def get_phot_fluxes(A, ind, drm_e0, drm_e1, E0=50.0):
 
     photon_fluxes = np.zeros_like(drm_e0)
-    for i in range(len(photon_fluxes)):
+    for i in xrange(len(photon_fluxes)):
         photon_fluxes[i] = plaw_flux(A, ind, drm_e0[i],\
                                      drm_e1[i], E_0=E0)
     return photon_fluxes
@@ -35,7 +35,7 @@ def get_cnts_mat(A, ind, drm_e0, drm_e1, drm_mat,\
     if abs_cor is not None:
         photon_fluxes = photon_fluxes*abs_cor
     cnts_mat = np.array([drm_mat[:,i]*photon_fluxes for i in\
-                         range(np.shape(drm_mat)[1])]).T
+                         xrange(np.shape(drm_mat)[1])]).T
     return cnts_mat
 
 def get_cnt_ebins(A, ind, drm, ebin_ind_edges, E0=50.0, abs_cor=None):
@@ -49,7 +49,7 @@ def get_cnt_ebins(A, ind, drm, ebin_ind_edges, E0=50.0, abs_cor=None):
     cnts_imgs = np.sum(cnts_mat, axis=0)
 
     cnts_ebins = [np.sum(cnts_imgs[ebin_ind_edges[i][0]:ebin_ind_edges[i][1]+1])\
-                 for i in range(len(ebin_ind_edges))]
+                 for i in xrange(len(ebin_ind_edges))]
 
     return np.array(cnts_ebins)
 
@@ -71,7 +71,7 @@ def get_cnt_ebins_normed(ind, drm, ebin_ind_edges, abs_cor=None, E0=50.0):
 
     cnts_ebins = np.array([np.sum(cnts_imgs[ebin_ind_edges[i][0]:\
                                    ebin_ind_edges[i][1]+1])\
-                 for i in range(len(ebin_ind_edges))])
+                 for i in xrange(len(ebin_ind_edges))])
 
     normed_cnts_ebins = cnts_ebins/np.sum(cnts_ebins)
 
@@ -113,7 +113,7 @@ def get_nllh_ebins(datas, bkg_cnts, bkg_errs, ray_trace, index, Ns,\
 
     # add in the bkg_errs
 
-    for i in range(n_ebins):
+    for i in xrange(n_ebins):
         #nllhs.append(get_nllh(datas[i], bkg_mods[i], ray_trace,\
         #                      N_sig_cnts_per_ebin[i], cks[i]))
 

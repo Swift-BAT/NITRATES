@@ -1,7 +1,7 @@
 import logging, traceback, argparse
 import requests
-import urllib.request, urllib.error, urllib.parse
-import urllib.request, urllib.parse, urllib.error
+import urllib2
+import urllib
 from bs4 import BeautifulSoup
 import os
 import numpy as np
@@ -10,7 +10,7 @@ from astropy.time import Time
 from astropy.table import Table, vstack, unique
 import sys
 
-sys.path.append("/storage/work/jjd330/local/bat_data/BatML/data_scraping/")
+sys.path.append("/storage/home/gzr5209/work/BatML_code_work/NITRATES/data_scraping/")
 from db_ql_funcs import get_conn, get_ql_db_tab, write_new_obsid_line,\
                     update_obsid_line
 
@@ -41,7 +41,7 @@ def get_obsid_dict(url):
             f0s = f0[0].split('.')
             obsid = f0s[0][2:]
             ver = int(f0s[1])
-            if obsid in list(obsid_dict.keys()):
+            if obsid in obsid_dict.keys():
                 if ver <= obsid_dict[obsid]['ver']:
                     continue
             obsid_dict[obsid] = {}
@@ -52,7 +52,7 @@ def get_obsid_dict(url):
 
 def get_bat_files_from_list_url(url, aux=False):
 
-    data = urllib.request.urlopen(url).read()
+    data = urllib2.urlopen(url).read()
     data = data.split("\n")
     bat_files = []
     aux_files = []
@@ -107,12 +107,12 @@ def get_urls2download(obsid_url):
 def download_file(url, fname):
 
     try:
-        urllib.request.urlretrieve(url, fname)
+        urllib.urlretrieve(url, fname)
     except Exception as E:
         logging.error(E)
         try:
             logging.info("Let's try again")
-            urllib.request.urlretrieve(url, fname)
+            urllib.urlretrieve(url, fname)
         except Exception as E:
             logging.error(E)
 
@@ -125,10 +125,11 @@ def cli():
     parser = argparse.ArgumentParser()
     parser.add_argument('--save_dir', type=str,\
             help="Directory to save data to",\
-            default='/storage/work/jjd330/local/bat_data/realtime_workdir/')
+            #default='/gpfs/group/jak51/default/gzr5209/realtime_workdir/') # this is not mounted on amon so cant use this
+	    default='/storage/home/gzr5209/work/realtime_workdir_NITRATES/')
     parser.add_argument('--dbfname', type=str,\
             help="Name of the sqlite database",\
-            default=None)
+            default='/storage/home/gzr5209/work/BatML_code_work/NITRATES/data_scraping/BATQL.db')
     args = parser.parse_args()
     return args
 
@@ -162,7 +163,7 @@ def main(args):
     new_atts = []
     new_enb_tabs = []
 
-    for obsid, obs_dict in list(obsid_dict.items()):
+    for obsid, obs_dict in obsid_dict.iteritems():
 
         att_dict = {}
         new_obsid = True
@@ -235,18 +236,18 @@ def main(args):
         db_data_dict['ver'] = obs_dict['ver']
         db_data_dict['obsDname'] = obsid_dir
 
-        if 'patFname' in list(db_data_dict.keys()):
+        if 'patFname' in db_data_dict.keys():
             att_fname = db_data_dict['patFname']
             att_file = fits.open(att_fname)[1]
             att_dict['fname'] = att_fname
-        elif 'satFname' in list(db_data_dict.keys()):
+        elif 'satFname' in db_data_dict.keys():
             att_fname = db_data_dict['satFname']
             att_file = fits.open(att_fname)[1]
             att_dict['fname'] = att_fname
         else:
             att_file = None
 
-        if 'DetEnbFname' in list(db_data_dict.keys()):
+        if 'DetEnbFname' in db_data_dict.keys():
             new_enb_tabs.append(Table.read(db_data_dict['DetEnbFname']))
 
         if att_file is not None:
@@ -313,7 +314,7 @@ def main(args):
     if not os.path.exists(enb_merged_dname):
         os.mkdir(enb_merged_dname)
 
-    for i in range(met_steps):
+    for i in xrange(met_steps):
 
         met0 = met_min + i*met_step
         met1 = met0 + met_step
@@ -339,7 +340,7 @@ def main(args):
             att_tab_list = []
             acs_tab_list = []
 
-            for i in range(Natts):
+            for i in xrange(Natts):
 
                 tab = Table.read(AttTab[i]['fname'])
                 bl = (tab['TIME']>met00)&(tab['TIME']<met11)

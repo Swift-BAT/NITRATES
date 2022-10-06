@@ -139,7 +139,7 @@ class LLH_webins(object):
             dNs_dparam = self.model.get_dr_dps(params)
 
             jacob = [np.sum(fact*dNs_dparam[i])*self.dt for i\
-                    in range(len(dNs_dparam))]
+                    in xrange(len(dNs_dparam))]
 
         else:
 
@@ -157,7 +157,7 @@ class LLH_webins(object):
                 dNLP_dparams = np.zeros(len(dR_dparams))
 
             jacob = [dNLP_dparams[i] + np.sum(fact*dR_dparams[i])*self.dt\
-                     for i in range(len(dR_dparams))]
+                     for i in xrange(len(dR_dparams))]
 
         return jacob
 
@@ -457,7 +457,7 @@ class LLH_webins(object):
             dNs_dparam = self.model.get_dr_dps(params)
 
             jacob = [np.sum(fact*dNs_dparam[i])*self.dt for i\
-                    in range(len(dNs_dparam))]
+                    in xrange(len(dNs_dparam))]
 
         else:
 
@@ -475,7 +475,7 @@ class LLH_webins(object):
                 dNLP_dparams = np.zeros(len(dR_dparams))
 
             jacob = [dNLP_dparams[i] + np.sum(fact*dR_dparams[i])*self.dt\
-                     for i in range(len(dR_dparams))]
+                     for i in xrange(len(dR_dparams))]
 
         return jacob
 

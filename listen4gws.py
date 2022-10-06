@@ -26,14 +26,14 @@ script_path='/storage/work/j/jjd330/local/bat_data/BatML/run_stuff.sh'
     gcn.notice_types.LVC_RETRACTION)
 def process_gcn(payload, root):
 
-    print(root.attrib['role'])
+    print root.attrib['role']
 
     role = root.attrib['role']
 
     try:
 
         eventtime = root.find('.//ISOTime').text
-        print(eventtime)
+        print eventtime
 
 
     except Exception as E:
@@ -87,7 +87,7 @@ def process_gcn(payload, root):
         body += "IVORN: " + str(root.attrib['ivorn']) + '\n'
         body += "IsoTime: " + eventtime + '\n'
 
-        for key, value in list(params.items()):
+        for key, value in params.items():
             body += key
             body += '='
             body += value
@@ -101,7 +101,7 @@ def process_gcn(payload, root):
         for line in f:
             to.append(line.split('\n')[0])
         f.close()
-        print(to)
+        print to
 
         send_email(subj, body, to)
 
@@ -111,7 +111,7 @@ def process_gcn(payload, root):
 
         body = str(E)
         body += '\n' + traceback.format_exc()
-        print(body)
+        print body
         subject = 'listen4gws.py error on ' + socket.gethostname()
         send_error_email(subject, body)
 
@@ -165,5 +165,5 @@ if __name__ == "__main__":
     she.setFormatter(formatter)
     logger.addHandler(she)
 
-    print('PID: ', os.getpid())
+    print 'PID: ', os.getpid()
     gcn.listen(handler=process_gcn, log=logger)

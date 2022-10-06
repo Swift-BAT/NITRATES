@@ -8,7 +8,9 @@ import os
 import argparse
 import logging, traceback, time
 
-from config import EBINS0, EBINS1, solid_angle_dpi_fname, fp_dir, rt_dir
+#from config import EBINS0, EBINS1, solid_angle_dpi_fname, fp_dir, rt_dir
+from config import EBINS0, EBINS1, solid_angle_dpi_fname, rt_dir
+
 from sqlite_funcs import get_conn
 from dbread_funcs import get_info_tab, guess_dbfname, get_files_tab,\
                             get_twinds_tab, get_rate_fits_tab
@@ -63,7 +65,7 @@ def parse_bkg_csv(bkg_fname, solid_angle_dpi, ebins0, ebins1, bl_dmask, rt_dir):
     for name in col_names:
         if '_imx' in name:
             PSnames.append(name.split('_')[0])
-    print(PSnames)
+    print PSnames
     Nsrcs = len(PSnames)
     if Nsrcs > 0:
         bkg_name = 'Background_'
@@ -141,8 +143,8 @@ class Rates_Resp(object):
         self.ndets_in = np.sum(self.mask_in&self.bl_dmask)
         self.ndets_out = np.sum(self.mask_out&self.bl_dmask)
 
-        print(self.npz_file.files)
-        print(self.npz_file['RatesIn'].shape)
+        print self.npz_file.files
+        print self.npz_file['RatesIn'].shape
         self.nebins = self.npz_file['RatesIn'].shape[1]
 
         self.rates_in_intps = []
@@ -700,8 +702,8 @@ class rates_fp_llh_outFoV(object):
             try:
                 self.set_rates_resp(hp_ind)
             except Exception as E:
-                print("problem reading npz file for hp_ind,")
-                print(hp_ind)
+                print "problem reading npz file for hp_ind,"
+                print hp_ind
                 logging.error(E)
                 logging.error(traceback.format_exc())
                 continue
@@ -900,13 +902,13 @@ def main(args):
     nexps = len(exp_groups)
 
 
-    rates_resp_dir = '/gpfs/scratch/jjd330/bat_data/rates_resps/'
+    rates_resp_dir = '/gpfs/group/jak51/default/responses/rates_resps/'
     rate_resp_arr = get_rates_resp_arr(rates_resp_dir)
 
     imxs = rate_resp_arr['imx']
     imys = rate_resp_arr['imy']
 
-    rates_resp_out_dir = '/gpfs/scratch/jjd330/bat_data/rates_resps_outFoV2/'
+    rates_resp_out_dir = '/gpfs/group/jak51/default/responses/rates_resps_outFoV2/'
     rate_resp_out_arr = get_rates_resp_arr_outFoV(rates_resp_out_dir)
 
     hp_inds = rate_resp_out_arr['hp_ind']
@@ -914,18 +916,37 @@ def main(args):
     solid_angle_dpi = np.load(solid_angle_dpi_fname)
 
 
-    PC = fits.open(args.pcfname)[0]
-    pc = PC.data
-    w_t = WCS(PC.header, key='T')
+    try:
+        PC = fits.open(args.pcfname)[0]
+        pc = PC.data
+        w_t = WCS(PC.header, key='T')
 
-    pcs = world2val(w_t, pc, imxs, imys)
-    logging.info("min, max pcs: %.4f, %.4f"%(np.min(pcs),np.max(pcs)))
-    min_pc = max(args.min_pc - 0.25, 0.00499)
-    logging.info("min_pc: %.4f"%(min_pc))
-    logging.info("sum(pcs>min_pc): %d"%(np.sum(pcs>min_pc)))
-    pc_bl = (pcs>min_pc)
-    imxs = imxs[pc_bl]
-    imys = imys[pc_bl]
+        pcs = world2val(w_t, pc, imxs, imys)
+        logging.info("min, max pcs: %.4f, %.4f"%(np.min(pcs),np.max(pcs)))
+        min_pc = max(args.min_pc - 0.25, 0.00499)
+        logging.info("min_pc: %.4f"%(min_pc))
+        logging.info("sum(pcs>min_pc): %d"%(np.sum(pcs>min_pc)))
+        pc_bl = (pcs>min_pc)
+        imxs = imxs[pc_bl]
+        imys = imys[pc_bl]
+    except Exception as E:
+        logging.warn("Couldn't use PC img")
+        logging.error(E)
+        logging.error(traceback.format_exc())
+
+
+   # PC = fits.open(args.pcfname)[0]
+   # pc = PC.data
+   # w_t = WCS(PC.header, key='T')
+
+    #pcs = world2val(w_t, pc, imxs, imys)
+    #logging.info("min, max pcs: %.4f, %.4f"%(np.min(pcs),np.max(pcs)))
+   # min_pc = max(args.min_pc - 0.25, 0.00499)
+   # logging.info("min_pc: %.4f"%(min_pc))
+   # logging.info("sum(pcs>min_pc): %d"%(np.sum(pcs>min_pc)))
+   # pc_bl = (pcs>min_pc)
+   # imxs = imxs[pc_bl]
+   # imys = imys[pc_bl]
 
     # Should add a thing like this for the out FoV hp_inds
 
@@ -966,7 +987,7 @@ def main(args):
             save_fname = 'rates_llh_res_%d_.csv' %(args.job_id)
 
         elif i0 >= Nim_pnts:
-            i0_ = Nper_job*(int(i0-Nim_pnts)//Nper_job)
+            i0_ = Nper_job*(int(i0-Nim_pnts)/Nper_job)
             i1_ = i0_ + Nper_job
             hp_inds = hp_inds[i0_:i1_]
             logging.info('hp_inds: ')

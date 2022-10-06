@@ -59,14 +59,14 @@ def find_rate_spike_dets2mask(evdata, GTI=None, emax=50, tbin_size=20e-3, max_cn
         h = np.histogramdd([evdata['TIME'][ebl],evdata['DETX'][ebl],evdata['DETY'][ebl]],\
                            bins=[tbins,detx_bins,dety_bins])[0]
         # print len(h)
-        print(np.shape(h))
-        print(np.max(h), np.mean(h))
+        print np.shape(h)
+        print np.max(h), np.mean(h)
         # print tbins[np.argmax(h)]
         max_inds = np.unravel_index(np.argmax(h), h.shape)
-        print(max_inds)
-        print(tbins[max_inds[0]], detx_bins[max_inds[1]], dety_bins[max_inds[2]])
-        print(np.mean(h[max_inds[0]]), np.sum(h[max_inds[0]]))
-        print()
+        print max_inds
+        print tbins[max_inds[0]], detx_bins[max_inds[1]], dety_bins[max_inds[2]]
+        print np.mean(h[max_inds[0]]), np.sum(h[max_inds[0]])
+        print
         if np.max(h) > max_cnts:
             bl = (h>max_cnts)
             tbin_inds, detx_inds, dety_inds = np.where(bl)

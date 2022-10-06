@@ -1,0 +1,55 @@
+#!/bin/bash
+
+#PBS -l nodes=1:ppn=1
+#PBS -l walltime=48:00:00
+#PBS -l mem=8gb
+#PBS -l pmem=8gb
+
+echo "#-#-#Job started on `hostname` at `date` "
+echo This job runs on the following processors:
+echo `cat $PBS_NODEFILE`
+
+#module load anaconda3
+module load anaconda3/2020.07
+#module load anaconda3/2021.05
+# change this to whatever your env name is
+source activate py27new # edited on Oct 28th 
+
+export PYTHONPATH=$batml_path:$PYTHONPATH
+export PYTHONPATH=$ht_path:$PYTHONPATH
+
+# HEADAS=/storage/work/jjd330/heasoft/heasoft-6.24/x86_64-pc-linux-gnu-libc2.12
+# export HEADAS
+# . $HEADAS/headas-init.sh
+#
+# # CALDB stuff
+# CALDB=/storage/work/jjd330/caldb_files; export CALDB
+# source $CALDB/software/tools/caldbinit.sh
+#
+# export HEADASNOQUERY=
+# export HEADASPROMPT=/dev/null
+#
+# export PFILES="/tmp/$$.tmp/pfiles;$HEADAS/syspfiles"
+
+
+# change batml_path to wherever the code is 
+#batmlpath='/storage/home/gzr5209/work/BatML/'
+batmlpath='/storage/home/gzr5209/work/BatML_code_work/NITRATES/'
+
+#batml_path='/storage/work/jjd330/local/bat_data/BatML/'
+ht_path=$batml_path'HeasoftTools/'
+
+export PYTHONPATH=$batml_path:$PYTHONPATH
+export PYTHONPATH=$ht_path:$PYTHONPATH
+
+echo ${jobid}
+echo ${workdir}
+echo ${njobs}
+echo ${pyscript}
+echo ${extra_args}
+
+cd ${workdir}
+
+python $batml_path${pyscript} --job_id ${jobid} --Njobs ${njobs} ${extra_args}
+
+echo "#-#-#Job Ended at `date`"

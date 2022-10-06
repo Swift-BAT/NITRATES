@@ -15,7 +15,9 @@ try:
 except:
     pass
 
-from helper_funcs import send_email, send_error_email, send_email_attach, send_email_wHTML
+#from helper_funcs import send_email, send_error_email, send_email_attach, send_email_wHTML
+#using the same helperfuncs as open grb even for vc because email settings are same.. July 4th 2022
+from helper_funcs_open_grb_realtime import send_email, send_error_email, send_email_attach, send_email_wHTML
 
 from sqlite_funcs import get_conn
 from dbread_funcs import get_files_tab, get_info_tab, guess_dbfname
@@ -31,10 +33,16 @@ def cli():
             default=None)
     parser.add_argument('--fp_dir', type=str,\
             help="Directory where the detector footprints are",
-            default='/storage/work/jjd330/local/bat_data/rtfp_dir_npy/')
+            default='/gpfs/group/jak51/default/gzr5209/bat-data/rtfp_dir_npy/')
     parser.add_argument('--Nrate_jobs', type=int,\
             help="Total number of jobs",
             default=16)
+    parser.add_argument('--N_infov_jobs', type=int,\
+            help="Number of infov jobs to submit",\
+            default=96)
+    parser.add_argument('--N_outfov_jobs', type=int,\
+            help="Number of outfov jobs to submit",\
+            default=24)
     parser.add_argument('--TSscan', type=float,\
             help="Min TS needed to do a full FoV scan",
             default=6.25)
@@ -52,25 +60,28 @@ def cli():
             default='')
     parser.add_argument('--queue', type=str,\
             help="Name of the queue to submit jobs to",\
-            default='cyberlamp')
+            default='jak51_b_g_vc_default')
     parser.add_argument('--qos', type=str,\
             help="Name of the qos to submit jobs to",\
             default=None)
+    parser.add_argument('--q', type=str,\
+            help="Name of the q to submit jobs to",\
+	    default='hprc')
     parser.add_argument('--pcfname', type=str,\
             help="Name of the partial coding image",\
             default='pc_2.img')
     parser.add_argument('--BKGpyscript', type=str,\
             help="Name of python script for Bkg Estimation",\
-            default='do_bkg_estimation_wPSs_mp2.py')
+            default='/storage/home/gzr5209/work/BatML_code_work/NITRATES/do_bkg_estimation_wPSs_mp2.py')
     parser.add_argument('--RATEpyscript', type=str,\
             help="Name of python script for Rates analysis",\
-            default='do_rates_mle_InOutFoV2.py')
+            default='/storage/home/gzr5209/work/BatML_code_work/NITRATES/do_rates_mle_InOutFoV2.py')
     parser.add_argument('--LLHINpyscript', type=str,\
             help="Name of python script for LLH analysis",\
-            default='do_llh_inFoV4realtime2.py')
+            default='/storage/home/gzr5209/work/BatML_code_work/NITRATES/do_llh_inFoV4realtime2.py')
     parser.add_argument('--LLHOUTpyscript', type=str,\
             help="Name of python script for LLH analysis",\
-            default='do_llh_outFoV4realtime2.py')
+            default='/storage/home/gzr5209/work/BatML_code_work/NITRATES/do_llh_outFoV4realtime2.py')
     # parser.add_argument('--SCANpyscript', type=str,\
     #         help="Name of python script for FoV scan",\
     #         default='do_llh_scan_uncoded.py')
@@ -100,10 +111,10 @@ def cli():
             action='store_true')
     parser.add_argument('--pbs_fname', type=str,\
             help="Name of pbs script",\
-            default='/storage/work/jjd330/local/bat_data/BatML/submission_scripts/pyscript_template.pbs')
+            default='/storage/home/gzr5209/work/BatML_code_work/NITRATES/submission_scripts/pyscript_template_g3.pbs')
     parser.add_argument('--pbs_rhel7_fname', type=str,\
             help="Name of pbs script",\
-            default='/storage/work/jjd330/local/bat_data/BatML/submission_scripts/pyscript_template_rhel7.pbs')
+            default='/storage/home/gzr5209/work/BatML_code_work/NITRATES/submission_scripts/pyscript_template_rhel7_g3.pbs')
     parser.add_argument('--min_pc', type=float,\
             help="Min partical coding fraction to use",\
             default=0.1)
@@ -440,8 +451,8 @@ def mk_in_seed_tab(rates_res, TS_min=4.5, im_steps=25, max_Ntwinds=8, max_overla
             rank48_dlogl = get_Nrank_val(dlogls.values, 48)
             rank196_dlogl = get_Nrank_val(dlogls.values, 196)
 
-            print(("max, med dlogl: ", max_dlogl, med_dlogl))
-            print(("rank 48, 196 dlogl: ", rank48_dlogl, rank196_dlogl))
+            print("max, med dlogl: ", max_dlogl, med_dlogl)
+            print("rank 48, 196 dlogl: ", rank48_dlogl, rank196_dlogl)
 
 
             # dlogl_cut at most the median
@@ -455,7 +466,7 @@ def mk_in_seed_tab(rates_res, TS_min=4.5, im_steps=25, max_Ntwinds=8, max_overla
                 dlogl_cut = min(dlogl_cut, rank196_dlogl)
 
             print(dlogl_cut)
-            print((np.sum(dlogls<=dlogl_cut), len(dlogls)))
+            print(np.sum(dlogls<=dlogl_cut), len(dlogls))
 
 
 
@@ -577,9 +588,9 @@ def assign_in_seeds2jobs(seed_tab, Nmax_jobs=96):
                 job_ids[bl] = job_iter%Njobs
                 job_iter += 1
                 continue
-            job_ids[bl][:(Nt//2)] = job_iter%Njobs
+            job_ids[bl][:(Nt/2)] = job_iter%Njobs
             job_iter += 1
-            job_ids[bl][(Nt//2):] = job_iter%Njobs
+            job_ids[bl][(Nt/2):] = job_iter%Njobs
             job_iter += 1
         logging.debug("Njobs, job_iter: %d, %d"%(Njobs, job_iter))
 
@@ -592,9 +603,9 @@ def assign_in_seeds2jobs(seed_tab, Nmax_jobs=96):
             Nt = np.sum(bl)
             if Nt > (2*Ntbins_perSq):
                 inds_ = np.where(bl)[0]
-                job_ids[inds_[:(Nt//2)]] = job_iter%Njobs
+                job_ids[inds_[:(Nt/2)]] = job_iter%Njobs
                 job_iter += 1
-                job_ids[inds_[(Nt//2):]] = job_iter%Njobs
+                job_ids[inds_[(Nt/2):]] = job_iter%Njobs
                 job_iter += 1
                 continue
             job_ids[bl] = job_iter%Njobs
@@ -612,9 +623,9 @@ def assign_in_seeds2jobs(seed_tab, Nmax_jobs=96):
                 job_ids[bl] = job_iter%Njobs
                 job_iter += 1
                 continue
-            job_ids[bl][:(Nt//2)] = job_iter%Njobs
+            job_ids[bl][:(Nt/2)] = job_iter%Njobs
             job_iter += 1
-            job_ids[bl][(Nt//2):] = job_iter%Njobs
+            job_ids[bl][(Nt/2):] = job_iter%Njobs
             job_iter += 1
         logging.debug("Njobs, job_iter: %d, %d"%(Njobs, job_iter))
 
@@ -631,9 +642,9 @@ def mk_out_seed_tab(in_seed_tab, hp_inds, att_q, Nside=2**4, Nmax_jobs=24):
 
     Npix = len(hp_inds)
 
-    print(("Npix: ", Npix))
+    print("Npix: ", Npix)
     Njobs = min(Npix, Nmax_jobs)
-    print(("Njobs: ", Njobs))
+    print("Njobs: ", Njobs)
 
     timeIDs = []
     t0s = []
@@ -789,8 +800,8 @@ def get_ssh_client(server, retries=5):
 
 
 
-def sub_jobs(njobs, name, pyscript, pbs_fname, queue='open',\
-                workdir=None, qos=None, ssh=True, extra_args=None,\
+def sub_jobs(njobs, name, pyscript, pbs_fname, queue='jak51_b_g_vc_default',\
+                workdir=None, qos=None, q='hprc', ssh=True, extra_args=None,\
                 ppn=1, rhel7=False):
 
     hostname = socket.gethostname()
@@ -805,8 +816,8 @@ def sub_jobs(njobs, name, pyscript, pbs_fname, queue='open',\
         ssh_cmd = 'ssh aci-b.aci.ics.psu.edu "'
         server = 'aci-b.aci.ics.psu.edu'
         server = 'submit.aci.ics.psu.edu'
-        server = 'submit-001.aci.ics.psu.edu'
-        server = 'submit-010.aci.ics.psu.edu'
+        #server = 'submit-001.aci.ics.psu.edu'
+       # server = 'submit-010.aci.ics.psu.edu'
         # client = paramiko.SSHClient()
         # client.load_system_host_keys()
         # client.connect(server)
@@ -815,34 +826,34 @@ def sub_jobs(njobs, name, pyscript, pbs_fname, queue='open',\
         #             %(args.pbs_fname, args.queue, args.name)
         if qos is not None:
             if rhel7:
-                base_sub_cmd = 'qsub %s -A %s -N %s -l nodes=1:ppn=%d -l qos=%s -l feature=rhel7 -v '\
-                            %(pbs_fname, queue, name, ppn, qos)
+                base_sub_cmd = 'qsub %s -A %s -q %s -N %s -l nodes=1:ppn=%d -l qos=%s -l feature=rhel7 -v '\
+                            %(pbs_fname, queue, q, name, ppn, qos)
             else:
-                base_sub_cmd = 'qsub %s -A %s -N %s -l nodes=1:ppn=%d -l qos=%s -v '\
-                            %(pbs_fname, queue, name, ppn, qos)
+                base_sub_cmd = 'qsub %s -A %s -q %s -N %s -l nodes=1:ppn=%d -l qos=%s -v '\
+                            %(pbs_fname, queue, q, name, ppn, qos)
         else:
             if rhel7:
-                base_sub_cmd = 'qsub %s -A %s -N %s -l nodes=1:ppn=%d -l feature=rhel7 -v '\
-                            %(pbs_fname, queue, name, ppn)
+                base_sub_cmd = 'qsub %s -A %s -q %s -N %s -l nodes=1:ppn=%d -l feature=rhel7 -v '\
+                            %(pbs_fname, queue, q, name, ppn)
             else:
-                base_sub_cmd = 'qsub %s -A %s -N %s -l nodes=1:ppn=%d -v '\
-                            %(pbs_fname, queue, name, ppn)
+                base_sub_cmd = 'qsub %s -A %s -q %s -N %s -l nodes=1:ppn=%d -v '\
+                            %(pbs_fname, queue, q, name, ppn)
 
     else:
         if qos is not None:
             if rhel7:
-                base_sub_cmd = 'qsub %s -A %s -N %s -l nodes=1:ppn=%d -l qos=%s -l feature=rhel7 -v '\
-                            %(pbs_fname, queue, name, ppn, qos)
+                base_sub_cmd = 'qsub %s -A %s -q %s -N %s -l nodes=1:ppn=%d -l qos=%s -l feature=rhel7 -v '\
+                            %(pbs_fname, queue, q, name, ppn, qos)
             else:
-                base_sub_cmd = 'qsub %s -A %s -N %s -l nodes=1:ppn=%d -l qos=%s -v '\
-                            %(pbs_fname, queue, name, ppn, qos)
+                base_sub_cmd = 'qsub %s -A %s -q %s -N %s -l nodes=1:ppn=%d -l qos=%s -v '\
+                            %(pbs_fname, queue, q, name, ppn, qos)
         else:
             if rhel7:
-                base_sub_cmd = 'qsub %s -A %s -N %s -l nodes=1:ppn=%d -l feature=rhel7 -v '\
-                            %(pbs_fname, queue, name, ppn)
+                base_sub_cmd = 'qsub %s -A %s -q %s -N %s -l nodes=1:ppn=%d -l feature=rhel7 -v '\
+                            %(pbs_fname, queue, q, name, ppn)
             else:
-                base_sub_cmd = 'qsub %s -A %s -N %s -l nodes=1:ppn=%d -v '\
-                            %(pbs_fname, queue, name, ppn)
+                base_sub_cmd = 'qsub %s -A %s -q %s -N %s -l nodes=1:ppn=%d -v '\
+                            %(pbs_fname, queue, q, name, ppn)
 
     if workdir is None:
         workdir = os.getcwd()
@@ -852,7 +863,7 @@ def sub_jobs(njobs, name, pyscript, pbs_fname, queue='open',\
     cmd = ''
     jobids = []
 
-    for i in range(njobs):
+    for i in xrange(njobs):
 
         # cmd_ = 'jobid=%d,workdir=%s,njobs=%d,pyscript=%s' %(i,workdir,njobs,pyscript)
         cmd_ = 'jobid=%d,workdir=%s,njobs=%d,pyscript=%s,extra_args="%s"' %(i,workdir,njobs,pyscript,extra_args)
@@ -981,9 +992,8 @@ def main(args):
 
     logging.info("Wrote pid: %d" %(os.getpid()))
 
-    to = ['delauj2@gmail.com', 'aaron.tohu@gmail.com',
-            'g3raman@psu.edu', 'jak51@psu.edu']
-    subject = 'BATML ' + args.GWname
+    to = ['gzr5209@psu.edu','delauj2@gmail.com', 'aaron.tohu@gmail.com','jak51@psu.edu']
+    subject = ' g3 BATML ' + args.GWname
     body = "Got data and starting analysis"
     try:
         send_email(subject, body, to)
@@ -1109,21 +1119,21 @@ def main(args):
             if args.rhel7:
                 sub_jobs(1, 'BKG_'+args.GWname, args.BKGpyscript,\
                         args.pbs_rhel7_fname, queue=args.queue, ppn=4,\
-                        extra_args=extra_args, qos=None, rhel7=args.rhel7)
+                        extra_args=extra_args, qos=None, rhel7=args.rhel7,q=args.q)
             else:
                 sub_jobs(1, 'BKG_'+args.GWname, args.BKGpyscript,\
                         args.pbs_fname, queue=args.queue, ppn=4,\
-                        extra_args=extra_args, qos=None, rhel7=args.rhel7)
+                        extra_args=extra_args, qos=None, rhel7=args.rhel7,q=args.q)
         else:
             if args.rhel7:
                 sub_jobs(1, 'BKG_'+args.GWname, args.BKGpyscript,\
                         args.pbs_rhel7_fname, queue=args.queue,\
-                        ppn=4, qos=None, rhel7=args.rhel7)
+                        ppn=4, qos=None, rhel7=args.rhel7,q=args.q)
             else:
                 sub_jobs(1, 'BKG_'+args.GWname, args.BKGpyscript,\
                         args.pbs_fname,\
-                        queue='open',#args.queue,\
-                        ppn=4, qos=None, rhel7=args.rhel7)
+                        queue=args.queue,\
+                        ppn=4, qos=None, rhel7=args.rhel7,q=args.q)
         logging.info("Job submitted")
         # except Exception as E:
         #     logging.warn(E)
@@ -1162,11 +1172,11 @@ def main(args):
         if args.rhel7:
             sub_jobs(Nratejobs, 'RATES_'+args.GWname, args.RATEpyscript,\
                         args.pbs_rhel7_fname, queue=args.queue, qos=args.qos,\
-                        extra_args=extra_args, rhel7=args.rhel7)
+                        extra_args=extra_args, rhel7=args.rhel7,q=args.q)
         else:
             sub_jobs(Nratejobs, 'RATES_'+args.GWname, args.RATEpyscript,\
                         args.pbs_fname, queue=args.queue, qos=args.qos,\
-                        extra_args=extra_args, rhel7=args.rhel7)
+                        extra_args=extra_args, rhel7=args.rhel7,q=args.q)
         logging.info("Jobs submitted")
         # except Exception as E:
         #     logging.warn(E)
@@ -1315,17 +1325,17 @@ def main(args):
         if args.rhel7:
             sub_jobs(Njobs_in, 'LLHin_'+args.GWname, args.LLHINpyscript,\
                         args.pbs_rhel7_fname, queue=args.queue, qos=args.qos,\
-                        extra_args=extra_args, rhel7=args.rhel7)
+                        extra_args=extra_args, rhel7=args.rhel7,q=args.q)
             logging.info("Submitting %d out of FoV Jobs now"%(Njobs_out))
             sub_jobs(Njobs_out, 'LLHo_'+args.GWname, args.LLHOUTpyscript,\
-                        args.pbs_rhel7_fname, queue=args.queue, qos=args.qos, rhel7=args.rhel7)
+                        args.pbs_rhel7_fname, queue=args.queue, qos=args.qos, rhel7=args.rhel7,q=args.q)
         else:
             sub_jobs(Njobs_in, 'LLHin_'+args.GWname, args.LLHINpyscript,\
                         args.pbs_fname, queue=args.queue, qos=args.qos,\
-                        extra_args=extra_args, rhel7=args.rhel7)
+                        extra_args=extra_args, rhel7=args.rhel7,q=args.q)
             logging.info("Submitting %d out of FoV Jobs now"%(Njobs_out))
             sub_jobs(Njobs_out, 'LLHo_'+args.GWname, args.LLHOUTpyscript,\
-                        args.pbs_fname, queue=args.queue, qos=args.qos, rhel7=args.rhel7)
+                        args.pbs_fname, queue=args.queue, qos=args.qos, rhel7=args.rhel7,q=args.q)
         logging.info("Jobs submitted, now going to monitor progress")
 
 
@@ -1379,7 +1389,7 @@ def main(args):
                     logging.error(E)
                     try:
                         res_in_tab = get_merged_csv_df(res_in_fnames)
-                        # res_peak_tab = get_merged_csv_df(res_peak_fnames)
+                        res_peak_tab = get_merged_csv_df(res_peak_fnames)
                         logging.info("Got merged in results without RA Decs")
                     except Exception as E:
                         logging.error(E)
@@ -1468,6 +1478,16 @@ def main(args):
             break
         time.sleep(30.0)
         dt = time.time() - t_0
+#Added on 4th Sept, 2022 from jjd repo
+
+    dlogl_peak, dlogl_out = get_dlogl_peak_out(res_peak_maxSqTime_tab, res_out_tab)
+
+    body = "DeltaLLH_peak = %.3f \nDeltaLLH_out = %.3f" %(dlogl_peak, dlogl_out)
+    try:
+        send_email(subject, body, to)
+    except Exception as E:
+        logging.error(E)
+        logging.error("Trouble sending email")
 
 
     # logging.info("Saving full result table to: ")

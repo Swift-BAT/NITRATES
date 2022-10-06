@@ -1,0 +1,49 @@
+2022-01-25 17:47:07,328-INFO- Wrote pid: 15959
+2022-01-25 17:47:08,967-WARNING- problem reading skymap
+2022-01-25 17:47:08,967-ERROR- list index out of range
+2022-01-25 17:47:08,968-ERROR- Traceback (most recent call last):
+  File "do_manage2_open.py", line 1012, in main
+    sky_map = hp.read_map(sky_map_fnames[0], field=(0,), nest=True)
+IndexError: list index out of range
+
+2022-01-25 17:47:08,968-INFO- Connecting to DB
+2022-01-25 17:47:08,969-WARNING- problem getting files tab from DB
+2022-01-25 17:47:08,969-ERROR- database parameter must be string or APSW Connection object
+2022-01-25 17:47:08,971-ERROR- Traceback (most recent call last):
+  File "do_manage2_open.py", line 1030, in main
+    conn = get_conn(db_fname)
+  File "/storage/work/g/gzr5209/BatML_code_work/NITRATES/sqlite_funcs.py", line 473, in get_conn
+    conn = sqlite3.connect(db_fname, timeout=timeout)
+ValueError: database parameter must be string or APSW Connection object
+
+2022-01-25 17:47:08,972-WARNING- Trouble openning attitude file
+2022-01-25 17:47:08,972-ERROR- [Errno 2] No such file or directory: 'attitude.fits'
+2022-01-25 17:47:08,985-ERROR- Traceback (most recent call last):
+  File "do_manage2_open.py", line 1047, in main
+    attfile = Table.read(attfname)
+  File "/storage/home/gzr5209/.conda/envs/py27new/lib/python2.7/site-packages/astropy/table/table.py", line 2525, in read
+    out = io_registry.read(cls, *args, **kwargs)
+  File "/storage/home/gzr5209/.conda/envs/py27new/lib/python2.7/site-packages/astropy/io/registry.py", line 516, in read
+    fileobj = ctx.__enter__()
+  File "/storage/home/gzr5209/.conda/envs/py27new/lib/python2.7/contextlib.py", line 17, in __enter__
+    return self.gen.next()
+  File "/storage/home/gzr5209/.conda/envs/py27new/lib/python2.7/site-packages/astropy/utils/data.py", line 206, in get_readable_fileobj
+    fileobj = open(name_or_obj, 'rb')
+IOError: [Errno 2] No such file or directory: 'attitude.fits'
+
+2022-01-25 17:47:08,986-WARNING- Trouble openning GTI file
+2022-01-25 17:47:08,986-ERROR- [Errno 2] No such file or directory: 'filter_evdata.fits'
+2022-01-25 17:47:08,986-ERROR- Traceback (most recent call last):
+  File "do_manage2_open.py", line 1055, in main
+    GTI_pnt = Table.read(evfname, hdu='GTI_POINTING')
+  File "/storage/home/gzr5209/.conda/envs/py27new/lib/python2.7/site-packages/astropy/table/table.py", line 2525, in read
+    out = io_registry.read(cls, *args, **kwargs)
+  File "/storage/home/gzr5209/.conda/envs/py27new/lib/python2.7/site-packages/astropy/io/registry.py", line 516, in read
+    fileobj = ctx.__enter__()
+  File "/storage/home/gzr5209/.conda/envs/py27new/lib/python2.7/contextlib.py", line 17, in __enter__
+    return self.gen.next()
+  File "/storage/home/gzr5209/.conda/envs/py27new/lib/python2.7/site-packages/astropy/utils/data.py", line 206, in get_readable_fileobj
+    fileobj = open(name_or_obj, 'rb')
+IOError: [Errno 2] No such file or directory: 'filter_evdata.fits'
+
+2022-01-25 17:47:08,987-WARNING- Trouble reading good pix file

@@ -21,7 +21,7 @@ def do_ray_trace(out_fname, att_fname, ra, dec, time, detmask, infile):
 def do_ray_trace_ra_dec_list(out_fname, att_fname, ras, decs, time, detmask, infile):
 
     ftool = "batmaskwtimg"
-    for i in range(len(ras)):
+    for i in xrange(len(ras)):
         outf = out_fname + '_%.2f_%.2f.img' %(ras[i], decs[i])
         arg_list = [outf, att_fname, str(ras[i]), str(decs[i])]
         arg_list += ["time=%.2f" %(time), "rebalance=NO",
@@ -37,7 +37,7 @@ def do_ray_trace_ra_dec_list(out_fname, att_fname, ras, decs, time, detmask, inf
 def do_ray_trace_imxy_list(out_fname, att_fname, imxs, imys, detmask, infile):
 
     ftool = "batmaskwtimg"
-    for i in range(len(imxs)):
+    for i in xrange(len(imxs)):
         outf = out_fname + '_%.4f_%.4f.img' %(imxs[i], imys[i])
         arg_list = [outf, att_fname, str(imxs[i]), str(imys[i])]
         arg_list += ["outtype=NONZERO", "detmask="+detmask,
@@ -49,7 +49,7 @@ def do_ray_trace_imxy_list(out_fname, att_fname, imxs, imys, detmask, infile):
 def do_footprint_imxy_list(out_fname, att_fname, imxs, imys, time, detmask, infile):
 
     ftool = "batmaskwtimg"
-    for i in range(len(imxs)):
+    for i in xrange(len(imxs)):
         outf = out_fname + '_%.5f_%.5f.img' %(imxs[i], imys[i])
         arg_list = [outf, att_fname, str(imxs[i]), str(imys[i])]
         arg_list += ["time=%.2f" %(time), "rebalance=NO",
@@ -68,7 +68,7 @@ def do_ray_trace_imxy_tab(out_fname, att_fname, imxs, imys, detmask, infile, inc
     outf = out_fname + '_%.5f_%.5f_%.5f_%.5f_.img'\
             %(np.min(imxs), np.min(imys), np.max(imxs), np.max(imys))
     if os.path.isfile(outf):
-        print("already made")
+        print "already made"
         return
     arg_list = [outf, att_fname, "0.0", "0.0"]
     arg_list += ["rebalance=NO",
@@ -85,9 +85,9 @@ def mk_imxy_tab(imxs, imys, fname):
     tab = Table()
     tab['IMX'] = grid_x.ravel()
     tab['IMY'] = grid_y.ravel()
-    names = np.array(['%.5f %.5f' %(tab['IMX'][i], tab['IMY'][i]) for i in range(len(tab))])
+    names = np.array(['%.5f %.5f' %(tab['IMX'][i], tab['IMY'][i]) for i in xrange(len(tab))])
     tab['NAME'] = names
-    print(len(tab), " positions to do")
+    print len(tab), " positions to do"
     tab.write(fname, overwrite=True)
 
 
@@ -211,15 +211,15 @@ def main(args):
 
     imx_ax = np.linspace(-1.8, 1.8, 40*36+1)
     imy_ax = np.linspace(-1.0, 1.0, 40*20+1)
-    print(imx_ax)
-    print(imy_ax)
+    print imx_ax
+    print imy_ax
 
     imx_grid, imy_grid = np.meshgrid(imx_ax, imy_ax, indexing='ij')
     imxs = imx_grid.ravel()
     imys = imy_grid.ravel()
     Npnts = len(imxs)
 
-    print(Npnts, " total points to make")
+    print Npnts, " total points to make"
 
     if args.job_id >= 0:
         Nper_job = 1 + Npnts/args.Njobs
@@ -229,7 +229,7 @@ def main(args):
         imys = imys[i0:i1]
 
     Npnts = len(imxs)
-    print(Npnts, " points to do in this job")
+    print Npnts, " points to do in this job"
 
     if not os.path.exists(args.rtdir):
         os.makedirs(args.rtdir)
@@ -237,7 +237,7 @@ def main(args):
     out_fname = os.path.join(args.rtdir, 'footprint')
     do_ray_trace_imxy_list(out_fname, "NONE", imxs, imys, "NONE", args.infile)
 
-    print("Took %.2f seconds, %.2f minutes to do everything" %(time.time()-t_0, (time.time()-t_0)/60.))
+    print "Took %.2f seconds, %.2f minutes to do everything" %(time.time()-t_0, (time.time()-t_0)/60.)
 
 if __name__ == '__main__':
 

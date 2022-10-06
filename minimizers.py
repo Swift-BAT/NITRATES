@@ -1,13 +1,13 @@
 import numpy as np
 import abc
 from scipy import optimize
-import six
 
-@six.add_metaclass(abc.ABCMeta)
 class NLLH_Minimizer(object):
-    #, metaclass=abc.ABCMeta
 
     # should remember to put in support for several seeds
+
+    __metaclass__ = abc.ABCMeta
+
 
     def __init__(self, minimizer_type):
 
@@ -148,7 +148,7 @@ class NLLH_Minimizer(object):
         elif trans_type == 'lognorm':
             return self.lognorm_param(x, pname)
         else:
-            print(("Bad trans type:", trans_type))
+            print("Bad trans type:", trans_type)
             return x
 
     def untrans_param(self, x, pname):
@@ -163,7 +163,7 @@ class NLLH_Minimizer(object):
         elif trans_type == 'lognorm':
             return self.unlognorm_param(x, pname)
         else:
-            print(("Bad trans type:", trans_type))
+            print("Bad trans type:", trans_type)
             return x
 
     def trans_params(self, x):
@@ -269,7 +269,7 @@ class NLLH_DualAnnealingMin(NLLH_Minimizer):
         bounds = optimize.Bounds(np.array(lowers), np.array(uppers))
 
         bounds = np.array([lowers, uppers]).T
-        print(("bounds shape: ", bounds.shape))
+        print("bounds shape: ", bounds.shape)
         print("bounds: ")
         print(bounds)
 
@@ -550,7 +550,7 @@ def imxy_grid_miner(miner, imx0, imy0, imx1, imy1, dimxy=.002):
 
     # print len(imxs), " grid points to minimize at"
 
-    for i in range(len(imxs)):
+    for i in xrange(len(imxs)):
 
         miner.set_fixed_params(['Signal_imx', 'Signal_imy'],\
                                values=[imxs[i], imys[i]])
@@ -572,12 +572,12 @@ def imxy_grid_miner_wimjacob(miner, imx0, imy0, imx1, imy1,\
     param_list = []
     nllhs = []
 
-    print((len(imxs), " grid points to minimize at"))
+    print(len(imxs), " grid points to minimize at")
     x0s = [miner.get_default_x0()]
 
 
 
-    for i in range(len(imxs)):
+    for i in xrange(len(imxs)):
 
         miner.set_fixed_params(['Signal_imx', 'Signal_imy'],\
                                values=[imxs[i], imys[i]])

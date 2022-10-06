@@ -1,6 +1,10 @@
 import os
 
-NITRATES_RESP_DIR="/Users/tparsota/Documents/BAT_SCRIPTS/NITRATES_BAT_RSP_FILES/" # env variable can be used or this can be set
+#NITRATES_RESP_DIR='/gpfs/scratch/jjd330/bat_data/'
+NITRATES_RESP_DIR='/gpfs/group/jak51/default/responses/'
+
+
+ # env variable can be used or this can be set
 if NITRATES_RESP_DIR is None:
     NITRATES_RESP_DIR=os.getenv('NITRATES_RESP_DIR')
 if NITRATES_RESP_DIR is None:
@@ -17,23 +21,49 @@ COMP_FLOR_RESP_DNAME = os.path.join(NITRATES_RESP_DIR,'comp_flor_resps')
 # Directory with Flor response only
 HP_FLOR_RESP_DNAME = os.path.join(NITRATES_RESP_DIR,'hp_flor_resps')
 # Directory with the element cross section data files
-ELEMENT_CROSS_SECTION_DNAME = os.path.join(NITRATES_RESP_DIR,'element_cross_sections')
+#ELEMENT_CROSS_SECTION_DNAME = os.path.join(NITRATES_RESP_DIR,'element_cross_sections')
+ELEMENT_CROSS_SECTION_DNAME='/storage/home/gzr5209/work/BatML_code_work/NITRATES/element_cross_sections/'
+
 
 # DPI with st per det exposed to sky
-solid_angle_dpi_fname = os.path.join(NITRATES_RESP_DIR,'solid_angle_dpi.npy')
+#solid_angle_dpi_fname = os.path.join(NITRATES_RESP_DIR,'solid_angle_dpi.npy')
+solid_angle_dpi_fname='/storage/home/gzr5209/bat-data/solid_angle_dpi.npy'
+
 # Table of bright known sources from the Trans Monitor
-bright_source_table_fname = os.path.join(NITRATES_RESP_DIR,'bright_src_cat.fits')
+#bright_source_table_fname = os.path.join(NITRATES_RESP_DIR,'bright_src_cat.fits')
+bright_source_table_fname='/storage/home/gzr5209/bat-data/bright_src_cat.fits'
 
 EBINS0 = [15., 24., 35., 48., 64., 84., 120., 171.5, 245.]
 EBINS1 = [24., 35., 48., 64., 84., 120., 171.5, 245., 350.]
 
 
+#uncommenting old stuff part on Jan 21st 2021---
+#-------------------
+
+#rt_dir='/storage/home/gzr5209/scratch/ray_traces_detapp_npy/'
+#rt_dir='/gpfs/scratch/jjd330/bat_data/ray_traces_detapp_npy/'
+
+rt_dir='/gpfs/group/jak51/default/responses/ray_traces_detapp_npy'
+
+#fp_dir = '/gpfs/scratch/jjd330/bat_data/footprints_npy/'
+
+# #drm_dir='/gpfs/scratch/jjd330/bat_data/drms/'
+drm_dir='/storage/home/gzr5209/work/drms/'
+# drm_quad_dir='/gpfs/scratch/jjd330/bat_data/drms4quads/'
+# solid_angle_dpi_fname='/storage/work/jjd330/local/bat_data/solid_angle_dpi.npy'
+# bright_source_table_fname='/storage/work/jjd330/local/bat_data/BatML/bright_src_cat.fits'
+
+#---------------------
+
 ###########################
 ###   Old Stuff ###
 ###########################
 
-bat_ml_dir='/storage/work/jjd330/local/bat_data/BatML/'
-ftool_wrap='/storage/work/jjd330/local/bat_data/BatML/HeasoftTools/run_ftool.sh'
+#bat_ml_dir='/storage/work/jjd330/local/bat_data/BatML/'
+#ftool_wrap='/storage/work/jjd330/local/bat_data/BatML/HeasoftTools/run_ftool.sh'
+
+bat_ml_dir='/storage/home/gzr5209/work/BatML_code_work/NITRATES/'
+ftool_wrap='/storage/home/gzr5209/work/BatML_code_work/NITRATES/HeasoftTools/run_ftool.sh'
 
 # rt_dir='/gpfs/scratch/jjd330/bat_data/ray_traces_detapp_npy/'
 # fp_dir = '/gpfs/scratch/jjd330/bat_data/footprints_npy/'
@@ -43,10 +73,23 @@ ftool_wrap='/storage/work/jjd330/local/bat_data/BatML/HeasoftTools/run_ftool.sh'
 # solid_angle_dpi_fname='/storage/work/jjd330/local/bat_data/solid_angle_dpi.npy'
 # bright_source_table_fname='/storage/work/jjd330/local/bat_data/BatML/bright_src_cat.fits'
 
-HEADAS="/storage/work/jjd330/heasoft/heasoft-6.21/x86_64-unknown-linux-gnu-libc2.12"
-HEADAS_INIT="/storage/work/jjd330/heasoft/heasoft-6.21/x86_64-unknown-linux-gnu-libc2.12/headas-init.sh"
-CALDB="/storage/work/jjd330/caldb_files"
-CALDB_INIT="/storage/work/jjd330/caldb_files/software/tools/caldbinit.sh"
+#HEADAS="/storage/work/jjd330/heasoft/heasoft-6.21/x86_64-unknown-linux-gnu-libc2.12"
+#HEADAS_INIT="/storage/work/jjd330/heasoft/heasoft-6.21/x86_64-unknown-linux-gnu-libc2.12/headas-init.sh"
+#CALDB="/storage/work/jjd330/caldb_files"
+#CALDB_INIT="/storage/work/jjd330/caldb_files/software/tools/caldbinit.sh"
+
+
+HEADAS="/storage/home/gzr5209/work/Softwares/heasoft/heasoft-6.28/x86_64-pc-linux-gnu-libc2.17"
+HEADAS_INIT="/storage/home/gzr5209/work/Softwares/heasoft/heasoft-6.28/x86_64-pc-linux-gnu-libc2.17/headas-init.sh"
+CALDB="/storage/home/gzr5209/work/Softwares/CALDB"
+CALDB_INIT="/storage/home/gzr5209/work/Softwares/CALDB/software/tools/caldbinit.sh"
+
+
+#HEADAS="/storage/work/jjd330/heasoft/heasoft-6.21/x86_64-unknown-linux-gnu-libc2.12"
+#export HEADAS
+#. $HEADAS/headas-init.sh
+
+
 
 # EBINS0 = [14., 24., 36.3, 55.4, 80.0, 120.7]
 # EBINS1 = [24., 36.3, 55.4, 80.0, 120.7, 194.9]

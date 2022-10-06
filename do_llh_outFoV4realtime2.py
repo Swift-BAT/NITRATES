@@ -17,7 +17,7 @@ from sqlite_funcs import get_conn, write_result, write_results,\
 from dbread_funcs import get_rate_fits_tab, guess_dbfname,\
                     get_seeds_tab, get_info_tab, get_files_tab,\
                     get_square_tab, get_full_sqlite_table_as_df
-from config import EBINS0, EBINS1, solid_angle_dpi_fname, fp_dir, rt_dir
+from config import EBINS0, EBINS1, solid_angle_dpi_fname, rt_dir
 from flux_models import Plaw_Flux, Cutoff_Plaw_Flux
 from minimizers import NLLH_ScipyMinimize_Wjacob, imxy_grid_miner, NLLH_ScipyMinimize
 # from drm_funcs import DRMs
@@ -92,7 +92,7 @@ def parse_bkg_csv(bkg_fname, solid_angle_dpi, ebins0, ebins1, bl_dmask, rt_dir):
     for name in col_names:
         if '_imx' in name:
             PSnames.append(name.split('_')[0])
-    print(PSnames)
+    print PSnames
     Nsrcs = len(PSnames)
     if Nsrcs > 0:
         bkg_name = 'Background_'
@@ -166,10 +166,12 @@ def min_at_Epeaks_gammas(sig_miner, sig_mod, Epeaks, gammas):
 
 
 
-def analysis_at_theta_phi(theta, phi, rt_obj, bkg_bf_params_list, bkg_mod,\
+def analysis_at_theta_phi(theta, phi, rt_dir, bkg_bf_params_list, bkg_mod,\
                         flux_mod, ev_data, ebins0, ebins1,\
                         tbins0, tbins1, timeIDs):
-
+    rt_obj = RayTraces(rt_dir) 
+    
+    #g3 added on Sept 1st 2022 and changed above from rt_obj to rt_dir
     bl_dmask = bkg_mod.bl_dmask
 
     # sig_mod = Source_Model_OutFoV(flux_mod, [ebins0,ebins1], bl_dmask, use_deriv=True)
@@ -177,7 +179,7 @@ def analysis_at_theta_phi(theta, phi, rt_obj, bkg_bf_params_list, bkg_mod,\
                                     rt_obj, use_deriv=True)
     # sig_mod.flor_resp_dname = '/gpfs/scratch/jjd330/bat_data/flor_resps_ebins/'
     sig_mod.set_theta_phi(theta, phi)
-    print("theta, phi set")
+    print "theta, phi set"
 
     comp_mod = CompoundModel([bkg_mod, sig_mod])
     sig_miner = NLLH_ScipyMinimize_Wjacob('')
@@ -192,16 +194,16 @@ def analysis_at_theta_phi(theta, phi, rt_obj, bkg_bf_params_list, bkg_mod,\
     pars_ = {}
     pars_['Signal_theta'] = theta
     pars_['Signal_phi'] = phi
-    for pname,val in bkg_bf_params_list[0].items():
+    for pname,val in bkg_bf_params_list[0].iteritems():
         # pars_['Background_'+pname] = val
         pars_[bkg_name+'_'+pname] = val
-    for pname,val in flux_params.items():
+    for pname,val in flux_params.iteritems():
         pars_['Signal_'+pname] = val
 
     sig_miner.set_llh(sig_llh_obj)
 
-    fixed_pnames = list(pars_.keys())
-    fixed_vals = list(pars_.values())
+    fixed_pnames = pars_.keys()
+    fixed_vals = pars_.values()
     trans = [None for i in range(len(fixed_pnames))]
     sig_miner.set_trans(fixed_pnames, trans)
     sig_miner.set_fixed_params(fixed_pnames, values=fixed_vals)
@@ -232,11 +234,11 @@ def analysis_at_theta_phi(theta, phi, rt_obj, bkg_bf_params_list, bkg_mod,\
         sig_llh_obj.set_time(tbins0[i], tbins1[i])
 
         parss_ = {}
-        for pname,val in bkg_bf_params_list[i].items():
+        for pname,val in bkg_bf_params_list[i].iteritems():
             # pars_['Background_'+pname] = val
             parss_[bkg_name+'_'+pname] = val
             pars_[bkg_name+'_'+pname] = val
-        sig_miner.set_fixed_params(list(parss_.keys()), values=list(parss_.values()))
+        sig_miner.set_fixed_params(parss_.keys(), values=parss_.values())
 
 
         res_dict = {'theta':theta, 'phi':phi,
@@ -264,6 +266,7 @@ def analysis_at_theta_phi(theta, phi, rt_obj, bkg_bf_params_list, bkg_mod,\
 
         res_dfs.append(pd.DataFrame(res_dict))
         logging.debug("done with %d of %d tbins"%(i+1,ntbins))
+    del sig_mod
     return pd.concat(res_dfs, ignore_index=True)
 
 
@@ -296,7 +299,7 @@ def do_analysis(seed_tab, ev_data, flux_mod, rt_dir,\
             ps_mod.has_deriv = False
         bkg_mod = CompoundModel(bkg_mod_list)
 
-
+    gc.collect()
     hp_ind_grps = seed_tab.groupby('hp_ind')
 
     for hp_ind, df in hp_ind_grps:
@@ -325,10 +328,11 @@ def do_analysis(seed_tab, ev_data, flux_mod, rt_dir,\
             bkg_params = {pname:bkg_row[pname] for pname in\
                         bkg_mod.param_names}
             bkg_params_list.append(bkg_params)
+            gc.collect()
 
 
 
-        res_df = analysis_at_theta_phi(theta, phi, rt_obj,\
+        res_df = analysis_at_theta_phi(theta, phi, rt_dir,\
                                 bkg_params_list, bkg_mod,\
                                 flux_mod, ev_data, ebins0, ebins1,\
                                 t0s, t1s, timeIDs)

@@ -26,7 +26,7 @@ def get_ebin_ind_edges(drm, ebins0, ebins1):
     drm_ebins1 = drm[2].data['E_MAX']
     ebin_ind_edges = [(np.argmin(np.abs(drm_ebins0 - ebins0[i])),
                        np.argmin(np.abs(drm_ebins1 - ebins1[i])))
-                     for i in range(len(ebins0))]
+                     for i in xrange(len(ebins0))]
 
     return ebin_ind_edges
 
@@ -128,7 +128,7 @@ def get_cnts_intp_obj(ind_ax, drm, ebin_ind_edges, abs_cor, E0=50.0, normed=True
     nebins = len(ebin_ind_edges)
     cnt_ebins_ind_mat = np.zeros((len(ind_ax),nebins))
 
-    for i in range(len(ind_ax)):
+    for i in xrange(len(ind_ax)):
         if normed:
             cnt_ebins_ind_mat[i] =\
                     get_cnt_ebins_normed(ind_ax[i],\
@@ -140,7 +140,7 @@ def get_cnts_intp_obj(ind_ax, drm, ebin_ind_edges, abs_cor, E0=50.0, normed=True
 
     if np.any(np.isnan(cnt_ebins_ind_mat)):
         print("Bad cnt_ebins_ind_mat")
-        print((np.sum(np.isnan(cnt_ebins_ind_mat))))
+        print(np.sum(np.isnan(cnt_ebins_ind_mat)))
 
     if normed:
         intp_obj = cnts_norm_intp(cnt_ebins_ind_mat, ind_ax)

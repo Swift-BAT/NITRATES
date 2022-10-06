@@ -1,7 +1,7 @@
 import logging, traceback, argparse
 import requests
-import urllib.request, urllib.error, urllib.parse
-import urllib.request, urllib.parse, urllib.error
+import urllib2
+import urllib
 from bs4 import BeautifulSoup
 import os
 from astropy.io import fits
@@ -9,7 +9,10 @@ from astropy.time import Time
 import numpy as np
 import sys
 import pandas as pd
-sys.path.append("/storage/work/jjd330/local/bat_data/BatML/data_scraping/")
+
+#sys.path.append("/storage/work/jjd330/local/bat_data/BatML/data_scraping/")
+sys.path.append("/storage/home/gzr5209/work/BatML_code_work/NITRATES/data_scraping")
+
 
 from db_ql_funcs import get_conn, get_qlevent_db_tab, write_new_obsid_line,\
                     update_obsid_line, get_db_tab, write_event_files2db
@@ -65,7 +68,7 @@ def get_obsid_dict(url):
             f0s = f0[0].split('.')
             obsid = f0s[0][2:]
             ver = int(f0s[1])
-            if obsid in list(obsid_dict.keys()):
+            if obsid in obsid_dict.keys():
                 if ver <= obsid_dict[obsid]['ver']:
                     continue
             obsid_dict[obsid] = {}
@@ -76,7 +79,7 @@ def get_obsid_dict(url):
 
 def get_bat_files_from_list_url(url, aux=False):
 
-    data = urllib.request.urlopen(url).read()
+    data = urllib2.urlopen(url).read()
     data = data.split("\n")
     bat_files = []
     aux_files = []
@@ -127,12 +130,12 @@ def get_urls2download(obsid_url):
 def download_file(url, fname):
 
     try:
-        urllib.request.urlretrieve(url, fname)
+        urllib.urlretrieve(url, fname)
     except Exception as E:
         logging.error(E)
         try:
             logging.info("Let's try again")
-            urllib.request.urlretrieve(url, fname)
+            urllib.urlretrieve(url, fname)
         except Exception as E:
             logging.error(E)
 
@@ -158,13 +161,15 @@ def cli():
     parser = argparse.ArgumentParser()
     parser.add_argument('--save_dir', type=str,\
             help="Directory to save data to",\
-            default='/storage/work/jjd330/local/bat_data/realtime_workdir/')
+            default='/storage/home/gzr5209/work/realtime_workdir_NITRATES/')
+	    #default='/gpfs/group/jak51/default/gzr5209/realtime_workdir/')
     parser.add_argument('--dbfname', type=str,\
             help="Name of the sqlite database",\
             default=None)
     parser.add_argument('--htmldir', type=str,\
             help="bash script to run analysis",
-            default="/storage/work/j/jjd330/local/bat_data/realtime_workdir/LVC_BAT/")
+            default='/storage/home/gzr5209/work/realtime_workdir_NITRATES/htmls')
+	    #default="/gpfs/group/jak51/default/gzr5209/realtime_workdir/htmls")
     parser.add_argument('--loglevel', type=int,\
             help="loglevel, 10=debug, 20=info",
             default=20)
@@ -249,7 +254,7 @@ def main(args):
                 gti = ev_file[2]
                 # obs_mode = ev_file[1].header['OBS_MODE']
                 Ngtis = len(gti.data['START'])
-                for ii in range(Ngtis):
+                for ii in xrange(Ngtis):
                     obs_dict = {'obsid':obsids[i],'eventURL':ev_url}
                     obs_dict['eventFname'] = fname
                     obs_dict['METstart'] = gti.data['START'][ii]

@@ -1,0 +1,13 @@
+*/20 * * * * . /storage/home/gzr5209/work/BatML_code_work/NITRATES/data_scraping/script_getdata.sh python /storage/home/gzr5209/work/BatML_code_work/NITRATES/data_scraping/get_ql_data.py --dbfname BATQL.db
+/storage/home/gzr5209/work/BatML_code_work/NITRATES/data_scraping/BATQL.db >
+/gpfs/group/jak51/default/gzr5209/realtime_workdir/get_ql_data_output.out 2>&1
+
+#python /storage/home/gzr5209/work/BatML_code_work/NITRATES/data_scraping/get_ql_event_data.py --dbfname BATQL.db
+#/storage/home/gzr5209/work/BatML_code_work/NITRATES/data_scraping/BATQL.db >
+#/gpfs/group/jak51/default/gzr5209/realtime_workdir/get_ql_event_data_output.out 2>&1
+
+#python /storage/home/gzr5209/work/BatML_code_work/NITRATES/data_scraping/get_ql_trig_event_data.py --dbfname BATQL.db
+#/storage/home/gzr5209/work/BatML_code_work/NITRATES/data_scraping/BATQL.db >
+#/gpfs/group/jak51/default/gzr5209/realtime_workdir/get_ql_trig_event_data_output.out 2>&1
+
+
