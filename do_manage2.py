@@ -39,10 +39,10 @@ def cli():
             default=16)
     parser.add_argument('--N_infov_jobs', type=int,\
             help="Number of infov jobs to submit",\
-            default=96)
+            default=260)
     parser.add_argument('--N_outfov_jobs', type=int,\
             help="Number of outfov jobs to submit",\
-            default=24)
+            default=40)
     parser.add_argument('--TSscan', type=float,\
             help="Min TS needed to do a full FoV scan",
             default=6.25)
@@ -1239,6 +1239,7 @@ def main(args):
     else:
         seed_in_tab = mk_in_seed_tab(rate_res, TS_min=args.rateTScut)
     Nmax_jobs = 96
+    Nmax_jobs = args.N_infov_jobs
     if args.queue == 'open':
         Nmax_jobs = 64
     seed_in_tab = assign_in_seeds2jobs(seed_in_tab, Nmax_jobs=Nmax_jobs)
@@ -1259,6 +1260,7 @@ def main(args):
 
     attq = attfile['QPARAM'][np.argmin(np.abs(attfile['TIME'] - trigtime))]
     Nmax_jobs = 24
+    Nmax_jobs = args.N_outfov_jobs
     if args.queue == 'open':
         Nmax_jobs = 16
     seed_out_tab = mk_out_seed_tab(seed_in_tab, good_hp_inds, attq, Nmax_jobs=Nmax_jobs)
