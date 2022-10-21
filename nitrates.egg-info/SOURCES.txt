@@ -148,6 +148,7 @@ nitrates/lib/trans_func.py
 nitrates/lib/wcs_funcs.py
 nitrates/listeners/__init__.py
 nitrates/listeners/get_FRB_emails4cron.py
+nitrates/listeners/get_GECAM_emails4cron.py
 nitrates/listeners/get_LVC_emails4cron.py
 nitrates/listeners/listen4gws.py
 nitrates/listeners/listen4notices.py
