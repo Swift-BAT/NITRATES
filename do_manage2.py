@@ -1295,7 +1295,16 @@ def main(args):
             logging.error("Trouble sending email")
         return
 
+	# directory to put files saying each infov square has started processing 
+    started_in_dname = 'started_infov'
+    if not os.path.exists(started_in_dname):
+        os.mkdir(started_in_dname)
 
+	# directory to put files saying each ofov hp_ind has started processing 
+	started_out_dname = 'started_outfov'
+    if not os.path.exists(started_out_dname):
+        os.mkdir(started_out_dname)
+	
     # if Nsquares > 512:
     #     Njobs = 96
     # elif Nsquares > 128:
