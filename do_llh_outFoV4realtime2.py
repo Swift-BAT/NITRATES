@@ -267,17 +267,19 @@ def analysis_at_theta_phi(theta, phi, rt_obj, bkg_bf_params_list, bkg_mod,\
     return pd.concat(res_dfs, ignore_index=True)
 
 
-def do_analysis(seed_tab, ev_data, flux_mod, rt_dir,\
+def do_analysis(proc_num, seed_tab, ev_data, flux_mod, rt_dir,\
                 ebins0, ebins1, bl_dmask,\
                 trigger_time, work_dir,\
                 bkg_fname):
 
+    started_dname = os.path.join(work_dir,'started_ofov')
 
     nebins = len(ebins0)
 
     solid_ang_dpi = np.load(solid_angle_dpi_fname)
 
-    job_id = np.min(seed_tab['proc_group'])
+    bl_jobid = np.isclose(seed_tab['proc_group'],proc_num)
+    N4jobid = np.sum(bl_jobid)
 
     bkg_miner = NLLH_ScipyMinimize('')
     sig_miner = NLLH_ScipyMinimize_Wjacob('')
@@ -297,7 +299,7 @@ def do_analysis(seed_tab, ev_data, flux_mod, rt_dir,\
         bkg_mod = CompoundModel(bkg_mod_list)
 
 
-    hp_ind_grps = seed_tab.groupby('hp_ind')
+    hp_ind_grps = seed_tab[bl_jobid].groupby('hp_ind')
 
     for hp_ind, df in hp_ind_grps:
 
@@ -308,6 +310,22 @@ def do_analysis(seed_tab, ev_data, flux_mod, rt_dir,\
         dec = np.nanmean(df['dec'])
         logging.info("At theta, phi: %.2f, %.2f"%(theta, phi))
         logging.info("RA, Dec: %.2f, %.2f"%(ra, dec))
+		
+		ident_str = 'hpind_%d' %(hp_ind)
+        fname0 = ident_str+'.txt'
+        fname = os.path.join(started_dname, fname0)
+
+        fnames = os.listdir(started_dname)
+        already_started = False
+        if fname0 in fnames:
+            already_started = True
+        if already_started:
+            logging.info("Already started")
+            continue
+
+        f = open(fname, 'w')
+        f.write('NONE')
+        f.close()
 
 
         t0s = []
@@ -418,15 +436,15 @@ def main(args):
     # sig_llh_obj = LLH_webins(ev_data, ebins0, ebins1, bl_dmask)
 
     seed_tab = pd.read_csv(args.job_fname)
-    if proc_num >= 0:
-        bl = (seed_tab['proc_group']==proc_num)
-    else:
-        bl = np.ones(len(seed_tab), dtype=np.bool)
-    seed_tab = seed_tab[bl]
+#     if proc_num >= 0:
+#         bl = (seed_tab['proc_group']==proc_num)
+#     else:
+#         bl = np.ones(len(seed_tab), dtype=np.bool)
+#     seed_tab = seed_tab[bl]
 
     logging.info("Read in Seed Table, now to do analysis")
 
-    do_analysis(seed_tab, ev_data, flux_mod, rt_dir,\
+    do_analysis(proc_num, seed_tab, ev_data, flux_mod, rt_dir,\
                     ebins0, ebins1, bl_dmask,\
                     trigtime, work_dir, args.bkg_fname)
     # do_analysis(square_tab, rate_res_tab, good_pix['imx'], good_pix['imy'], pl_flux,\
@@ -434,6 +452,20 @@ def main(args):
     #                 bkg_llh_obj, sig_llh_obj,\
     #                 conn, db_fname, trigtime, work_dir,bkg_fits_df)
     conn.close()
+
+    logging.info("Done with all seeds for this proc")
+
+    logging.info("Now checking for other unstarted seeds")
+
+    Njobs = args.Njobs
+
+    for i in range(Njobs):
+        if i == proc_num:
+            continue
+		do_analysis(i, seed_tab, ev_data, flux_mod, rt_dir,\
+						ebins0, ebins1, bl_dmask,\
+						trigtime, work_dir, args.bkg_fname)
+
 
 
 
