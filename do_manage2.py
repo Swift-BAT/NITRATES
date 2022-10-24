@@ -1122,21 +1122,21 @@ def main(args):
             if args.rhel7:
                 sub_jobs(1, 'BKG_'+args.GWname, args.BKGpyscript,\
                         args.pbs_rhel7_fname, queue=args.queue, ppn=4,\
-                        extra_args=extra_args, qos=None, rhel7=args.rhel7)
+                        extra_args=extra_args, qos=None, rhel7=args.rhel7, q=args.q)
             else:
                 sub_jobs(1, 'BKG_'+args.GWname, args.BKGpyscript,\
                         args.pbs_fname, queue=args.queue, ppn=4,\
-                        extra_args=extra_args, qos=None, rhel7=args.rhel7)
+                        extra_args=extra_args, qos=None, rhel7=args.rhel7, q=args.q)
         else:
             if args.rhel7:
                 sub_jobs(1, 'BKG_'+args.GWname, args.BKGpyscript,\
                         args.pbs_rhel7_fname, queue=args.queue,\
-                        ppn=4, qos=None, rhel7=args.rhel7)
+                        ppn=4, qos=None, rhel7=args.rhel7, q=args.q)
             else:
                 sub_jobs(1, 'BKG_'+args.GWname, args.BKGpyscript,\
                         args.pbs_fname,\
-                        queue='open',#args.queue,\
-                        ppn=4, qos=None, rhel7=args.rhel7)
+                        queue=args.queue,\
+                        ppn=4, qos=None, rhel7=args.rhel7, q=args.q)
         logging.info("Job submitted")
         # except Exception as E:
         #     logging.warn(E)
@@ -1175,11 +1175,11 @@ def main(args):
         if args.rhel7:
             sub_jobs(Nratejobs, 'RATES_'+args.GWname, args.RATEpyscript,\
                         args.pbs_rhel7_fname, queue=args.queue, qos=args.qos,\
-                        extra_args=extra_args, rhel7=args.rhel7)
+                        extra_args=extra_args, rhel7=args.rhel7, q=args.q)
         else:
             sub_jobs(Nratejobs, 'RATES_'+args.GWname, args.RATEpyscript,\
                         args.pbs_fname, queue=args.queue, qos=args.qos,\
-                        extra_args=extra_args, rhel7=args.rhel7)
+                        extra_args=extra_args, rhel7=args.rhel7, q=args.q)
         logging.info("Jobs submitted")
         # except Exception as E:
         #     logging.warn(E)
@@ -1339,17 +1339,19 @@ def main(args):
         if args.rhel7:
             sub_jobs(Njobs_in, 'LLHin_'+args.GWname, args.LLHINpyscript,\
                         args.pbs_rhel7_fname, queue=args.queue, qos=args.qos,\
-                        extra_args=extra_args, rhel7=args.rhel7)
+                        extra_args=extra_args, rhel7=args.rhel7, q=args.q)
             logging.info("Submitting %d out of FoV Jobs now"%(Njobs_out))
             sub_jobs(Njobs_out, 'LLHo_'+args.GWname, args.LLHOUTpyscript,\
-                        args.pbs_rhel7_fname, queue=args.queue, qos=args.qos, rhel7=args.rhel7)
+                        args.pbs_rhel7_fname, queue=args.queue, qos=args.qos,\
+					 	rhel7=args.rhel7, q=args.q)
         else:
             sub_jobs(Njobs_in, 'LLHin_'+args.GWname, args.LLHINpyscript,\
                         args.pbs_fname, queue=args.queue, qos=args.qos,\
-                        extra_args=extra_args, rhel7=args.rhel7)
+                        extra_args=extra_args, rhel7=args.rhel7, q=args.q)
             logging.info("Submitting %d out of FoV Jobs now"%(Njobs_out))
             sub_jobs(Njobs_out, 'LLHo_'+args.GWname, args.LLHOUTpyscript,\
-                        args.pbs_fname, queue=args.queue, qos=args.qos, rhel7=args.rhel7)
+                        args.pbs_fname, queue=args.queue, qos=args.qos,\
+					 	rhel7=args.rhel7, q=args.q)
         logging.info("Jobs submitted, now going to monitor progress")
 
 
