@@ -914,19 +914,23 @@ def main(args):
     solid_angle_dpi = np.load(solid_angle_dpi_fname)
 
 
-    PC = fits.open(args.pcfname)[0]
-    pc = PC.data
-    w_t = WCS(PC.header, key='T')
+    try:
+        PC = fits.open(args.pcfname)[0]
+        pc = PC.data
+        w_t = WCS(PC.header, key='T')
 
-    pcs = world2val(w_t, pc, imxs, imys)
-    logging.info("min, max pcs: %.4f, %.4f"%(np.min(pcs),np.max(pcs)))
-    min_pc = max(args.min_pc - 0.25, 0.00499)
-    logging.info("min_pc: %.4f"%(min_pc))
-    logging.info("sum(pcs>min_pc): %d"%(np.sum(pcs>min_pc)))
-    pc_bl = (pcs>min_pc)
-    imxs = imxs[pc_bl]
-    imys = imys[pc_bl]
-
+        pcs = world2val(w_t, pc, imxs, imys)
+        logging.info("min, max pcs: %.4f, %.4f"%(np.min(pcs),np.max(pcs)))
+        min_pc = max(args.min_pc - 0.25, 0.00499)
+        logging.info("min_pc: %.4f"%(min_pc))
+        logging.info("sum(pcs>min_pc): %d"%(np.sum(pcs>min_pc)))
+        pc_bl = (pcs>min_pc)
+        imxs = imxs[pc_bl]
+        imys = imys[pc_bl]
+    except Exception as E:
+        logging.warn("Couldn't use PC img")
+        logging.error(E)
+        logging.error(traceback.format_exc())
     # Should add a thing like this for the out FoV hp_inds
 
     # try:
