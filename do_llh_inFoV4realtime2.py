@@ -588,7 +588,7 @@ def analysis_for_imxy_square(imx0, imx1, imy0, imy1, bkg_bf_params_list,\
 
 
 @profile
-def do_analysis(square_tab, ev_data, flux_mod, rt_dir,\
+def do_analysis(proc_num, square_tab, ev_data, flux_mod, rt_dir,\
                 ebins0, ebins1, bl_dmask,\
                 trigger_time, work_dir,\
                 bkg_fname, keep_all, TS2keep=4.5,\
@@ -617,14 +617,40 @@ def do_analysis(square_tab, ev_data, flux_mod, rt_dir,\
             ps_mod.has_deriv = False
         bkg_mod = CompoundModel(bkg_mod_list)
 
+    bl_jobid = np.isclose(square_tab['proc_group'],proc_num)
+    N4jobid = np.sum(bl_jobid)
 
-    df_sq_grps = square_tab.groupby('squareID')
+    started_dname = os.path.join(work_dir,'started_infov')
+
+    df_sq_grps = square_tab[bl_jobid].groupby('squareID')
 
 
     for squareID, square_df in df_sq_grps:
 
         logging.info("Starting squareID: %d"%(squareID))
 
+        job_id = np.min(square_df['proc_group'])
+
+        logging.info("For proc group: %d"%(job_id))
+
+        ident_str = '%d_%d' %(squareID,job_id)
+
+        fname0 = ident_str+'.txt'
+        fname = os.path.join(started_dname, fname0)
+
+        fnames = os.listdir(started_dname)
+        already_started = False
+        if fname0 in fnames:
+            already_started = True
+        if already_started:
+            logging.info("Already started")
+            continue
+
+        f = open(fname, 'w')
+        f.write('NONE')
+        f.close()
+
+		
         rt_obj = RayTraces(rt_dir, max_nbytes=2e9)
 
         imx0 = np.mean(square_df['imx0'])
@@ -830,14 +856,26 @@ def main(args):
 
     logging.info("Read in Square Seed Table, now to do analysis")
 
-    do_analysis(square_tab, ev_data, flux_mod, rt_dir,\
+    do_analysis(proc_num, square_tab, ev_data, flux_mod, rt_dir,\
                     ebins0, ebins1, bl_dmask,\
                     trigtime, work_dir, args.bkg_fname, args.keep_all,\
                     TS2keep=args.TS2keep, minTS2scan=args.minTS2scan)
-    # do_analysis(square_tab, rate_res_tab, good_pix['imx'], good_pix['imy'], pl_flux,\
-    #                 drm_obj, rt_dir,\
-    #                 bkg_llh_obj, sig_llh_obj,\
-    #                 conn, db_fname, trigtime, work_dir,bkg_fits_df)
+
+    logging.info("Done with all seeds for this proc")
+
+    logging.info("Now checking for other unstarted seeds")
+
+
+    Njobs = args.Njobs
+
+    for i in range(Njobs):
+        if i == proc_num:
+            continue
+
+        do_analysis(i, square_tab, ev_data, flux_mod, rt_dir,\
+                        ebins0, ebins1, bl_dmask,\
+                        trigtime, work_dir, args.bkg_fname, args.keep_all,\
+                        TS2keep=args.TS2keep, minTS2scan=args.minTS2scan)
 
 
 
