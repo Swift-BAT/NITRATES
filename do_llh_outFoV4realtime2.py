@@ -311,7 +311,7 @@ def do_analysis(proc_num, seed_tab, ev_data, flux_mod, rt_dir,\
         logging.info("At theta, phi: %.2f, %.2f"%(theta, phi))
         logging.info("RA, Dec: %.2f, %.2f"%(ra, dec))
 		
-		ident_str = 'hpind_%d' %(hp_ind)
+        ident_str = 'hpind_%d' %(hp_ind)
         fname0 = ident_str+'.txt'
         fname = os.path.join(started_dname, fname0)
 
@@ -462,7 +462,7 @@ def main(args):
     for i in range(Njobs):
         if i == proc_num:
             continue
-		do_analysis(i, seed_tab, ev_data, flux_mod, rt_dir,\
+        do_analysis(i, seed_tab, ev_data, flux_mod, rt_dir,\
 						ebins0, ebins1, bl_dmask,\
 						trigtime, work_dir, args.bkg_fname)
 
