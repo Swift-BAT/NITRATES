@@ -822,35 +822,35 @@ def sub_jobs(njobs, name, pyscript, pbs_fname, queue='open',\
         client = get_ssh_client(server)
         # base_sub_cmd = 'qsub %s -A %s -N %s -v '\
         #             %(args.pbs_fname, args.queue, args.name)
-	if qos is not None:
-		if rhel7:
-			if q is None:
-				base_sub_cmd = 'qsub %s -A %s -N %s -l nodes=1:ppn=%d -l qos=%s -l feature=rhel7 -v '\
+    if qos is not None:
+        if rhel7:
+            if q is None:
+                base_sub_cmd = 'qsub %s -A %s -N %s -l nodes=1:ppn=%d -l qos=%s -l feature=rhel7 -v '\
 							%(pbs_fname, queue, name, ppn, qos)
-			else:
-				base_sub_cmd = 'qsub %s -A %s -q %s -N %s -l nodes=1:ppn=%d -l qos=%s -l feature=rhel7 -v '\
+            else:
+                base_sub_cmd = 'qsub %s -A %s -q %s -N %s -l nodes=1:ppn=%d -l qos=%s -l feature=rhel7 -v '\
 							%(pbs_fname, queue, q, name, ppn, qos)
-		else:
-			if q is None:
-				base_sub_cmd = 'qsub %s -A %s -N %s -l nodes=1:ppn=%d -l qos=%s -v '\
+        else:
+            if q is None:
+                base_sub_cmd = 'qsub %s -A %s -N %s -l nodes=1:ppn=%d -l qos=%s -v '\
 							%(pbs_fname, queue, name, ppn, qos)
-			else:
-				base_sub_cmd = 'qsub %s -A %s -q %s -N %s -l nodes=1:ppn=%d -l qos=%s -v '\
+            else:
+                base_sub_cmd = 'qsub %s -A %s -q %s -N %s -l nodes=1:ppn=%d -l qos=%s -v '\
 							%(pbs_fname, queue, q, name, ppn, qos)					
-	else:
-		if rhel7:
-			if q is None:
-				base_sub_cmd = 'qsub %s -A %s -N %s -l nodes=1:ppn=%d -l feature=rhel7 -v '\
+    else:
+        if rhel7:
+            if q is None:
+                base_sub_cmd = 'qsub %s -A %s -N %s -l nodes=1:ppn=%d -l feature=rhel7 -v '\
 							%(pbs_fname, queue, name, ppn)
-			else:
-				base_sub_cmd = 'qsub %s -A %s -q %s -N %s -l nodes=1:ppn=%d -l feature=rhel7 -v '\
+            else:
+                base_sub_cmd = 'qsub %s -A %s -q %s -N %s -l nodes=1:ppn=%d -l feature=rhel7 -v '\
 							%(pbs_fname, queue, q, name, ppn)
-		else:
-			if q is None:
-				base_sub_cmd = 'qsub %s -A %s -N %s -l nodes=1:ppn=%d -v '\
+        else:
+            if q is None:
+                base_sub_cmd = 'qsub %s -A %s -N %s -l nodes=1:ppn=%d -v '\
 							%(pbs_fname, queue, name, ppn)
-			else:
-				base_sub_cmd = 'qsub %s -A %s -q %s -N %s -l nodes=1:ppn=%d -v '\
+            else:
+                base_sub_cmd = 'qsub %s -A %s -q %s -N %s -l nodes=1:ppn=%d -v '\
 							%(pbs_fname, queue, q, name, ppn)					
 
 
@@ -860,7 +860,7 @@ def sub_jobs(njobs, name, pyscript, pbs_fname, queue='open',\
         extra_args = ""
 
     cmd = ''
-	cmds = []
+    cmds = []
     jobids = []
 
     for i in range(njobs):
@@ -1301,7 +1301,7 @@ def main(args):
         os.mkdir(started_in_dname)
 
 	# directory to put files saying each ofov hp_ind has started processing 
-	started_out_dname = 'started_outfov'
+    started_out_dname = 'started_outfov'
     if not os.path.exists(started_out_dname):
         os.mkdir(started_out_dname)
 	
