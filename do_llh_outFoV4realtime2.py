@@ -17,7 +17,7 @@ from sqlite_funcs import get_conn, write_result, write_results,\
 from dbread_funcs import get_rate_fits_tab, guess_dbfname,\
                     get_seeds_tab, get_info_tab, get_files_tab,\
                     get_square_tab, get_full_sqlite_table_as_df
-from config import EBINS0, EBINS1, solid_angle_dpi_fname, fp_dir, rt_dir
+from config import EBINS0, EBINS1, solid_angle_dpi_fname, rt_dir
 from flux_models import Plaw_Flux, Cutoff_Plaw_Flux
 from minimizers import NLLH_ScipyMinimize_Wjacob, imxy_grid_miner, NLLH_ScipyMinimize
 # from drm_funcs import DRMs
@@ -272,7 +272,7 @@ def do_analysis(proc_num, seed_tab, ev_data, flux_mod, rt_dir,\
                 trigger_time, work_dir,\
                 bkg_fname):
 
-    started_dname = os.path.join(work_dir,'started_ofov')
+    started_dname = os.path.join(work_dir,'started_outfov')
 
     nebins = len(ebins0)
 
