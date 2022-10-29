@@ -654,7 +654,7 @@ def main(args):
     # combine it with the global mask and make a hotpix map to also
     # combine it with
 
-    from config import rt_dir, drm_dir, bat_ml_dir
+    from config import rt_dir, bat_ml_dir
 
     if args.dbfname is None:
         dbfname = guess_dbfname()
@@ -811,6 +811,8 @@ def main(args):
         rt_dir = args.rt_dir
     if args.drm_dir is not None:
         drm_dir = args.drm_dir
+    else:
+        drm_dir = '.'
 
     logging.info("Writing the Files table")
     setup_files_tab(conn, ev_fname, att_fname, dmask_fname,\
