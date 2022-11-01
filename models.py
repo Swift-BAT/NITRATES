@@ -3560,6 +3560,8 @@ class Sig_Bkg_Model(Model):
             
         self.bkg_mod = bkg_mod
         self.sig_mod = sig_mod
+        self.dt = 0.0
+
         
     def set_bkg_params(self, bkg_params):
         
@@ -3577,6 +3579,7 @@ class Sig_Bkg_Model(Model):
         self.sig_rate_dpis_err2 = self.sig_rate_dpis_err**2
         self.sig_rate_dpis = np.ravel(self.sig_rate_dpis)
         self.sig_rate_dpis_err2 = np.ravel(self.sig_rate_dpis_err2)
+        self.set_dur(self.dt)
 
     def set_dur(self, dt):
         
