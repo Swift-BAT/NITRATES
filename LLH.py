@@ -547,7 +547,7 @@ def pois_norm_conv_n42(mu, sig2):
 #     eterm = np.exp((sig2/2.) - mu)
     mu_sig2 = mu - sig2
 #     return (eterm/24.0)*((mu_sig2)**4 + 6*(sig2*mu_sig2**2) + 3*(sig2**2))
-    return ((sig2/2.) - mu)*np.log((1./24.0)*((mu_sig2)**4 + 6*(sig2*mu_sig2**2) + 3*(sig2**2)))
+    return ((sig2/2.) - mu) + np.log((1./24.0)*((mu_sig2)**4 + 6*(sig2*mu_sig2**2) + 3*(sig2**2)))
 
 
 @njit(cache=True, fastmath=True)
