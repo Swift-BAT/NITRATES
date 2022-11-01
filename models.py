@@ -3305,6 +3305,7 @@ class Source_Model_InOutFoV(Model):
 
         self.ones = np.ones(self.ndets)
 
+        self.norm_photon_flux_dict = {}
 
 
 
@@ -3348,9 +3349,13 @@ class Source_Model_InOutFoV(Model):
     def set_flux_params(self, flux_params):
 
         self.flux_params = deepcopy(flux_params)
-        resp_ebins = np.append(self.resp_obj.PhotonEmins, [self.resp_obj.PhotonEmaxs[-1]])
         self.flux_params['A'] = 1.0
-        self.normed_photon_fluxes = self.fmodel.get_photon_fluxes(resp_ebins, self.flux_params)
+        if tuple(self.flux_params.values()) in self.norm_photon_flux_dict.keys():
+            self.normed_photon_fluxes = self.norm_photon_flux_dict[tuple(self.flux_params.values())]
+        else:
+            resp_ebins = np.append(self.resp_obj.PhotonEmins, [self.resp_obj.PhotonEmaxs[-1]])
+            self.normed_photon_fluxes = self.fmodel.get_photon_fluxes(resp_ebins, self.flux_params)
+            self.norm_photon_flux_dict[tuple(self.flux_params.values())] = self.normed_photon_fluxes
 
 #         self.normed_rate_dpis = np.swapaxes(self.resp_obj.get_rate_dpis_from_photon_fluxes(\
 #                                            self.normed_photon_fluxes),0,1)
@@ -3523,3 +3528,105 @@ class Source_Model_InOutFoV(Model):
                 dr_dps.append( self.get_dr_dgamma(params) )
 
         return dr_dps
+
+
+class Sig_Bkg_Model(Model):
+
+    def __init__(self, bl_dmask, sig_mod, bkg_mod,\
+                 use_prior=False, use_deriv=False):
+
+        
+        param_names = ['A']
+
+        param_dict = {}
+        for i, pname in enumerate(param_names):
+            pdict = {}
+            pdict['bounds'] = (0, 1e5)
+            pdict['val'] = 0.1
+            pdict['nuis'] = False
+            pdict['fixed'] = False
+            param_dict[pname] = pdict
+
+        nebins = sig_mod.nebins
+        
+        super(Sig_Bkg_Model, self).__init__('Sig_Bkg', bl_dmask,\
+                                        param_names, param_dict,\
+                                        nebins, has_prior=use_prior)
+
+        
+        if use_deriv:
+            self.has_deriv = True
+
+            
+        self.bkg_mod = bkg_mod
+        self.sig_mod = sig_mod
+        
+    def set_bkg_params(self, bkg_params):
+        
+        self.bkg_params = copy(bkg_params)
+        self.bkg_rate_dpis, self.bkg_rate_dpis_err = self.bkg_mod.get_rate_dpis_err(bkg_params, ret_rate_dpis=True)
+        self.bkg_rate_dpis_err2 = self.bkg_rate_dpis_err**2
+        self.bkg_rate_dpis = np.ravel(self.bkg_rate_dpis)
+        self.bkg_rate_dpis_err2 = np.ravel(self.bkg_rate_dpis_err2)
+        
+    def set_sig_params(self, sig_params):
+        
+        self.sig_params = copy(sig_params)
+        self.sig_params['A'] = 1.0
+        self.sig_rate_dpis, self.sig_rate_dpis_err = self.sig_mod.get_rate_dpis_err(sig_params, ret_rate_dpis=True)
+        self.sig_rate_dpis_err2 = self.sig_rate_dpis_err**2
+        self.sig_rate_dpis = np.ravel(self.sig_rate_dpis)
+        self.sig_rate_dpis_err2 = np.ravel(self.sig_rate_dpis_err2)
+
+    def set_dur(self, dt):
+        
+        self.dt = dt
+        self.bkg_cnt_dpis = (self.bkg_rate_dpis*self.dt)#.astype(np.float32)
+        self.bkg_cnt_dpis_err2 = (self.bkg_rate_dpis_err2*self.dt*self.dt)#.astype(np.float32)
+        self.sig_cnt_dpis = (self.sig_rate_dpis*self.dt)#.astype(np.float32)
+        self.sig_cnt_dpis_err2 = (self.sig_rate_dpis_err2*self.dt*self.dt)#.astype(np.float32)
+        
+    def get_rate_dpis(self, params):
+#         rate_dpis = numba_mult_sig_add_bkg(self.sig_rate_dpis, self.bkg_rate_dpis, params['A'])
+        rate_dpis = params['A']*self.sig_rate_dpis + self.bkg_rate_dpis
+        return rate_dpis
+        
+    def get_rate_dpis_err(self, params, ret_rate_dpis=False):
+        
+        rate_dpis_err = ((params['A']**2)*self.sig_rate_dpis_err2 + self.bkg_rate_dpis_err2)**0.5
+#         rate_dpis_err = numba_mult_add_errs(self.sig_rate_dpis_err, self.bkg_rate_dpis_err, params['A']**2)
+        if ret_rate_dpis:
+            rate_dpis = self.get_rate_dpis(params)
+            return rate_dpis, rate_dpis_err
+        return rate_dpis_err
+
+    def get_cnt_dpis(self, params):
+#         rate_dpis = numba_mult_sig_add_bkg(self.sig_rate_dpis, self.bkg_rate_dpis, params['A'])
+        cnt_dpis = params['A']*self.sig_cnt_dpis + self.bkg_cnt_dpis
+        return cnt_dpis
+        
+    def get_cnt_dpis_err(self, params, ret_cnt_dpis=False):
+        
+        cnt_dpis_err = ((params['A']**2)*self.sig_cnt_dpis_err2 + self.bkg_cnt_dpis_err2)**0.5
+        if ret_cnt_dpis:
+            cnt_dpis = self.get_cnt_dpis(params)
+            return cnt_dpis, cnt_dpis_err
+        return cnt_dpis_err
+
+    def get_cnt_dpis_err2(self, params, ret_cnt_dpis=False):
+        
+        cnt_dpis_err2 = (params['A']**2)*self.sig_cnt_dpis_err2 + self.bkg_cnt_dpis_err2
+        if ret_cnt_dpis:
+            cnt_dpis = self.get_cnt_dpis(params)
+            return cnt_dpis, cnt_dpis_err2
+        return cnt_dpis_err2
+
+    def get_dr_dps(self, params):
+        
+        dr_dps = [self.sig_rate_dpis]
+        return dr_dps
+        
+    def get_dc_dps(self, params):
+        dc_dps = [self.sig_cnt_dpis]
+        return dc_dps
+

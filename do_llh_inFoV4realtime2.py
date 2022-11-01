@@ -9,6 +9,7 @@ import time
 import pandas as pd
 from memory_profiler import profile
 import gc
+from copy import copy, deepcopy
 
 from bkg_rate_estimation import rate_obj_from_sqltab
 from sqlite_funcs import get_conn, write_result, write_results,\
@@ -23,12 +24,12 @@ from flux_models import Plaw_Flux, Cutoff_Plaw_Flux
 from minimizers import NLLH_ScipyMinimize_Wjacob, imxy_grid_miner, NLLH_ScipyMinimize
 # from drm_funcs import DRMs
 from ray_trace_funcs import RayTraces, FootPrints
-from LLH import LLH_webins
+from LLH import LLH_webins2
 # from do_InFoV_scan3 import Swift_Mask_Interactions, Source_Model_InFoV, Bkg_Model_wFlatA,\
 #                             CompoundModel, Point_Source_Model_Binned_Rates,\
 #                             theta_phi2imxy, bldmask2batxys, imxy2theta_phi,\
 #                             get_fixture_struct, LLH_webins
-from models import CompoundModel, Point_Source_Model_Binned_Rates,\
+from models import CompoundModel, Point_Source_Model_Binned_Rates, Sig_Bkg_Model,\
                     Bkg_Model_wFlatA, Source_Model_InFoV, Source_Model_InOutFoV
 from coord_conv_funcs import theta_phi2imxy, imxy2theta_phi
 from gti_funcs import mk_gti_bl, union_gtis
@@ -207,8 +208,9 @@ def find_peaks2scan(res_df, max_dv=12.0, min_sep=1e-2, max_Npeaks=3,\
     return peaks_df
 
 
+
 def do_scan_around_peak(peak_row, bkg_bf_params, bkg_name, sig_miner,\
-                        sig_llh_obj, sig_mod,\
+                        sig_llh_obj, sig_bkg_mod, sig_mod,\
                         imstep=2e-3, dimx=2e-3, dimy=2e-3,\
                         dgamma=0.2, dlog10Ep=0.2,\
                         gam_steps=3, Ep_steps=3):
@@ -218,12 +220,14 @@ def do_scan_around_peak(peak_row, bkg_bf_params, bkg_name, sig_miner,\
 
     t1 = peak_row['time'] + peak_row['dur']
     sig_llh_obj.set_time(peak_row['time'], t1)
+    
+    sig_bkg_mod.set_bkg_params(bkg_bf_params)
 
-    parss = {}
-    for pname,val in bkg_bf_params.items():
-        # pars_['Background_'+pname] = val
-        parss[bkg_name+'_'+pname] = val
-    sig_miner.set_fixed_params(list(parss.keys()), values=list(parss.values()))
+#     parss = {}
+#     for pname,val in bkg_bf_params.items():
+#         # pars_['Background_'+pname] = val
+#         parss[bkg_name+'_'+pname] = val
+#     sig_miner.set_fixed_params(list(parss.keys()), values=list(parss.values()))
 
 
     imxax = np.arange(-dimx, dimx+(imstep/2.), imstep) + peak_row['imx']
@@ -237,7 +241,8 @@ def do_scan_around_peak(peak_row, bkg_bf_params, bkg_name, sig_miner,\
 
     N_impnts = len(imxs)
 
-    logging.info("N_impnts: ", N_impnts)
+    logging.info("N_impnts: ")
+    logging.info(N_impnts)
 
     Epeak_ax = np.logspace(np.log10(peak_row['Epeak']) - dlog10Ep,\
                         np.log10(peak_row['Epeak']) + dlog10Ep, Ep_steps)
@@ -250,7 +255,8 @@ def do_scan_around_peak(peak_row, bkg_bf_params, bkg_name, sig_miner,\
 
     Nspec_pnts = len(Epeaks)
 
-    logging.info("Nspec_pnts: ", Nspec_pnts)
+    logging.info("Nspec_pnts: ")
+    logging.info(Nspec_pnts)
 
     logging.info("Epeak_ax: ")
     logging.info(Epeak_ax)
@@ -263,8 +269,9 @@ def do_scan_around_peak(peak_row, bkg_bf_params, bkg_name, sig_miner,\
 
         print((imxs[ii], imys[ii]))
         print((thetas[ii], phis[ii]))
-        sig_miner.set_fixed_params(['Signal_theta', 'Signal_phi'],\
-                                    values=[thetas[ii],phis[ii]])
+#         sig_miner.set_fixed_params(['Signal_theta', 'Signal_phi'],\
+#                                     values=[thetas[ii],phis[ii]])
+        sig_mod.set_theta_phi(thetas[ii], phis[ii])
 
         res_dict = {}
         res_dict['imx'] = imxs[ii]
@@ -287,6 +294,13 @@ def do_scan_around_peak(peak_row, bkg_bf_params, bkg_name, sig_miner,\
             flux_params['Epeak'] = Epeaks[jj]
             sig_mod.set_flux_params(flux_params)
 
+            sig_pars = copy(flux_params)
+            sig_pars['A'] = 1.0
+            sig_pars['theta'] = thetas[ii]
+            sig_pars['phi'] = phis[ii]
+            sig_bkg_mod.set_sig_params(sig_pars)
+
+            
             try:
                 pars, nllh, res = sig_miner.minimize()
                 As[jj] = pars[0][0]
@@ -308,6 +322,8 @@ def do_scan_around_peak(peak_row, bkg_bf_params, bkg_name, sig_miner,\
     res_df['TS'][np.isnan(res_df['TS'])] = 0.0
 
     return res_df
+
+
 
 @profile
 def analysis_for_imxy_square(imx0, imx1, imy0, imy1, bkg_bf_params_list,\
@@ -372,7 +388,7 @@ def analysis_for_imxy_square(imx0, imx1, imy0, imy1, bkg_bf_params_list,\
     sig_mod.set_theta_phi(np.mean(thetas), np.mean(phis))
 
 
-    comp_mod = CompoundModel([bkg_mod, sig_mod])
+#     comp_mod = CompoundModel([bkg_mod, sig_mod])
     sig_miner = NLLH_ScipyMinimize_Wjacob('')
 
     tmin = np.min(tbins0)
@@ -387,32 +403,39 @@ def analysis_for_imxy_square(imx0, imx1, imy0, imy1, bkg_bf_params_list,\
     else:
         tbl = (ev_data['TIME']>=(tmin-1.0))&(ev_data['TIME']<(tmax+1.0))
     logging.debug("np.sum(tbl): %d"%(np.sum(tbl)))
-    sig_llh_obj = LLH_webins(ev_data[tbl], ebins0, ebins1, bl_dmask, has_err=True)
+    
+    
+    sig_llh_obj = LLH_webins2(ev_data[tbl], ebins0, ebins1, bl_dmask, has_err=True)
+    
 
-    sig_llh_obj.set_model(comp_mod)
-
-    flux_params = {'A':1.0, 'gamma':0.5, 'Epeak':1e2}
+    flux_params = {'A':1.0, 'gamma':gammas[0], 'Epeak':Epeaks[0]}
+    
+    sig_mod.set_flux_params(flux_params)
 
     bkg_name = bkg_mod.name
 
-    pars_ = {}
-    pars_['Signal_theta'] = np.mean(thetas)
-    pars_['Signal_phi'] = np.mean(phis)
-    for pname,val in bkg_bf_params_list[0].items():
-        # pars_['Background_'+pname] = val
-        pars_[bkg_name+'_'+pname] = val
-    for pname,val in flux_params.items():
-        pars_['Signal_'+pname] = val
+#     pars_ = {}
+#     pars_['Signal_theta'] = np.mean(thetas)
+#     pars_['Signal_phi'] = np.mean(phis)
+#     for pname,val in bkg_bf_params_list[0].items():
+#         # pars_['Background_'+pname] = val
+#         pars_[bkg_name+'_'+pname] = val
+#     for pname,val in flux_params.items():
+#         pars_['Signal_'+pname] = val
+
+    sig_bkg_mod = Sig_Bkg_Model(bl_dmask, sig_mod, bkg_mod, use_deriv=True)
+    sig_pars = copy(flux_params)
+    sig_pars['A'] = 1.0
+    sig_pars['theta'] = np.mean(thetas)
+    sig_pars['phi'] = np.mean(phis)
+    sig_bkg_mod.set_bkg_params(bkg_bf_params_list[0])
+    sig_bkg_mod.set_sig_params(sig_pars)
+    
+    sig_llh_obj.set_model(sig_bkg_mod)
 
     sig_miner.set_llh(sig_llh_obj)
 
-    fixed_pnames = list(pars_.keys())
-    fixed_vals = list(pars_.values())
-    trans = [None for i in range(len(fixed_pnames))]
-    sig_miner.set_trans(fixed_pnames, trans)
-    sig_miner.set_fixed_params(fixed_pnames, values=fixed_vals)
-    sig_miner.set_fixed_params(['Signal_A'], fixed=False)
-
+    sig_miner.set_trans(['A'], [None])
 
     res_dfs_ = []
 
@@ -422,8 +445,9 @@ def analysis_for_imxy_square(imx0, imx1, imy0, imy1, bkg_bf_params_list,\
 
         print((imxs[ii], imys[ii]))
         print((thetas[ii], phis[ii]))
-        sig_miner.set_fixed_params(['Signal_theta', 'Signal_phi'],\
-                                    values=[thetas[ii],phis[ii]])
+#         sig_miner.set_fixed_params(['Signal_theta', 'Signal_phi'],\
+#                                     values=[thetas[ii],phis[ii]])
+        sig_mod.set_theta_phi(thetas[ii],phis[ii])
 
 
 
@@ -436,6 +460,12 @@ def analysis_for_imxy_square(imx0, imx1, imy0, imy1, bkg_bf_params_list,\
             flux_params['Epeak'] = Epeaks[j]
             sig_mod.set_flux_params(flux_params)
 
+            sig_pars = copy(flux_params)
+            sig_pars['A'] = 1.0
+            sig_pars['theta'] = thetas[ii]
+            sig_pars['phi'] = phis[ii]
+            sig_bkg_mod.set_sig_params(sig_pars)
+            
             res_dict = {}
 
             res_dict['Epeak'] = Epeaks[j]
@@ -446,11 +476,13 @@ def analysis_for_imxy_square(imx0, imx1, imy0, imy1, bkg_bf_params_list,\
 
             for i in range(ntbins):
 
-                parss_ = {}
-                for pname,val in bkg_bf_params_list[i].items():
-                    # pars_['Background_'+pname] = val
-                    parss_[bkg_name+'_'+pname] = val
-                sig_miner.set_fixed_params(list(parss_.keys()), values=list(parss_.values()))
+#                 parss_ = {}
+#                 for pname,val in bkg_bf_params_list[i].items():
+#                     # pars_['Background_'+pname] = val
+#                     parss_[bkg_name+'_'+pname] = val
+#                 sig_miner.set_fixed_params(list(parss_.keys()), values=list(parss_.values()))
+                
+                sig_bkg_mod.set_bkg_params(bkg_bf_params_list[0])
 
                 t0 = tbins0[i]
                 t1 = tbins1[i]
@@ -498,13 +530,16 @@ def analysis_for_imxy_square(imx0, imx1, imy0, imy1, bkg_bf_params_list,\
             t1 = tbins1[i]
             dt = t1 - t0
             sig_llh_obj.set_time(tbins0[i], tbins1[i])
-            for pname,val in bkg_bf_params_list[i].items():
-                pars_[bkg_name+'_'+pname] = val
+            
+            sig_bkg_mod.set_bkg_params(bkg_bf_params_list[i])
+            
+#             for pname,val in bkg_bf_params_list[i].items():
+#                 pars_[bkg_name+'_'+pname] = val
             bkg_bf_param_dict[timeIDs[i]] = bkg_bf_params_list[i]
-            pars_['Signal_theta'] = thetas[ii]
-            pars_['Signal_phi'] = phis[ii]
-            pars_['Signal_A'] = 1e-10
-            bkg_nllh = -sig_llh_obj.get_logprob(pars_)
+#             pars_['Signal_theta'] = thetas[ii]
+#             pars_['Signal_phi'] = phis[ii]
+#             pars_['Signal_A'] = 1e-10
+            bkg_nllh = -sig_llh_obj.get_logprob({'A':1e-10})
             bl = np.isclose(res_df['time']-t0,t0-t0)&np.isclose(res_df['dur'],dt)
             bkg_nllhs[bl] = bkg_nllh
 
@@ -566,12 +601,12 @@ def analysis_for_imxy_square(imx0, imx1, imy0, imy1, bkg_bf_params_list,\
             logging.info(peak_row)
 
             df = do_scan_around_peak(peak_row, bkg_bf_params, bkg_name,\
-                                    sig_miner, sig_llh_obj, sig_mod)
+                                    sig_miner, sig_llh_obj,sig_bkg_mod, sig_mod)
 
             max_peak_row = df.loc[df['TS'].idxmax()]
 
             df2 = do_scan_around_peak(max_peak_row, bkg_bf_params, bkg_name,\
-                                    sig_miner, sig_llh_obj, sig_mod,\
+                                    sig_miner, sig_llh_obj,sig_bkg_mod, sig_mod,\
                                     imstep=1e-3, dimx=1e-3, dimy=1e-3,\
                                     dgamma=0.1, dlog10Ep=0.1)
 
@@ -585,7 +620,8 @@ def analysis_for_imxy_square(imx0, imx1, imy0, imy1, bkg_bf_params_list,\
     else:
         del sig_mod
         return res_df, None
-
+    
+    
 
 @profile
 def do_analysis(proc_num, square_tab, ev_data, flux_mod, rt_dir,\

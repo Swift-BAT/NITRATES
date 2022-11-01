@@ -1809,7 +1809,7 @@ class ResponseInFoV2(object):
         comp_dpi = self.comp_resp_dpis*(self.comp_trans_dpis[:,:,np.newaxis])
         self.comp_resp_dpi = comp_dpi
         self.lines_resp_dpi = lines_dpi
-        self.non_flor_resp_dpi = lines_dpi + comp_dpi
+        #self.non_flor_resp_dpi = lines_dpi + comp_dpi
         # if not self.use_comp_flor:
         #     self.flor_resp_dpi = self.flor_resp_obj.get_resp_dpi()
 
@@ -1824,7 +1824,7 @@ class ResponseInFoV2(object):
         else:
             self.comp_flor_resp_dpis = self.comp_resp_dpi + self.flor_resp_dpi
 
-        self.tot_resp_dpis = self.lines_resp_dpi + self.comp_flor_resp_dpis
+        #self.tot_resp_dpis = self.lines_resp_dpi + self.comp_flor_resp_dpis
 
 
     def get_lines_resp_dpis(self):
