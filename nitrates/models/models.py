@@ -3396,7 +3396,7 @@ class Source_Model_InOutFoV(Model):
         if ang_sep(phi, 90.0-theta, self._trans_phi, 90.0-self._trans_theta) > self._trans_update:
             self.set_theta_phi(theta, phi)
             self.set_flux_params(self.flux_params)
-        imx, imy = theta_phi2imxy(theta, phi)
+#        imx, imy = theta_phi2imxy(theta, phi)
 
 #         trans_dpi0 = self.resp_obj.lines_trans_dpis[:,0]
 #         coded = np.isclose(trans_dpi0, 1.0)
