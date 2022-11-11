@@ -1,7 +1,7 @@
 """
 This file allows the user to configure where the data is located on their system and keeps the changes persistent through the whole code.
 """
-#asdf
+
 import os
 
 #variable to specify where the bat data will be downloaded to
