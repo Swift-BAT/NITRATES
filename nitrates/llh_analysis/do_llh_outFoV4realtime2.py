@@ -8,6 +8,7 @@ import logging, traceback
 import time
 import pandas as pd
 import gc
+from copy import copy, deepcopy
 
 from ..analysis_seeds.bkg_rate_estimation import rate_obj_from_sqltab
 from ..lib.sqlite_funcs import get_conn, write_result, write_results,\
@@ -23,7 +24,7 @@ from ..models.flux_models import Plaw_Flux, Cutoff_Plaw_Flux
 from ..llh_analysis.minimizers import NLLH_ScipyMinimize_Wjacob, imxy_grid_miner, NLLH_ScipyMinimize
 # from ..lib.drm_funcs import DRMs
 from ..response.ray_trace_funcs import RayTraces, FootPrints
-from ..llh_analysis.LLH import LLH_webins
+from ..llh_analysis.LLH import LLH_webins2
 # from ..models.models import Bkg_Model_wSA, Point_Source_Model, Point_Source_Model_Wuncoded,\
 #             CompoundModel, Bkg_Model_wFlatA, Point_Source_Model_Binned_Rates
 # from do_intllh_scan import kum_mode, kum_pdf, kum_logpdf, kum_deriv_logpdf, deriv2_kum_logpdf
@@ -32,8 +33,8 @@ from ..llh_analysis.LLH import LLH_webins
 #                             theta_phi2imxy, bldmask2batxys, imxy2theta_phi,\
 #                             get_fixture_struct, LLH_webins
 # from do_OutFoV_scan2 import Source_Model_OutFoV
-from ..models.models import CompoundModel, Point_Source_Model_Binned_Rates,\
-                    Bkg_Model_wFlatA, Source_Model_InFoV, Source_Model_InOutFoV
+from ..models.models import CompoundModel, Point_Source_Model_Binned_Rates, Sig_Bkg_Model,\
+                     Bkg_Model_wFlatA, Source_Model_InFoV, Source_Model_InOutFoV
 from ..lib.coord_conv_funcs import theta_phi2imxy, imxy2theta_phi
 
 
