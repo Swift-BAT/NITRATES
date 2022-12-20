@@ -25,13 +25,14 @@ from ..models.flux_models import Plaw_Flux, Cutoff_Plaw_Flux
 from ..llh_analysis.minimizers import NLLH_ScipyMinimize_Wjacob, imxy_grid_miner, NLLH_ScipyMinimize
 # from ..lib.drm_funcs import DRMs
 from ..response.ray_trace_funcs import RayTraces, FootPrints
-from ..llh_analysis.LLH import LLH_webins
+from ..llh_analysis.LLH import LLH_webins2
 # from do_InFoV_scan3 import Swift_Mask_Interactions, Source_Model_InFoV, Bkg_Model_wFlatA,\
 #                             CompoundModel, Point_Source_Model_Binned_Rates,\
 #                             theta_phi2imxy, bldmask2batxys, imxy2theta_phi,\
 #                             get_fixture_struct, LLH_webins
 
-from ..models.models import CompoundModel, Point_Source_Model_Binned_Rates,\
+from ..models.models import CompoundModel, Point_Source_Model_Binned_Rates, Sig_Bkg_Model,\
+                     Bkg_Model_wFlatA, Source_Model_InFoV, Source_Model_InOutFoV
 from ..lib.coord_conv_funcs import theta_phi2imxy, imxy2theta_phi
 from ..lib.gti_funcs import mk_gti_bl, union_gtis
 
