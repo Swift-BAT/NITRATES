@@ -183,7 +183,7 @@ def analysis_at_theta_phi(theta, phi, rt_obj, bkg_bf_params_list, bkg_mod,\
 
     comp_mod = CompoundModel([bkg_mod, sig_mod])
     sig_miner = NLLH_ScipyMinimize_Wjacob('')
-    sig_llh_obj = LLH_webins(ev_data, ebins0, ebins1, bl_dmask, has_err=True)
+    sig_llh_obj = LLH_webins2(ev_data, ebins0, ebins1, bl_dmask, has_err=True)
 
     sig_llh_obj.set_model(comp_mod)
 
