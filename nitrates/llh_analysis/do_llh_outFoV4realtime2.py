@@ -181,24 +181,40 @@ def analysis_at_theta_phi(theta, phi, rt_obj, bkg_bf_params_list, bkg_mod,\
     sig_mod.set_theta_phi(theta, phi)
     print("theta, phi set")
 
-    comp_mod = CompoundModel([bkg_mod, sig_mod])
+    #comp_mod = CompoundModel([bkg_mod, sig_mod])
     sig_miner = NLLH_ScipyMinimize_Wjacob('')
     sig_llh_obj = LLH_webins2(ev_data, ebins0, ebins1, bl_dmask, has_err=True)
 
-    sig_llh_obj.set_model(comp_mod)
+    #sig_llh_obj.set_model(comp_mod)
 
-    flux_params = {'A':1.0, 'gamma':0.5, 'Epeak':1e2}
+    #flux_params = {'A':1.0, 'gamma':0.5, 'Epeak':1e2}
+    
+    flux_params = {'A':1.0, 'gamma':gammas[0], 'Epeak':Epeaks[0]}
+    
+    sig_mod.set_flux_params(flux_params)
+
 
     bkg_name = bkg_mod.name
 
-    pars_ = {}
-    pars_['Signal_theta'] = theta
-    pars_['Signal_phi'] = phi
-    for pname,val in bkg_bf_params_list[0].items():
+    #pars_ = {}
+    #pars_['Signal_theta'] = theta
+    #pars_['Signal_phi'] = phi
+    #for pname,val in bkg_bf_params_list[0].items():
         # pars_['Background_'+pname] = val
-        pars_[bkg_name+'_'+pname] = val
-    for pname,val in flux_params.items():
-        pars_['Signal_'+pname] = val
+    #    pars_[bkg_name+'_'+pname] = val
+    #for pname,val in flux_params.items():
+    #    pars_['Signal_'+pname] = val
+    
+    sig_bkg_mod = Sig_Bkg_Model(bl_dmask, sig_mod, bkg_mod, use_deriv=True)
+    sig_pars = copy(flux_params)
+    sig_pars['A'] = 1.0
+    sig_pars['theta'] = np.mean(thetas)
+    sig_pars['phi'] = np.mean(phis)
+    sig_bkg_mod.set_bkg_params(bkg_bf_params_list[0])
+    sig_bkg_mod.set_sig_params(sig_pars)
+    
+    sig_llh_obj.set_model(sig_bkg_mod)
+
 
     sig_miner.set_llh(sig_llh_obj)
 
@@ -233,12 +249,12 @@ def analysis_at_theta_phi(theta, phi, rt_obj, bkg_bf_params_list, bkg_mod,\
         dt = t1 - t0
         sig_llh_obj.set_time(tbins0[i], tbins1[i])
 
-        parss_ = {}
-        for pname,val in bkg_bf_params_list[i].items():
+        #parss_ = {}
+        #for pname,val in bkg_bf_params_list[i].items():
             # pars_['Background_'+pname] = val
-            parss_[bkg_name+'_'+pname] = val
-            pars_[bkg_name+'_'+pname] = val
-        sig_miner.set_fixed_params(list(parss_.keys()), values=list(parss_.values()))
+        #    parss_[bkg_name+'_'+pname] = val
+        #    pars_[bkg_name+'_'+pname] = val
+        #sig_miner.set_fixed_params(list(parss_.keys()), values=list(parss_.values()))
 
 
         res_dict = {'theta':theta, 'phi':phi,
