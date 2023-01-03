@@ -218,12 +218,14 @@ def analysis_at_theta_phi(theta, phi, rt_obj, bkg_bf_params_list, bkg_mod,\
 
     sig_miner.set_llh(sig_llh_obj)
 
-    fixed_pnames = list(pars_.keys())
-    fixed_vals = list(pars_.values())
-    trans = [None for i in range(len(fixed_pnames))]
-    sig_miner.set_trans(fixed_pnames, trans)
-    sig_miner.set_fixed_params(fixed_pnames, values=fixed_vals)
-    sig_miner.set_fixed_params(['Signal_A'], fixed=False)
+    #fixed_pnames = list(pars_.keys())
+    #fixed_vals = list(pars_.values())
+    #trans = [None for i in range(len(fixed_pnames))]
+    #sig_miner.set_trans(fixed_pnames, trans)
+    #sig_miner.set_fixed_params(fixed_pnames, values=fixed_vals)
+    #sig_miner.set_fixed_params(['Signal_A'], fixed=False)
+    
+    sig_miner.set_trans(['A'], [None])
 
     gamma_ax = np.linspace(-0.2, 1.8, 8+1)
     gamma_ax = np.linspace(-0.4, 1.6, 4+1)[1:-1]
