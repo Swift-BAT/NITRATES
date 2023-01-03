@@ -267,6 +267,7 @@ def analysis_at_theta_phi(theta, phi, rt_obj, bkg_bf_params_list, bkg_mod,\
         #    pars_[bkg_name+'_'+pname] = val
         #sig_miner.set_fixed_params(list(parss_.keys()), values=list(parss_.values()))
 
+        sig_bkg_mod.set_bkg_params(bkg_bf_params_list[i])
 
         res_dict = {'theta':theta, 'phi':phi,
                     'time':t0, 'dur':dt,
@@ -282,7 +283,7 @@ def analysis_at_theta_phi(theta, phi, rt_obj, bkg_bf_params_list, bkg_mod,\
         res_dict['Epeak'] = np.append(Epeaks, Epeaks2)
         res_dict['gamma'] = np.append(gammas, gammas2)
 
-        pars_['Signal_A'] = 1e-10
+        pars_['A'] = 1e-10
         bkg_nllh = -sig_llh_obj.get_logprob(pars_)
 
         res_dict['nllh'] = np.array(nllhs)
