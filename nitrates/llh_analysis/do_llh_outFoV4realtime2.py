@@ -205,7 +205,7 @@ def analysis_at_theta_phi(theta, phi, rt_obj, bkg_bf_params_list, bkg_mod,\
 
     bkg_name = bkg_mod.name
 
-    #pars_ = {}
+    pars_ = {}
     #pars_['Signal_theta'] = theta
     #pars_['Signal_phi'] = phi
     #for pname,val in bkg_bf_params_list[0].items():
