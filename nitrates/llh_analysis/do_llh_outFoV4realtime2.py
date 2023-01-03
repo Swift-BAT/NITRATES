@@ -149,7 +149,7 @@ def get_new_Epeaks_gammas2scan(nllhs, Epeaks_done, gammas_done,\
     return Epeaks, gammas
 
 
-def min_at_Epeaks_gammas(sig_miner, sig_mod, Epeaks, gammas):
+def min_at_Epeaks_gammas(sig_miner, sig_mod, sig_bkg_mod, Epeaks, gammas):
 
     nllhs = []
     As = []
@@ -161,6 +161,15 @@ def min_at_Epeaks_gammas(sig_miner, sig_mod, Epeaks, gammas):
         flux_params['gamma'] = gammas[i]
         flux_params['Epeak'] = Epeaks[i]
         sig_mod.set_flux_params(flux_params)
+        
+        sig_pars = copy(flux_params)
+        sig_pars['A'] = 1.0
+        #Below are already defined in analysis_at_theta_phi
+        #sig_pars['theta'] = thetas[ii]
+        #sig_pars['phi'] = phis[ii]
+        sig_bkg_mod.set_sig_params(sig_pars)
+
+        
         pars, nllh, res = sig_miner.minimize()
         nllhs.append(nllh[0])
         As.append(pars[0][0])
@@ -208,8 +217,8 @@ def analysis_at_theta_phi(theta, phi, rt_obj, bkg_bf_params_list, bkg_mod,\
     sig_bkg_mod = Sig_Bkg_Model(bl_dmask, sig_mod, bkg_mod, use_deriv=True)
     sig_pars = copy(flux_params)
     sig_pars['A'] = 1.0
-    sig_pars['theta'] = np.mean(thetas)
-    sig_pars['phi'] = np.mean(phis)
+    sig_pars['theta'] = theta #np.mean(thetas)
+    sig_pars['phi'] = phi #np.mean(phis)
     sig_bkg_mod.set_bkg_params(bkg_bf_params_list[0])
     sig_bkg_mod.set_sig_params(sig_pars)
     
@@ -263,10 +272,10 @@ def analysis_at_theta_phi(theta, phi, rt_obj, bkg_bf_params_list, bkg_mod,\
                     'time':t0, 'dur':dt,
                     'timeID':timeID}
 
-        nllhs, As = min_at_Epeaks_gammas(sig_miner, sig_mod, Epeaks, gammas)
+        nllhs, As = min_at_Epeaks_gammas(sig_miner, sig_mod, sig_bkg_mod, Epeaks, gammas)
 
         Epeaks2, gammas2 = get_new_Epeaks_gammas2scan(nllhs, Epeaks, gammas)
-        nllhs2, As2 = min_at_Epeaks_gammas(sig_miner, sig_mod, Epeaks2, gammas2)
+        nllhs2, As2 = min_at_Epeaks_gammas(sig_miner, sig_mod, sig_bkg_mod, Epeaks2, gammas2)
 
         nllhs = np.append(nllhs, nllhs2)
         As = np.append(As, As2)
