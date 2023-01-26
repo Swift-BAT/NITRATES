@@ -10,7 +10,7 @@ import os
 import argparse
 import logging, traceback, time
 
-from ..config import EBINS0, EBINS1, solid_angle_dpi_fname, fp_dir, rt_dir
+from ..config import EBINS0, EBINS1, solid_angle_dpi_fname, fp_dir, rt_dir, rates_resp_out_dir, rates_resp_dir
 from ..lib.sqlite_funcs import get_conn
 from ..lib.dbread_funcs import get_info_tab, guess_dbfname, get_files_tab,\
                             get_twinds_tab, get_rate_fits_tab
