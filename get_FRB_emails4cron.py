@@ -18,10 +18,10 @@ def cli():
             action='store_true')
     parser.add_argument('--dbfname', type=str,\
             help="database file name",
-            default="/storage/work/jjd330/local/bat_data/realtime_workdir/FRB.db")
+            default="/storage/home/gzr5209/work/realtime_workdir_NITRATES/FRB.db")
     parser.add_argument('--logfname', type=str,\
             help="log file name",
-            default="/storage/work/jjd330/local/bat_data/realtime_workdir/FRBemail_parse.log")
+            default="/storage/home/gzr5209/work/realtime_workdir_NITRATES/FRBemail_parse.log")
     parser.add_argument('--user', type=str,\
             help="email receiving emails",
             default="amon.bat.psu@gmail.com")
@@ -33,13 +33,13 @@ def cli():
             default="imap.gmail.com")
     parser.add_argument('--script_path', type=str,\
             help="bash script to run analysis",
-            default="/storage/work/j/jjd330/local/bat_data/BatML/run_stuff_grb2.sh")
+            default="/storage/home/gzr5209/work/BatML_public_repo/NITRATES/run_stuff_grb2_vc.sh")
     parser.add_argument('--workdir', type=str,\
-            help="bash script to run analysis",
-            default="/storage/work/j/jjd330/local/bat_data/realtime_workdir/")
+            help="location of  run analysis",
+            default="/storage/home/gzr5209/work/realtime_workdir_NITRATES/")
     parser.add_argument('--htmldir', type=str,\
-            help="bash script to run analysis",
-            default="/storage/work/j/jjd330/local/bat_data/realtime_workdir/FRB_BAT/")
+            help="htmldir",
+            default="/storage/home/gzr5209/work/realtime_workdir_NITRATES/FRB_BAT/")
 
     args = parser.parse_args()
     return args
@@ -372,8 +372,8 @@ def main(args):
             logging.error(traceback.format_exc())
             logging.warning("Trouble writing to DB, done trying")
             conn.close()
-            New_Trigger = False
-            logging.warning("Won't run analysis until it can be written")
+            #New_Trigger = False
+            #logging.warning("Won't run analysis until it can be written")
     try:
         df_tot = pd.concat([df_old, df_new])
         df_tot.to_html(html_file)

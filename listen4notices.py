@@ -17,8 +17,11 @@ from hp_funcs import err_circle2prob_map
 
 # run as nohup python $batml_path'listen4notices.py' > /storage/work/jjd330/local/bat_data/realtime_workdir/listen4gcns_out.log 2>&1 &
 
-workdir='/storage/work/j/jjd330/local/bat_data/realtime_workdir/'
-script_path='/storage/work/j/jjd330/local/bat_data/BatML/run_stuff_grb2.sh'
+#workdir='/storage/work/j/jjd330/local/bat_data/realtime_workdir/'
+#script_path='/storage/work/j/jjd330/local/bat_data/BatML/run_stuff_grb2.sh'
+
+workdir='/storage/work/g/gzr5209/realtime_workdir_NITRATES/'
+script_path='/storage/home/gzr5209/work/BatML_public_repo/NITRATES/run_stuff_grb2_vc.sh'
 
 INTEGRAL = [gcn.notice_types.INTEGRAL_SPIACS,
             gcn.notice_types.INTEGRAL_WAKEUP,
@@ -38,6 +41,9 @@ HAWC = [171]#gcn.notice_types.HAWC_BURST_MONITOR]
 
 IC = [173, 174]#gcn.notice_types.ICECUBE_ASTROTRACK_GOLD,
         # gcn.notice_types.ICECUBE_ASTROTRACK_BRONZE]
+GECAM = [gcn.notice_types.GECAM_FLT,
+        gcn.notice_types.GECAM_GND]
+
 
 # Function to call every time a GCN is received.
 # Run only for notices of type
@@ -53,6 +59,8 @@ IC = [173, 174]#gcn.notice_types.ICECUBE_ASTROTRACK_GOLD,
     gcn.notice_types.MAXI_UNKNOWN,
     gcn.notice_types.CALET_GBM_FLT_LC,
     171, 173, 174,
+    gcn.notice_types.GECAM_FLT,
+    gcn.notice_types.GECAM_GND,
     # gcn.notice_types.HAWC_BURST_MONITOR,
     # gcn.notice_types.ICECUBE_ASTROTRACK_GOLD,
     # gcn.notice_types.ICECUBE_ASTROTRACK_BRONZE,
@@ -114,6 +122,8 @@ def process_gcn(payload, root):
             name = 'F' + params['TrigID']
         elif notice_type in CALET:
             name = 'C' + params['TrigID']
+        elif notice_type in GECAM:
+            name = 'GECAM' + params['TrigID']
         else:
             name = eventtime
 
@@ -284,7 +294,8 @@ if __name__ == "__main__":
     log_fname = os.path.join(workdir, 'gcn_listner.log')
     pid_fname = os.path.join(workdir, 'gcn_listner.pid')
     with open(pid_fname, 'wb') as f:
-        f.write(str(os.getpid()))
+        f.write(str(os.getpid()).encode('utf-8')) # Edited Jan 9th
+        #f.write(os.getpid())
     fh = logging.FileHandler(filename=log_fname)
     fh.setLevel(logging.INFO)
     fh.setFormatter(formatter)

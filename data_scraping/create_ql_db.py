@@ -58,7 +58,8 @@ def get_sql_tab_list():
 
     sql_tab_list = [sql_tab_qleventOBS,
                     sql_tab_qlevent,
-                    sql_tab_ql]#, sql_tab_qltdrss]
+                    sql_tab_ql]
+                    #sql_tab_qltdrss]
 
     return sql_tab_list
 

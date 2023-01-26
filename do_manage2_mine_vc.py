@@ -16,8 +16,8 @@ except:
     pass
 
 #from helper_funcs import send_email, send_error_email, send_email_attach, send_email_wHTML
-from helper_funcs_open_grb_realtime import send_email, send_error_email, send_email_attach, send_email_wHTML 
- 
+#from helper_funcs_open_grb_realtime import send_email, send_error_email, send_email_attach, send_email_wHTML 
+from helper_funcs_to_me import send_email, send_error_email, send_email_attach, send_email_wHTML 
 
 from sqlite_funcs import get_conn
 from dbread_funcs import get_files_tab, get_info_tab, guess_dbfname

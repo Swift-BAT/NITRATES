@@ -70,13 +70,31 @@ export PFILES="/tmp/$$.tmp/pfiles;$HEADAS/syspfiles"
 # trigtime=$4
 # gwname=$5
 
-workdir=$1
-evfname=$2
-dmask=$3
-attfname=$4
-trigtime=$5
-gwname=$6
+#workdir=$1
+#evfname=$2
+#dmask=$3
+#attfname=$4
+#trigtime=$5
+#gwname=$6
 
+
+
+#------------------------------------
+#Adding these lines on Jan 12th, 2023
+
+# first arg is the trigger time in either isot or MET
+trigtime=$1
+# gwname is the name of the event/analysis
+# it'll be the name of the directory inside workdir and used for job names
+gwname=$2
+# file name of the event file to use
+evfname=$3
+# file name of the detmask to use
+dmask=$4
+# file name of the attitude to use
+attfname=$5
+# file names can also be urls
+#-----------------------------------
 
 # if [ "$#" -ne 2 ]; then
 #     nimgs=$3
@@ -89,6 +107,8 @@ tmin=-20.0
 Ntdbls=6
 
 # $Njobs=
+
+workdir=$workdir$gwname
 
 # workdir=$workdir$gwname
 # workdir=$(pwd)
@@ -130,7 +150,7 @@ if [ -f "filter_evdata.fits" ]; then
     # python $sub_path'submit_jobs.py' --Njobs $Nratejobs --workdir $workdir --name $gwname --pbs_fname $ratespbs > submit_jobs.log 2>&1 &
     # python $batml_path'do_manage.py' --Nrate_jobs $Nratejobs --GWname $gwname > manager.out 2>&1 &
     python $batml_path'do_full_rates.py' --min_tbin $mintbin > full_rates.out 2>&1 &
-    python $batml_path'do_manage2.py' --GWname $gwname --do_bkg --do_rates --do_llh --queue open --N_infov_jobs 96 --N_outfov_jobs 24  > manager.out 2>&1 &
+    python $batml_path'do_manage2.py' --GWname $gwname  --do_llh --queue jak51_b_g_vc_default --q hprc --N_infov_jobs 260 --N_outfov_jobs 40  > manager.out 2>&1 &
 fi
 
 cd $curdir

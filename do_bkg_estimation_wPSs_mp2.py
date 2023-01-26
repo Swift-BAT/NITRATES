@@ -1,8 +1,8 @@
-import numpy as np
 from astropy.io import fits
 from astropy.table import Table, vstack
 from astropy.wcs import WCS
 import os
+import numpy as np
 import argparse
 import logging, traceback
 import pandas as pd

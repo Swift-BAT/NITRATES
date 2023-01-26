@@ -25,7 +25,7 @@ except:
     pas = ''
 
 def send_error_email(subject, body):
-    to = ['delauj2@gmail.com']
+    to = ['gzr5209@psu.edu']
     me = 'amon.psu@gmail.com'
     msg = MIMEText(body)
     msg['Subject'] = subject
@@ -42,6 +42,7 @@ def send_error_email(subject, body):
 
 def send_email(subject, body, to):
     #to = ['delauj2@gmail.com']
+    to = ['gzr5209@psu.edu']
     me = 'amon.psu@gmail.com'
     msg = MIMEText(body)
     msg['Subject'] = subject
@@ -58,6 +59,7 @@ def send_email(subject, body, to):
 
 def send_email_wHTML(subject, body, to):
     #to = ['delauj2@gmail.com']
+    to = ['gzr5209@psu.edu']
     me = 'amon.psu@gmail.com'
     msg = MIMEMultipart('alternative')
     msg['Subject'] = subject
@@ -76,7 +78,7 @@ def send_email_wHTML(subject, body, to):
 
 
 def send_email_attach(subject, body, to, fname):
-
+    to = ['gzr5209@psu.edu']
     me = 'amon.psu@gmail.com'
 
     msg = MIMEMultipart()
