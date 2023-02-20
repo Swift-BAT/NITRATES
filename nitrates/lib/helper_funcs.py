@@ -1,5 +1,6 @@
 import smtplib
 import sys
+from ..config import PASSWD_FILE
 from email.mime.text import MIMEText
 if sys.version_info < (3, 0):
     from email.MIMEMultipart import MIMEMultipart
@@ -17,7 +18,7 @@ else:
     from email import encoders
 
 
-pass_fname = 'pass.txt'
+pass_fname = PASSWD_FILE #'pass.txt'
 try:
     with open(pass_fname, 'r') as f:
         pas = f.read().strip()

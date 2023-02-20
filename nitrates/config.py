@@ -129,3 +129,6 @@ quad_dicts = {'all':{'quads':[0,1,2,3],
                     'imx':-1.1, 'imy':0.5, 'id':8}
                 }
 
+
+#email password file
+PASSWD_FILE=os.path.join(dir, "data",'pass.txt')
