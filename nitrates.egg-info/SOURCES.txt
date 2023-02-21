@@ -1,10 +1,8 @@
-.DS_Store
 .gitignore
 LICENSE
 README.md
 requirements.txt
 setup.py
-nitrates/.DS_Store
 nitrates/__init__.py
 nitrates/config.py
 nitrates/run_stuff_grb2.sh
@@ -15,7 +13,6 @@ nitrates.egg-info/SOURCES.txt
 nitrates.egg-info/dependency_links.txt
 nitrates.egg-info/requires.txt
 nitrates.egg-info/top_level.txt
-nitrates/HeasoftTools/.DS_Store
 nitrates/HeasoftTools/__init__.py
 nitrates/HeasoftTools/bat_tool_funcs.py
 nitrates/HeasoftTools/gen_tools.py
@@ -213,7 +210,6 @@ nitrates/submission_scripts/scan_int_llh.pbs
 nitrates/submission_scripts/sub_sigimgs.pbs
 nitrates/submission_scripts/submit_img_jobs.py
 nitrates/submission_scripts/submit_jobs.py
-notebooks/.DS_Store
 notebooks/Example_LLH_setup_fixed_dirs.ipynb
 notebooks/Example_Reading_Results.ipynb
 notebooks/MakingDRMsFromNITRATESresps-Copy1.ipynb

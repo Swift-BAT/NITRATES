@@ -802,13 +802,13 @@ def main(args):
 
     setup_tab_info(conn, ev_fname, trig_time)
 
-
-    if args.rt_dir is not None:
-        rt_dir = args.rt_dir
-    if args.drm_dir is not None:
-        drm_dir = args.drm_dir
-    else:
-        drm_dir = '.'
+    #not needed since this is defined in config.py. Only rt_dir is really needed but keeping it for now. 
+    #if args.rt_dir is not None:
+    #    rt_dir = args.rt_dir
+    #if args.drm_dir is not None:
+    #    drm_dir = args.drm_dir
+    #else:
+    #    drm_dir = '.'
 
     logging.info("Writing the Files table")
     setup_files_tab(conn, ev_fname, att_fname, dmask_fname,\

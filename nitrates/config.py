@@ -74,7 +74,10 @@ ftool_wrap= os.path.join(dir, "HeasoftTools", 'run_ftool.sh')
 
 fp_dir = '/gpfs/scratch/jjd330/bat_data/footprints_npy/'
 
-drm_dir='/storage/work/jjd330/local/bat_data/drms/'
+#this isnt necessary anymore, written to dabase in do_data_setup but not used
+drm_dir= ''#'/storage/work/jjd330/local/bat_data/drms/'
+bat_ml_dir='' #/storage/work/jjd330/local/bat_data/BatML/'
+
 
 drm_quad_dir='/gpfs/scratch/jjd330/bat_data/drms4quads/'
 
@@ -83,7 +86,6 @@ drm_quad_dir='/gpfs/scratch/jjd330/bat_data/drms4quads/'
 ###   Old Stuff ###
 ###########################
 
-#bat_ml_dir='/storage/work/jjd330/local/bat_data/BatML/'
 #this has alot of hardcoded paths
 #'/storage/work/jjd330/local/bat_data/BatML/HeasoftTools/run_ftool.sh' #referenced in gen_tools.py
 
