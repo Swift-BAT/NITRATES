@@ -1012,11 +1012,14 @@ def main(args):
         sky_map_fnames = [fname for fname in os.listdir('.') if\
                         'cWB.fits.gz' in fname or 'bayestar' in fname\
                         or 'skymap' in fname]
-        sky_map = hp.read_map(sky_map_fnames[0], field=(0,), nest=True)
-        logging.info('Opened sky map')
-        perc_map = probm2perc(sky_map)
-        logging.info('Made perc map')
-        has_sky_map = True
+        if len(sky_map_fnames)>0:
+            sky_map = hp.read_map(sky_map_fnames[0], field=(0,), nest=True)
+            logging.info('Opened sky map')
+            perc_map = probm2perc(sky_map)
+            logging.info('Made perc map')
+            has_sky_map = True
+        else:
+            logging.info('No sky maps were found.')
     except Exception as E:
         logging.warning("problem reading skymap")
         logging.error(E)

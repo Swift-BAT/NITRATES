@@ -55,7 +55,7 @@ fi
 if [ "$#" -ne 2 ]; then
     mintbin=$3
 else
-    mintbin=0.256
+    mintbin=0.128
 fi
 
 

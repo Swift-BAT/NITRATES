@@ -802,7 +802,7 @@ def main(args):
 
     setup_tab_info(conn, ev_fname, trig_time)
 
-    #not needed since this is defined in config.py. Only rt_dir is really needed but keeping it for now. 
+    #not needed since this is defined in config.py. Only rt_dir is really needed but keeping it for now.
     #if args.rt_dir is not None:
     #    rt_dir = args.rt_dir
     #if args.drm_dir is not None:
@@ -846,23 +846,23 @@ def main(args):
     sky_map_fnames = [fname for fname in os.listdir(args.work_dir) if\
                     'cWB.fits.gz' in fname or 'bayestar' in fname\
                     or 'skymap' in fname]
+    #this good_pix2scan file isnt used anymore, so commenting out this portion of code.
+    #if len(sky_map_fnames) > 0:
+    #
+    #    if check_if_in_GTI(GTI_pnt, tab_info['trigtimeMET'][0]-0.256,\
+    #                    tab_info['trigtimeMET'][0]+0.256):
+    #        t0 = tab_info['trigtimeMET'][0]
+    #    else:
+    #        t0 = np.nanmedian(twind_df['time'])
+    #    logging.debug("Using attitude at time: %.3f"%(t0))
+    #
+    #    pix_arr = pc_gwmap2good_pix(pc_fname, sky_map_fnames[0],\
+    #                                att_tab, t0,\
+    #                                gw_perc_max=0.99,\
+    #                                pc_min=args.min_pc)
 
-    if len(sky_map_fnames) > 0:
-
-        if check_if_in_GTI(GTI_pnt, tab_info['trigtimeMET'][0]-0.256,\
-                        tab_info['trigtimeMET'][0]+0.256):
-            t0 = tab_info['trigtimeMET'][0]
-        else:
-            t0 = np.nanmedian(twind_df['time'])
-        logging.debug("Using attitude at time: %.3f"%(t0))
-
-        pix_arr = pc_gwmap2good_pix(pc_fname, sky_map_fnames[0],\
-                                    att_tab, t0,\
-                                    gw_perc_max=0.99,\
-                                    pc_min=args.min_pc)
-
-        pix_fname = os.path.join(args.work_dir, 'good_pix2scan')
-        np.save(pix_fname, pix_arr)
+    #    pix_fname = os.path.join(args.work_dir, 'good_pix2scan')
+    #    np.save(pix_fname, pix_arr)
 
     logging.info("Done, exiting now")
 
