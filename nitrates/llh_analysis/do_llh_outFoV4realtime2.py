@@ -195,6 +195,20 @@ def analysis_at_theta_phi(theta, phi, rt_obj, bkg_bf_params_list, bkg_mod,\
     sig_llh_obj = LLH_webins2(ev_data, ebins0, ebins1, bl_dmask, has_err=True)
 
     #sig_llh_obj.set_model(comp_mod)
+    
+    gamma_ax = np.linspace(-0.2, 1.8, 8+1)
+    gamma_ax = np.linspace(-0.4, 1.6, 4+1)[1:-1]
+    gamma_ax = np.linspace(-0.2, 2.2, 4+1)
+
+    Epeak_ax = np.logspace(np.log10(45.0), 3, 10)#+1)
+    Epeak_ax = np.logspace(np.log10(45.0), 3, 5+1)[1:-1]
+    Epeak_ax = np.logspace(np.log10(45.0), 3, 4+1)[1:-1]
+    Epeak_ax = np.logspace(1.4, 3, 2*2+1)
+#     Epeak_ax = np.logspace(np.log10(25.0), 3, 3+1)
+    gammas, Epeaks = np.meshgrid(gamma_ax, Epeak_ax)
+    gammas = gammas.ravel()
+    Epeaks = Epeaks.ravel()
+
 
     #flux_params = {'A':1.0, 'gamma':0.5, 'Epeak':1e2}
     
@@ -235,19 +249,6 @@ def analysis_at_theta_phi(theta, phi, rt_obj, bkg_bf_params_list, bkg_mod,\
     #sig_miner.set_fixed_params(['Signal_A'], fixed=False)
     
     sig_miner.set_trans(['A'], [None])
-
-    gamma_ax = np.linspace(-0.2, 1.8, 8+1)
-    gamma_ax = np.linspace(-0.4, 1.6, 4+1)[1:-1]
-    gamma_ax = np.linspace(-0.2, 2.2, 4+1)
-
-    Epeak_ax = np.logspace(np.log10(45.0), 3, 10)#+1)
-    Epeak_ax = np.logspace(np.log10(45.0), 3, 5+1)[1:-1]
-    Epeak_ax = np.logspace(np.log10(45.0), 3, 4+1)[1:-1]
-    Epeak_ax = np.logspace(1.4, 3, 2*2+1)
-#     Epeak_ax = np.logspace(np.log10(25.0), 3, 3+1)
-    gammas, Epeaks = np.meshgrid(gamma_ax, Epeak_ax)
-    gammas = gammas.ravel()
-    Epeaks = Epeaks.ravel()
 
     res_dfs = []
 
