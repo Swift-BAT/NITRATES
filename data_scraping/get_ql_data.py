@@ -52,7 +52,7 @@ def get_obsid_dict(url):
 
 def get_bat_files_from_list_url(url, aux=False):
 
-    data = urllib.request.urlopen(url).read()
+    data = urllib.request.urlopen(url).read().decode('utf-8')
     data = data.split("\n")
     bat_files = []
     aux_files = []
