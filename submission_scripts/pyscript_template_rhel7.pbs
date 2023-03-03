@@ -3,6 +3,7 @@
 #PBS -l nodes=1:ppn=1
 #PBS -l walltime=48:00:00
 #PBS -l mem=8gb
+#PBS -l pmem=6gb
 
 echo "#-#-#Job started on `hostname` at `date` "
 echo This job runs on the following processors:
