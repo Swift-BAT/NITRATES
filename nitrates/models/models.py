@@ -3417,8 +3417,18 @@ class Source_Model_InOutFoV(Model):
 
     def get_rate_dpis_err(self, params, ret_rate_dpis=False):
 
-        theta = params['theta']
-        phi = params['phi']
+
+        # TODO: THIS DEPENDS OF THETA BEING IN PARAMS BUT MAY HAVE SET THETA OUTSIDE OF THIS AND SELF.THETA MAY EXIST: DONE
+        try:
+            theta = params['theta']
+        except KeyError:
+            theta = self.theta
+            
+        try:
+            phi = params['phi']
+        except KeyError:
+            phi = self.phi
+            
         A = params['A']
         if ang_sep(phi, 90.0-theta, self._trans_phi, 90.0-self._trans_theta) > self._trans_update:
             self.set_theta_phi(theta, phi)
