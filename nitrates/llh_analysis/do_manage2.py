@@ -1376,7 +1376,7 @@ def main(args):
 
             try:
                 if has_sky_map:
-                    res_in_tab = get_merged_csv_df_wpos(res_res_in_fnames, attfile, perc_map)
+                    res_in_tab = get_merged_csv_df_wpos(res_in_fnames, attfile, perc_map)
                 else:
                     res_in_tab = get_merged_csv_df_wpos(res_in_fnames, attfile)
                 logging.info("Got merged results with RA Decs")

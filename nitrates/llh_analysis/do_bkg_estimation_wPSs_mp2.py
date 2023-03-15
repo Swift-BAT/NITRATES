@@ -62,6 +62,9 @@ def cli():
     parser.add_argument('--pcfname', type=str,\
             help="partial coding file name",\
             default='pc_2.img')
+    parser.add_argument('--preset_bkg_log_file',\
+            help="Flag to tell the nitrates background estimation to print logging information into a log file that may have been created prior to calling the main function",\
+            action='store_true')
 
 
 
@@ -518,7 +521,8 @@ def bkg_withPS_fit_fiximxy(PS_tab, model, llh_obj, t0s, t1s, params_,\
 
 def main(args):
 
-    logging.basicConfig(filename='bkg_rate_estimation_wPSs.log', level=logging.DEBUG,\
+    if not args.preset_bkg_log_file:
+        logging.basicConfig(filename='bkg_rate_estimation_wPSs.log', level=logging.DEBUG,\
                     format='%(asctime)s-' '%(levelname)s- %(message)s')
 
     if args.bkg_nopost and args.bkg_nopre:
