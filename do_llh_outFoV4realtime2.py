@@ -34,7 +34,7 @@ from LLH import LLH_webins
 from models import CompoundModel, Point_Source_Model_Binned_Rates,\
                     Bkg_Model_wFlatA, Source_Model_InFoV, Source_Model_InOutFoV
 from coord_conv_funcs import theta_phi2imxy, imxy2theta_phi
-
+from do_manage2 import get_out_res_fnames
 
 # need to read rate fits from DB
 # and read twinds
@@ -270,7 +270,7 @@ def analysis_at_theta_phi(theta, phi, rt_obj, bkg_bf_params_list, bkg_mod,\
 def do_analysis(proc_num, seed_tab, ev_data, flux_mod, rt_dir,\
                 ebins0, ebins1, bl_dmask,\
                 trigger_time, work_dir,\
-                bkg_fname):
+                bkg_fname, ignore_started=False):
 
     started_dname = os.path.join(work_dir,'started_outfov')
 
@@ -319,9 +319,15 @@ def do_analysis(proc_num, seed_tab, ev_data, flux_mod, rt_dir,\
         already_started = False
         if fname0 in fnames:
             already_started = True
-        if already_started:
+        if already_started and not ignore_started:
             logging.info("Already started")
             continue
+        save_fname = 'res_hpind_%d_.csv' %(hp_ind)
+        fnames = get_out_res_fnames()
+        if save_fname in fnames:
+            logging.info("Already has results")
+            continue
+
 
         f = open(fname, 'w')
         f.write('NONE')
@@ -467,6 +473,15 @@ def main(args):
 						trigtime, work_dir, args.bkg_fname)
 
 
+    seed_tab_shuff = seed_tab.sample(frac=1)
+
+    for i in range(Njobs):
+        if i == proc_num:
+            continue
+        do_analysis(i, seed_tab_shuff, ev_data, flux_mod, rt_dir,\
+                        ebins0, ebins1, bl_dmask,\
+                        trigtime, work_dir, args.bkg_fname,\
+                        ignore_started=True)
 
 
 if __name__ == "__main__":
