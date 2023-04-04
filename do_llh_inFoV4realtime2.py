@@ -482,7 +482,7 @@ def analysis_for_imxy_square(imx0, imx1, imy0, imy1, bkg_bf_params_list,\
 #                     parss_[bkg_name+'_'+pname] = val
 #                 sig_miner.set_fixed_params(list(parss_.keys()), values=list(parss_.values()))
                 
-                sig_bkg_mod.set_bkg_params(bkg_bf_params_list[0])
+                sig_bkg_mod.set_bkg_params(bkg_bf_params_list[i])
 
                 t0 = tbins0[i]
                 t1 = tbins1[i]
@@ -623,7 +623,7 @@ def analysis_for_imxy_square(imx0, imx1, imy0, imy1, bkg_bf_params_list,\
     
     
 
-@profile
+#@profile
 def do_analysis(proc_num, square_tab, ev_data, flux_mod, rt_dir,\
                 ebins0, ebins1, bl_dmask,\
                 trigger_time, work_dir,\
