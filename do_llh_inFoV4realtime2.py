@@ -529,9 +529,9 @@ def analysis_for_imxy_square(imx0, imx1, imy0, imy1, bkg_bf_params_list,\
             t0 = tbins0[i]
             t1 = tbins1[i]
             dt = t1 - t0
-            sig_llh_obj.set_time(tbins0[i], tbins1[i])
             
             sig_bkg_mod.set_bkg_params(bkg_bf_params_list[i])
+            sig_llh_obj.set_time(tbins0[i], tbins1[i])
             
 #             for pname,val in bkg_bf_params_list[i].items():
 #                 pars_[bkg_name+'_'+pname] = val
