@@ -118,7 +118,7 @@ def cli():
             default='/storage/home/jjd330/work/local/NITRATES/submission_scripts/pyscript_template_array.pbs')
     parser.add_argument('--min_pc', type=float,\
             help="Min partical coding fraction to use",\
-            default=0.1)
+            default=0.001)
     parser.add_argument('--twind', type=float,\
             help="Number of seconds to go +/- from the trigtime",\
             default=20)
