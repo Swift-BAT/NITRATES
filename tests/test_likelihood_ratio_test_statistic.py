@@ -285,7 +285,9 @@ def calculate_LLH_ratio_test_statistic(theta, phi):
     flux_params['gamma'] = 0.8
     flux_params['Epeak'] = 350.0
     sig_mod.set_flux_params(flux_params)
-
+    sig_bkg_mod.set_bkg_params(bkg_params)
+    sig_bkg_mod.set_sig_params(sig_pars)
+    
     t0 = trigger_time - 0.512
     t1 = t0 + 2.048
     sig_llh_obj.set_time(t0, t1)
