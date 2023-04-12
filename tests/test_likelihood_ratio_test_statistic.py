@@ -22,6 +22,22 @@ from copy import copy, deepcopy
 import logging, traceback
 import sys
 
+import nitrates
+from nitrates.config import rt_dir, solid_angle_dpi_fname
+from nitrates.lib import get_conn, det2dpi, mask_detxy, get_info_tab,\
+                                    get_twinds_tab, ang_sep, theta_phi2imxy,\
+                                    imxy2theta_phi, convert_imxy2radec,\
+                                    convert_radec2thetaphi,\
+                                    convert_radec2imxy, convert_theta_phi2radec
+from nitrates.response import RayTraces
+from nitrates.models import Cutoff_Plaw_Flux, Plaw_Flux, \
+                                    get_eflux_from_model, Source_Model_InOutFoV,\
+                                    Bkg_Model_wFlatA, CompoundModel,\
+                                    Point_Source_Model_Binned_Rates,\
+                                    im_dist, Sig_Bkg_Model
+from nitrates.llh_analysis import parse_bkg_csv, LLH_webins,\
+                                    NLLH_ScipyMinimize_Wjacob
+from nitrates.llh_analysis.LLH import LLH_webins2
 
 #################################################################################
 # Function for calculating the likelihood ratio test statistic in the same manner
@@ -29,33 +45,17 @@ import sys
 # theta and phi values of the source signal as arguments.
 def old_calculate_LLH_ratio_test_statistic(theta, phi):
 
-    import nitrates
-    from nitrates.config import rt_dir, solid_angle_dpi_fname
-    from nitrates.lib import get_conn, det2dpi, mask_detxy, get_info_tab,\
-                                    get_twinds_tab, ang_sep, theta_phi2imxy,\
-                                    imxy2theta_phi, convert_imxy2radec,\
-                                    convert_radec2thetaphi,\
-                                    convert_radec2imxy, convert_theta_phi2radec
-    from nitrates.response import RayTraces
-    from nitrates.models import Cutoff_Plaw_Flux, Plaw_Flux, \
-                                    get_eflux_from_model, Source_Model_InOutFoV,\
-                                    Bkg_Model_wFlatA, CompoundModel,\
-                                    Point_Source_Model_Binned_Rates,\
-                                    im_dist
-    from nitrates.llh_analysis import parse_bkg_csv, LLH_webins,\
-                                    NLLH_ScipyMinimize_Wjacob
-
     work_dir = os.path.join(os.getcwd(), 'nitrates_resp_dir')
     rt_dir = os.path.join(work_dir,'ray_traces_detapp_npy')
-    nitrates.config.RESP_TAB_DNAME = os.path.join(work_dir,'resp_tabs_ebins')
     nitrates.config.COMP_FLOR_RESP_DNAME = os.path.join(work_dir,'comp_flor_resps')
     nitrates.config.HP_FLOR_RESP_DNAME = os.path.join(work_dir,'hp_flor_resps')
     solid_angle_dpi_fname = os.path.join(work_dir,'solid_angle_dpi.npy')
+    
+    nitrates.config.RESP_TAB_DNAME = os.path.join(work_dir,'resp_tabs_ebins')
     nitrates.config.bright_source_table_fname = os.path.join(work_dir,'bright_src_cat.fits')
     nitrates.config.ELEMENT_CROSS_SECTION_DNAME = os.path.join(work_dir,'element_cross_sections')
 
     conn = get_conn(os.path.join(work_dir,'results.db'))
-
     info_tab = get_info_tab(conn)
 
     ebins0 = np.array([15.0, 24.0, 35.0, 48.0, 64.0])
@@ -63,7 +63,6 @@ def old_calculate_LLH_ratio_test_statistic(theta, phi):
                                         np.log10(500.0),5+1))[:-1]
     ebins0 = np.round(ebins0, decimals=1)[:-1]
     ebins1 = np.append(ebins0[1:], [350.0])
-    nebins = len(ebins0)
 
     trigger_time = info_tab['trigtimeMET'][0]
     t_end = trigger_time + 1e3
@@ -80,7 +79,6 @@ def old_calculate_LLH_ratio_test_statistic(theta, phi):
     att_quat = attfile['QPARAM'][att_ind]
 
     dmask = fits.open(os.path.join(work_dir,'detmask.fits'))[0].data
-    ndets = np.sum(dmask==0)
 
     mask_vals = mask_detxy(dmask, ev_data)
     bl_dmask = (dmask==0.)
@@ -91,18 +89,19 @@ def old_calculate_LLH_ratio_test_statistic(theta, phi):
         (ev_data['TIME']>=t_start)
 
     ev_data0 = ev_data[bl_ev]
-
     ra, dec = convert_theta_phi2radec(theta, phi, att_quat)
-    imx, imy = convert_radec2imxy(ra, dec, att_quat)
 
     flux_params = {'A':1.0, 'gamma':0.5, 'Epeak':1e2}
     flux_mod = Cutoff_Plaw_Flux(E0=100.0)
 
     rt_obj = RayTraces(rt_dir)
-    rt = rt_obj.get_intp_rt(imx, imy)
 
     sig_mod = Source_Model_InOutFoV(flux_mod, [ebins0,ebins1], bl_dmask,\
-                                    rt_obj, use_deriv=True)
+                                    rt_obj, use_deriv=True, \
+                                    resp_tab_dname=nitrates.config.RESP_TAB_DNAME,\
+                                    comp_flor_resp_dname=nitrates.config.COMP_FLOR_RESP_DNAME,\
+                                    hp_flor_resp_dname=nitrates.config.HP_FLOR_RESP_DNAME)
+    
     sig_mod.get_batxys()
     sig_mod.set_theta_phi(theta, phi)
 
@@ -115,6 +114,7 @@ def old_calculate_LLH_ratio_test_statistic(theta, phi):
 
     bkg_mod.has_deriv = False
     bkg_mod_list = [bkg_mod]
+
     Nsrcs = len(ps_mods)
     if Nsrcs > 0:
         bkg_mod_list += ps_mods
@@ -136,8 +136,8 @@ def old_calculate_LLH_ratio_test_statistic(theta, phi):
     for pname,val in list(flux_params.items()):
         pars_['Signal_'+pname] = val
 
+    sig_mod.set_flux_params(flux_params)
     comp_mod = CompoundModel([bkg_mod, sig_mod])
-    
     sig_llh_obj = LLH_webins(ev_data0, ebins0, ebins1, bl_dmask, has_err=True)
     sig_llh_obj.set_model(comp_mod)
 
@@ -159,32 +159,19 @@ def old_calculate_LLH_ratio_test_statistic(theta, phi):
     t1 = t0 + 2.048
     sig_llh_obj.set_time(t0, t1)
 
-    pars, nllh, res = sig_miner.minimize()
+    _, nllh, _ = sig_miner.minimize()
     pars_['Signal_A'] = 1e-10
     bkg_nllh = -sig_llh_obj.get_logprob(pars_)
 
+    print('\n')
+    print("bkg_nllh = ", bkg_nllh)
+    print("old nllh = ", nllh)
+    print('\n')
     sqrtTS = np.sqrt(2.*(bkg_nllh - nllh[0]))
     return sqrtTS
 
 # Modifying previous test function to handle new LLH_webins2 class
 def calculate_LLH_ratio_test_statistic(theta, phi):
-
-    import nitrates
-    from nitrates.config import rt_dir, solid_angle_dpi_fname
-    from nitrates.lib import get_conn, det2dpi, mask_detxy, get_info_tab,\
-                                    get_twinds_tab, ang_sep, theta_phi2imxy,\
-                                    imxy2theta_phi, convert_imxy2radec,\
-                                    convert_radec2thetaphi,\
-                                    convert_radec2imxy, convert_theta_phi2radec
-    from nitrates.response import RayTraces
-    from nitrates.models import Cutoff_Plaw_Flux, Plaw_Flux, \
-                                    get_eflux_from_model, Source_Model_InOutFoV,\
-                                    Bkg_Model_wFlatA, CompoundModel,\
-                                    Point_Source_Model_Binned_Rates,\
-                                    im_dist, Sig_Bkg_Model
-    from nitrates.llh_analysis import parse_bkg_csv, LLH_webins,\
-                                    NLLH_ScipyMinimize_Wjacob
-    from nitrates.llh_analysis.LLH import LLH_webins2
 
     work_dir = os.path.join(os.getcwd(), 'nitrates_resp_dir')
     rt_dir = os.path.join(work_dir,'ray_traces_detapp_npy')
@@ -196,7 +183,9 @@ def calculate_LLH_ratio_test_statistic(theta, phi):
     nitrates.config.bright_source_table_fname = os.path.join(work_dir,'bright_src_cat.fits')
     nitrates.config.ELEMENT_CROSS_SECTION_DNAME = os.path.join(work_dir,'element_cross_sections')
 
+    evfname = os.path.join(work_dir,'filter_evdata.fits')
     conn = get_conn(os.path.join(work_dir,'results.db'))
+    solid_ang_dpi = np.load(solid_angle_dpi_fname)
     info_tab = get_info_tab(conn)
 
     ebins0 = np.array([15.0, 24.0, 35.0, 48.0, 64.0])
@@ -204,24 +193,17 @@ def calculate_LLH_ratio_test_statistic(theta, phi):
                                         np.log10(500.0),5+1))[:-1]
     ebins0 = np.round(ebins0, decimals=1)[:-1]
     ebins1 = np.append(ebins0[1:], [350.0])
-    nebins = len(ebins0)
 
     trigger_time = info_tab['trigtimeMET'][0]
     t_end = trigger_time + 1e3
     t_start = trigger_time - 1e3
 
-    evfname = os.path.join(work_dir,'filter_evdata.fits')
     ev_data = fits.open(evfname)[1].data
 
     GTI_PNT = Table.read(evfname, hdu='GTI_POINTING')
     GTI_SLEW = Table.read(evfname, hdu='GTI_SLEW')
 
-    attfile = fits.open(os.path.join(work_dir,'attitude.fits'))[1].data
-    att_ind = np.argmin(np.abs(attfile['TIME'] - trigger_time))
-    att_quat = attfile['QPARAM'][att_ind]
-
     dmask = fits.open(os.path.join(work_dir,'detmask.fits'))[0].data
-    ndets = np.sum(dmask==0)
 
     mask_vals = mask_detxy(dmask, ev_data)
     bl_dmask = (dmask==0.)
@@ -232,14 +214,11 @@ def calculate_LLH_ratio_test_statistic(theta, phi):
         (ev_data['TIME']>=t_start)
 
     ev_data0 = ev_data[bl_ev]
-    ra, dec = convert_theta_phi2radec(theta, phi, att_quat)
-    imx, imy = convert_radec2imxy(ra, dec, att_quat)
 
     flux_params = {'A':1.0, 'gamma':0.5, 'Epeak':1e2}
     flux_mod = Cutoff_Plaw_Flux(E0=100.0)
 
     rt_obj = RayTraces(rt_dir)
-    rt = rt_obj.get_intp_rt(imx, imy)
 
     sig_mod = Source_Model_InOutFoV(flux_mod, [ebins0,ebins1], bl_dmask,\
                                     rt_obj, use_deriv=True, \
@@ -251,14 +230,13 @@ def calculate_LLH_ratio_test_statistic(theta, phi):
     sig_mod.set_theta_phi(theta, phi)
 
     bkg_fname = os.path.join(work_dir,'bkg_estimation.csv')
-    solid_ang_dpi = np.load(solid_angle_dpi_fname)
-    
-    bkg_df, bkg_name, PSnames, bkg_mod, ps_mods = parse_bkg_csv(bkg_fname,\
+    bkg_df, bkg_name, _, bkg_mod, ps_mods = parse_bkg_csv(bkg_fname,\
                                     solid_ang_dpi, ebins0, ebins1,\
                                     bl_dmask, rt_dir)
 
     bkg_mod.has_deriv = False
     bkg_mod_list = [bkg_mod]
+
     Nsrcs = len(ps_mods)
     if Nsrcs > 0:
         bkg_mod_list += ps_mods
@@ -280,6 +258,7 @@ def calculate_LLH_ratio_test_statistic(theta, phi):
     for pname,val in list(flux_params.items()):
         pars_['Signal_'+pname] = val
 
+    # Only substantial changes from old test script start from here
     sig_llh_obj = LLH_webins2(ev_data0, ebins0, ebins1, bl_dmask, has_err=True)
     sig_mod.set_flux_params(flux_params)
 
@@ -291,12 +270,16 @@ def calculate_LLH_ratio_test_statistic(theta, phi):
 
     sig_bkg_mod.set_bkg_params(bkg_params)
     sig_bkg_mod.set_sig_params(sig_pars)
-
     sig_llh_obj.set_model(sig_bkg_mod)
+
+    fixed_pnames = list(pars_.keys())
+    fixed_vals = list(pars_.values())
+    trans = [None for i in range(len(fixed_pnames))]
 
     sig_miner = NLLH_ScipyMinimize_Wjacob('')
     sig_miner.set_llh(sig_llh_obj)
-    sig_miner.set_trans(['A'], [None])
+    #sig_miner.set_trans(fixed_pnames, trans)
+    #sig_miner.set_fixed_params(fixed_pnames, values=fixed_vals)
     sig_miner.set_fixed_params(['A'], fixed=False)
     
     flux_params['gamma'] = 0.8
@@ -307,10 +290,14 @@ def calculate_LLH_ratio_test_statistic(theta, phi):
     t1 = t0 + 2.048
     sig_llh_obj.set_time(t0, t1)
 
-    pars, nllh, res = sig_miner.minimize()
+    _, nllh, _ = sig_miner.minimize()
     pars_['A'] = 1e-10
     bkg_nllh = -sig_llh_obj.get_logprob(pars_)
     sqrtTS = np.sqrt(2.*(bkg_nllh - nllh[0]))
+    print('\n')
+    print("bkg_nllh = ", bkg_nllh)
+    print("nllh = ", nllh)
+    print('\n')
 
     return sqrtTS
 
@@ -332,6 +319,22 @@ def test_LLH_ratio_test_statistic_OFOV():
     assert (math.isclose(sqrtTS, 15.558480899442337) == True)
 
 
+#################################################################################
+# Older versions of the above tests using LLH_webins and using CompoundModel
+# in place of Sig_Bkg_Model.
+def old_test_LLH_ratio_test_statistic_IFOV():
+
+    sqrtTS = old_calculate_LLH_ratio_test_statistic(38.541, 137.652)
+    print("Old sqrtTS IFOV: ", sqrtTS)
+    assert (math.isclose(sqrtTS, 17.008497698693443) == True)
+
+def old_test_LLH_ratio_test_statistic_OFOV():
+    
+    sqrtTS = old_calculate_LLH_ratio_test_statistic(125.0, 25.0)
+    print("Old sqrtTS OFOV: ", sqrtTS)
+    assert (math.isclose(sqrtTS, 15.558480899442337) == True)
+
+
 
 if __name__ == "__main__":
     
@@ -339,14 +342,20 @@ if __name__ == "__main__":
     sqrtTS_2 = calculate_LLH_ratio_test_statistic(125.0, 25.0)
     print("sqrtTS for theta, phi = 38.541, 137.652: ", sqrtTS_1)
     print("sqrtTS for theta, phi = 125.0, 25.0: ", sqrtTS_2)
+
+
+    sqrtTS_1 = old_calculate_LLH_ratio_test_statistic(38.541, 137.652)
+    sqrtTS_2 = old_calculate_LLH_ratio_test_statistic(125.0, 25.0)
+    print("old sqrtTS for theta, phi = 38.541, 137.652: ", sqrtTS_1)
+    print("old sqrtTS for theta, phi = 125.0, 25.0: ", sqrtTS_2)
     
     
     '''
-    print("Testing IFOV")
+    print("Testing Old IFOV")
     print("___________________________________________________")
-    test_LLH_ratio_test_statistic_IFOV()
+    old_test_LLH_ratio_test_statistic_IFOV()
 
-    print("Testing OFOV")
+    print("Testing Old OFOV")
     print("___________________________________________________")
-    test_LLH_ratio_test_statistic_OFOV()
+    old_test_LLH_ratio_test_statistic_OFOV()
     '''
