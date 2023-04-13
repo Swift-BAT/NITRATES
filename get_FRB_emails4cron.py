@@ -18,28 +18,29 @@ def cli():
             action='store_true')
     parser.add_argument('--dbfname', type=str,\
             help="database file name",
-            default="/storage/work/jjd330/local/bat_data/realtime_workdir/FRB.db")
+            default="/gpfs/group/jak51/default/realtime_workdir/FRB.db")
+          #  default=None)
     parser.add_argument('--logfname', type=str,\
             help="log file name",
-            default="/storage/work/jjd330/local/bat_data/realtime_workdir/FRBemail_parse.log")
+            default="/gpfs/group/jak51/default/realtime_workdir/FRBemail_parse.log")
     parser.add_argument('--user', type=str,\
             help="email receiving emails",
             default="amon.bat.psu@gmail.com")
     parser.add_argument('--pas', type=str,\
             help="password for email receiving emails",
-            default=None)
+            default='wgiymjqcyapafqfp')
     parser.add_argument('--imap_server', type=str,\
             help="server for email receiving emails",
             default="imap.gmail.com")
     parser.add_argument('--script_path', type=str,\
             help="bash script to run analysis",
-            default="/storage/work/j/jjd330/local/bat_data/BatML/run_stuff_grb2.sh")
+            default="/gpfs/group/jak51/default/nitrates_realtime/NITRATES/run_stuff_grb2_vc.sh")
     parser.add_argument('--workdir', type=str,\
             help="bash script to run analysis",
-            default="/storage/work/j/jjd330/local/bat_data/realtime_workdir/")
+            default="/gpfs/group/jak51/default/realtime_workdir/")
     parser.add_argument('--htmldir', type=str,\
             help="bash script to run analysis",
-            default="/storage/work/j/jjd330/local/bat_data/realtime_workdir/FRB_BAT/")
+            default="/gpfs/group/jak51/default/realtime_workdir/FRB_BAT/")
 
     args = parser.parse_args()
     return args
@@ -307,8 +308,17 @@ def main(args):
         df_new.to_html(html_file)
 
 
+#    if db_exists:
+#        df_old = get_table_as_df(conn, table_name)
+
     if db_exists:
-        df_old = get_table_as_df(conn, table_name)
+        try:
+            df_old = get_table_as_df(conn, table_name)
+        except Exception as E:
+            logging.error(E)
+            logging.error(traceback.format_exc())
+            logging.warning("Error reading db")
+            db_exists=False
 
     New_Trigger = False
 
@@ -372,8 +382,8 @@ def main(args):
             logging.error(traceback.format_exc())
             logging.warning("Trouble writing to DB, done trying")
             conn.close()
-            New_Trigger = False
-            logging.warning("Won't run analysis until it can be written")
+           # New_Trigger = False
+           # logging.warning("Won't run analysis until it can be written")
     try:
         df_tot = pd.concat([df_old, df_new])
         df_tot.to_html(html_file)

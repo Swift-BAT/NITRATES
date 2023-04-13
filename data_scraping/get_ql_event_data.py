@@ -1,15 +1,15 @@
 import logging, traceback, argparse
 import requests
 import urllib.request, urllib.error, urllib.parse
-import urllib.request, urllib.parse, urllib.error
-from bs4 import BeautifulSoup
 import os
+from bs4 import BeautifulSoup
 from astropy.io import fits
 from astropy.time import Time
 import numpy as np
 import sys
 import pandas as pd
-sys.path.append("/storage/work/jjd330/local/bat_data/BatML/data_scraping/")
+#sys.path.append("/storage/work/jjd330/local/bat_data/BatML/data_scraping/")
+sys.path.append("/gpfs/group/jak51/default/nitrates_realtime/NITRATES/data_scraping/")
 
 from db_ql_funcs import get_conn, get_qlevent_db_tab, write_new_obsid_line,\
                     update_obsid_line, get_db_tab, write_event_files2db
@@ -128,13 +128,13 @@ def cli():
     parser = argparse.ArgumentParser()
     parser.add_argument('--save_dir', type=str,\
             help="Directory to save data to",\
-            default='/storage/work/jjd330/local/bat_data/realtime_workdir/')
+            default='/gpfs/group/jak51/default/realtime_workdir/')
     parser.add_argument('--dbfname', type=str,\
             help="Name of the sqlite database",\
             default=None)
     parser.add_argument('--htmldir', type=str,\
             help="bash script to run analysis",
-            default="/storage/work/j/jjd330/local/bat_data/realtime_workdir/LVC_BAT/")
+            default="/gpfs/group/jak51/default/realtime_workdir/htmls")
     args = parser.parse_args()
     return args
 
@@ -149,7 +149,7 @@ def main(args):
     # then download the files and record the file_names
     # also get the start and stop times of the event data and record them
 
-    log_fname = os.path.join(args.save_dir, 'get_quicklook_event_data.log')
+    log_fname = os.path.join(args.save_dir, 'get_quicklook_event_data_test.log')
 
     logging.basicConfig(filename=log_fname, level=logging.INFO,\
                     format='%(asctime)s-' '%(levelname)s- %(message)s')
@@ -274,8 +274,8 @@ def main(args):
     pd.set_option('display.max_colwidth', -1)
     ql_db_tab = get_db_tab(conn, table_name)
     html_file = os.path.join(args.htmldir, table_name+".html")
-    ql_db_tab.sort_values('METstart', ascending=False).to_html(\
-            html_file, render_links=True, float_format='{0:.4f}'.format)
+#    ql_db_tab.sort_values('METstart', ascending=False).to_html(\
+#            html_file, render_links=True, float_format='{0:.4f}'.format)
     conn.close()
 
 

@@ -8,14 +8,15 @@ echo "#-#-#Job started on `hostname` at `date` "
 echo This job runs on the following processors:
 echo `cat $PBS_NODEFILE`
 
-module load python/2.7.14-anaconda5.0.1
+#module load python/2.7.14-anaconda5.0.1
+module load anaconda3
 
-source activate myenv
+source activate py38_cluster
 
 export PYTHONPATH=$batml_path:$PYTHONPATH
 export PYTHONPATH=$ht_path:$PYTHONPATH
 
-HEADAS=/storage/work/jjd330/heasoft/heasoft-6.24/x86_64-pc-linux-gnu-libc2.12
+HEADAS=/storage/work/jjd330/heasoft/heasoft-6.21/x86_64-unknown-linux-gnu-libc2.12
 export HEADAS
 . $HEADAS/headas-init.sh
 
@@ -30,7 +31,8 @@ export PFILES="/tmp/$$.tmp/pfiles;$HEADAS/syspfiles"
 
 
 
-batml_path='/storage/work/jjd330/local/bat_data/BatML/'
+#batml_path='/storage/work/jjd330/local/bat_data/BatML/'
+batml_path='/gpfs/group/jak51/default/nitrates_realtime/NITRATES/'
 ht_path=$batml_path'HeasoftTools/'
 
 export PYTHONPATH=$batml_path:$PYTHONPATH

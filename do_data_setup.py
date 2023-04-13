@@ -24,8 +24,8 @@ from hp_funcs import pc_gwmap2good_pix
 from gti_funcs import add_bti2gti, bti2gti, gti2bti, union_gtis, flags2gti,\
                         get_btis_for_glitches, check_if_in_GTI,\
                         find_and_remove_cr_glitches
-sys.path.append('/storage/home/jjd330/work/local/bat_data/BatML/data_scraping/')
-sys.path.append('/storage/home/jjd330/work/local/bat_data/BatML/HeasoftTools/')
+sys.path.append('/gpfs/group/jak51/default/nitrates_realtime/NITRATES/data_scraping/')
+sys.path.append('/gpfs/group/jak51/default/nitrates_realtime/NITRATES/HeasoftTools/')
 from db_ql_funcs import get_gainoff_fname
 from bat_tool_funcs import bateconvert
 
@@ -432,8 +432,9 @@ def get_dmask(args, evdata, use_glob=False):
 
 
 
-
-    glob_dmask_fname = "/storage/work/j/jjd330/local/bat_data/swbbadpix20041120v008.fits.gz"
+#    glob_dmask_fname = "/storage/home/gzr5209/bat-data/swbbadpix20041120v008.fits.gz"
+    glob_dmask_fname= "/gpfs/group/jak51/default/swbbadpix20041120v008.fits.gz"
+#    glob_dmask_fname = "/storage/work/j/jjd330/local/bat_data/swbbadpix20041120v008.fits.gz"
     global_dmask = fits.open(glob_dmask_fname)[-2].data
 
     if args.dmask is None and args.Obsid_Dir is None:
@@ -581,25 +582,25 @@ def cli():
     parser = argparse.ArgumentParser()
     parser.add_argument('--drm_dir', type=str,\
             help="drm_directory",
-            default=None)
+            default='/gpfs/group/jak51/default/responses/drms/')
     parser.add_argument('--rt_dir', type=str,\
             help="rt_directory",\
             default=None)
     parser.add_argument('--work_dir', type=str,\
             help="Directory to work in",\
-            default='/gpfs/scratch/jjd330/bat_data/')
+            default=None)
     parser.add_argument('--data_dbfname', type=str,\
             help="DB file name with information on the BAT data already downloaded from the QL site",
-            default="/storage/home/j/jjd330/work/local/bat_data/realtime_workdir/BATQL.db")
+            default="/gpfs/group/jak51/default/nitrates_realtime/NITRATES/data_scraping/BATQL.db")
     parser.add_argument('--att_dname', type=str,\
             help="Directory name that contains merged attfiles over chunks of time",
-            default="/storage/home/j/jjd330/work/local/bat_data/realtime_workdir/merged_atts/")
+            default="/gpfs/group/jak51/default/realtime_workdir/merged_atts/")
     parser.add_argument('--acs_dname', type=str,\
             help="Directory name that contains merged acsfiles over chunks of time",
-            default="/storage/home/j/jjd330/work/local/bat_data/realtime_workdir/merged_acs/")
+            default="/gpfs/group/jak51/default/realtime_workdir/merged_acs/")
     parser.add_argument('--enb_dname', type=str,\
             help="Directory name that contains merged enable/disable files over chunks of time",
-            default="/storage/home/j/jjd330/work/local/bat_data/realtime_workdir/merged_enbs/")
+            default="/gpfs/group/jak51/default/realtime_workdir/merged_enbs/")
     parser.add_argument('--evfname', type=str,\
             help="Event data file",
             default=None)

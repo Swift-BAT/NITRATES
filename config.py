@@ -1,6 +1,6 @@
 import os
 
-NITRATES_RESP_DIR="/Users/tparsota/Documents/BAT_SCRIPTS/NITRATES_BAT_RSP_FILES/" # env variable can be used or this can be set
+NITRATES_RESP_DIR="/gpfs/group/jak51/default/responses/" # env variable can be used or this can be set
 if NITRATES_RESP_DIR is None:
     NITRATES_RESP_DIR=os.getenv('NITRATES_RESP_DIR')
 if NITRATES_RESP_DIR is None:
@@ -17,12 +17,17 @@ COMP_FLOR_RESP_DNAME = os.path.join(NITRATES_RESP_DIR,'comp_flor_resps')
 # Directory with Flor response only
 HP_FLOR_RESP_DNAME = os.path.join(NITRATES_RESP_DIR,'hp_flor_resps')
 # Directory with the element cross section data files
-ELEMENT_CROSS_SECTION_DNAME = os.path.join(NITRATES_RESP_DIR,'element_cross_sections')
+#ELEMENT_CROSS_SECTION_DNAME = os.path.join(NITRATES_RESP_DIR,'element_cross_sections')
+
+ELEMENT_CROSS_SECTION_DNAME ='/gpfs/group/jak51/default/nitrates_realtime/NITRATES/element_cross_sections'
 
 # DPI with st per det exposed to sky
 solid_angle_dpi_fname = os.path.join(NITRATES_RESP_DIR,'solid_angle_dpi.npy')
+
 # Table of bright known sources from the Trans Monitor
-bright_source_table_fname = os.path.join(NITRATES_RESP_DIR,'bright_src_cat.fits')
+#bright_source_table_fname = os.path.join(NITRATES_RESP_DIR,'bright_src_cat.fits')
+
+bright_source_table_fname = '/gpfs/group/jak51/default/nitrates_realtime/NITRATES/bright_src_cat.fits'
 
 EBINS0 = [15., 24., 35., 48., 64., 84., 120., 171.5, 245.]
 EBINS1 = [24., 35., 48., 64., 84., 120., 171.5, 245., 350.]
@@ -32,8 +37,8 @@ EBINS1 = [24., 35., 48., 64., 84., 120., 171.5, 245., 350.]
 ###   Old Stuff ###
 ###########################
 
-bat_ml_dir='/storage/work/jjd330/local/bat_data/BatML/'
-ftool_wrap='/storage/work/jjd330/local/bat_data/BatML/HeasoftTools/run_ftool.sh'
+bat_ml_dir='/gpfs/group/jak51/default/nitrates_realtime/NITRATES/'
+ftool_wrap='/gpfs/group/jak51/default/nitrates_realtime/NITRATES/HeasoftTools/run_ftool.sh'
 
 # rt_dir='/gpfs/scratch/jjd330/bat_data/ray_traces_detapp_npy/'
 # fp_dir = '/gpfs/scratch/jjd330/bat_data/footprints_npy/'
@@ -45,8 +50,16 @@ ftool_wrap='/storage/work/jjd330/local/bat_data/BatML/HeasoftTools/run_ftool.sh'
 
 HEADAS="/storage/work/jjd330/heasoft/heasoft-6.21/x86_64-unknown-linux-gnu-libc2.12"
 HEADAS_INIT="/storage/work/jjd330/heasoft/heasoft-6.21/x86_64-unknown-linux-gnu-libc2.12/headas-init.sh"
+#CALDB="/storage/work/jjd330/caldb_files"
+#CALDB_INIT="/storage/work/jjd330/caldb_files/software/tools/caldbinit.sh"
+
+#g3 heasoft installation
+#HEADAS="/storage/home/gzr5209/work/Softwares/heasoft/heasoft-6.28/x86_64-pc-linux-gnu-libc2.17"
+#HEADAS_INIT="/storage/home/gzr5209/work/Softwares/heasoft/heasoft-6.28/x86_64-pc-linux-gnu-libc2.17/headas-init.sh"
 CALDB="/storage/work/jjd330/caldb_files"
 CALDB_INIT="/storage/work/jjd330/caldb_files/software/tools/caldbinit.sh"
+
+
 
 # EBINS0 = [14., 24., 36.3, 55.4, 80.0, 120.7]
 # EBINS1 = [24., 36.3, 55.4, 80.0, 120.7, 194.9]
