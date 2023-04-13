@@ -900,13 +900,13 @@ def main(args):
     nexps = len(exp_groups)
 
 
-    rates_resp_dir = '/gpfs/scratch/jjd330/bat_data/rates_resps/'
+    rates_resp_dir = '/gpfs/group/jak51/default/responses/rates_resps/'
     rate_resp_arr = get_rates_resp_arr(rates_resp_dir)
 
     imxs = rate_resp_arr['imx']
     imys = rate_resp_arr['imy']
 
-    rates_resp_out_dir = '/gpfs/scratch/jjd330/bat_data/rates_resps_outFoV2/'
+    rates_resp_out_dir = '/gpfs/group/jak51/default/responses/rates_resps_outFoV2/'
     rate_resp_out_arr = get_rates_resp_arr_outFoV(rates_resp_out_dir)
 
     hp_inds = rate_resp_out_arr['hp_ind']

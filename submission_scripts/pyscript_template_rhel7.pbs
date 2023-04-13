@@ -11,7 +11,7 @@ echo `cat $PBS_NODEFILE`
 
 module load anaconda3
 # change this to whatever your env name is
-source activate myenv
+source activate py38_cluster
 
 export PYTHONPATH=$batml_path:$PYTHONPATH
 export PYTHONPATH=$ht_path:$PYTHONPATH
@@ -31,7 +31,8 @@ export PYTHONPATH=$ht_path:$PYTHONPATH
 
 
 # change batml_path to wherever the code is 
-batml_path='/storage/work/jjd330/local/bat_data/BatML/'
+#batml_path='/storage/work/jjd330/local/bat_data/BatML/'
+batml_path='/gpfs/group/jak51/default/nitrates_realtime/NITRATES/'
 ht_path=$batml_path'HeasoftTools/'
 
 export PYTHONPATH=$batml_path:$PYTHONPATH

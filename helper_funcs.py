@@ -25,7 +25,8 @@ except:
     pas = ''
 
 def send_error_email(subject, body):
-    to = ['delauj2@gmail.com']
+    to = ['gzr5209@psu.edu','sjs8171@psu.edu','jak51@psu.edu','aaron.tohu@gmail.com','delauj2@gmail.com']
+   # to = ['gzr5209@psu.edu', 'sjs8171@psu.edu','delauj2@gmail.com']
     me = 'amon.psu@gmail.com'
     msg = MIMEText(body)
     msg['Subject'] = subject
@@ -41,7 +42,8 @@ def send_error_email(subject, body):
     s.quit()
 
 def send_email(subject, body, to):
-    #to = ['delauj2@gmail.com']
+    to = ['gzr5209@psu.edu','sjs8171@psu.edu','jak51@psu.edu','aaron.tohu@gmail.com','delauj2@gmail.com']
+   # to = ['gzr5209@psu.edu', 'sjs8171@psu.edu','delauj2@gmail.com']
     me = 'amon.psu@gmail.com'
     msg = MIMEText(body)
     msg['Subject'] = subject
@@ -57,7 +59,8 @@ def send_email(subject, body, to):
     s.quit()
 
 def send_email_wHTML(subject, body, to):
-    #to = ['delauj2@gmail.com']
+    to = ['gzr5209@psu.edu','sjs8171@psu.edu','jak51@psu.edu','aaron.tohu@gmail.com','delauj2@gmail.com']
+    #to = ['gzr5209@psu.edu', 'sjs8171@psu.edu','delauj2@gmail.com']
     me = 'amon.psu@gmail.com'
     msg = MIMEMultipart('alternative')
     msg['Subject'] = subject
@@ -84,7 +87,6 @@ def send_email_attach(subject, body, to, fname):
     msg['Subject'] = subject
     msg['From'] = me
     msg['To'] = ", ".join(to)
-
     msg.attach(MIMEText(body))
     s = smtplib.SMTP('smtp.gmail.com:587')
     s.ehlo()

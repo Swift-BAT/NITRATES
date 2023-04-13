@@ -10,15 +10,19 @@ import subprocess
 import voeventparse as vp
 from datetime import datetime
 
-from helper_funcs import send_error_email, send_email
+from helper_funcs_gcn import send_error_email, send_email
 from hp_funcs import err_circle2prob_map
 # sys.path.append('/var/lib/mysql_drbd/amon/monitor_scripts/check_events/')
 # from functions import slack_message
 
 # run as nohup python $batml_path'listen4notices.py' > /storage/work/jjd330/local/bat_data/realtime_workdir/listen4gcns_out.log 2>&1 &
 
-workdir='/storage/work/j/jjd330/local/bat_data/realtime_workdir/'
-script_path='/storage/work/j/jjd330/local/bat_data/BatML/run_stuff_grb2.sh'
+#workdir='/storage/work/j/jjd330/local/bat_data/realtime_workdir/'
+workdir='/gpfs/group/jak51/default/realtime_workdir/'
+#open queue
+#script_path='/gpfs/group/jak51/default/nitrates_realtime/NITRATES/run_stuff_grb2_open.sh'
+#basic cores
+script_path='/gpfs/group/jak51/default/nitrates_realtime/NITRATES/run_stuff_grb2_vc.sh'
 
 INTEGRAL = [gcn.notice_types.INTEGRAL_SPIACS,
             gcn.notice_types.INTEGRAL_WAKEUP,
@@ -38,6 +42,9 @@ HAWC = [171]#gcn.notice_types.HAWC_BURST_MONITOR]
 
 IC = [173, 174]#gcn.notice_types.ICECUBE_ASTROTRACK_GOLD,
         # gcn.notice_types.ICECUBE_ASTROTRACK_BRONZE]
+
+GECAM = [gcn.notice_types.GECAM_FLT,
+        gcn.notice_types.GECAM_GND]
 
 # Function to call every time a GCN is received.
 # Run only for notices of type
@@ -114,6 +121,8 @@ def process_gcn(payload, root):
             name = 'F' + params['TrigID']
         elif notice_type in CALET:
             name = 'C' + params['TrigID']
+        elif notice_type in GECAM:
+            name = 'G' + params['TRIGGER_UID']
         else:
             name = eventtime
 
@@ -284,7 +293,7 @@ if __name__ == "__main__":
     log_fname = os.path.join(workdir, 'gcn_listner.log')
     pid_fname = os.path.join(workdir, 'gcn_listner.pid')
     with open(pid_fname, 'wb') as f:
-        f.write(str(os.getpid()))
+        f.write(str(os.getpid()).encode('utf-8'))
     fh = logging.FileHandler(filename=log_fname)
     fh.setLevel(logging.INFO)
     fh.setFormatter(formatter)
