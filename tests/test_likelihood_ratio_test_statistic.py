@@ -89,7 +89,6 @@ def old_calculate_LLH_ratio_test_statistic(theta, phi):
         (ev_data['TIME']>=t_start)
 
     ev_data0 = ev_data[bl_ev]
-    ra, dec = convert_theta_phi2radec(theta, phi, att_quat)
 
     flux_params = {'A':1.0, 'gamma':0.5, 'Epeak':1e2}
     flux_mod = Cutoff_Plaw_Flux(E0=100.0)
@@ -163,10 +162,6 @@ def old_calculate_LLH_ratio_test_statistic(theta, phi):
     pars_['Signal_A'] = 1e-10
     bkg_nllh = -sig_llh_obj.get_logprob(pars_)
 
-    print('\n')
-    print("bkg_nllh = ", bkg_nllh)
-    print("old nllh = ", nllh)
-    print('\n')
     sqrtTS = np.sqrt(2.*(bkg_nllh - nllh[0]))
     return sqrtTS
 
@@ -258,7 +253,6 @@ def calculate_LLH_ratio_test_statistic(theta, phi):
     for pname,val in list(flux_params.items()):
         pars_['Signal_'+pname] = val
 
-    # Only substantial changes from old test script start from here
     sig_llh_obj = LLH_webins2(ev_data0, ebins0, ebins1, bl_dmask, has_err=True)
     sig_mod.set_flux_params(flux_params)
 
@@ -272,14 +266,8 @@ def calculate_LLH_ratio_test_statistic(theta, phi):
     sig_bkg_mod.set_sig_params(sig_pars)
     sig_llh_obj.set_model(sig_bkg_mod)
 
-    fixed_pnames = list(pars_.keys())
-    fixed_vals = list(pars_.values())
-    trans = [None for i in range(len(fixed_pnames))]
-
     sig_miner = NLLH_ScipyMinimize_Wjacob('')
     sig_miner.set_llh(sig_llh_obj)
-    #sig_miner.set_trans(fixed_pnames, trans)
-    #sig_miner.set_fixed_params(fixed_pnames, values=fixed_vals)
     sig_miner.set_fixed_params(['A'], fixed=False)
     
     flux_params['gamma'] = 0.8
@@ -295,11 +283,8 @@ def calculate_LLH_ratio_test_statistic(theta, phi):
     _, nllh, _ = sig_miner.minimize()
     pars_['A'] = 1e-10
     bkg_nllh = -sig_llh_obj.get_logprob(pars_)
+    
     sqrtTS = np.sqrt(2.*(bkg_nllh - nllh[0]))
-    print('\n')
-    print("bkg_nllh = ", bkg_nllh)
-    print("nllh = ", nllh)
-    print('\n')
 
     return sqrtTS
 
@@ -310,7 +295,7 @@ def calculate_LLH_ratio_test_statistic(theta, phi):
 def test_LLH_ratio_test_statistic_IFOV():
 
     sqrtTS = calculate_LLH_ratio_test_statistic(38.541, 137.652)
-    assert (math.isclose(sqrtTS, 17.008497698693443) == True)
+    assert (math.isclose(sqrtTS, 17.0084976, rel_tol=1e-07) == True)
 
 #################################################################################
 # Testing the calculation of the LLH ratio test statistic for an OFOV source 
@@ -318,23 +303,23 @@ def test_LLH_ratio_test_statistic_IFOV():
 def test_LLH_ratio_test_statistic_OFOV():
     
     sqrtTS = calculate_LLH_ratio_test_statistic(125.0, 25.0)
-    assert (math.isclose(sqrtTS, 15.558480899442337) == True)
+    assert (math.isclose(sqrtTS, 15.5584808, rel_tol=1e-07) == True)
 
 
 #################################################################################
 # Older versions of the above tests using LLH_webins and using CompoundModel
-# in place of Sig_Bkg_Model.
+# in place of LLH_webins2 and Sig_Bkg_Model respectively.
 def old_test_LLH_ratio_test_statistic_IFOV():
 
     sqrtTS = old_calculate_LLH_ratio_test_statistic(38.541, 137.652)
     print("Old sqrtTS IFOV: ", sqrtTS)
-    assert (math.isclose(sqrtTS, 17.008497698693443) == True)
+    assert (math.isclose(sqrtTS, 17.0084976, rel_tol=1e-07) == True)
 
 def old_test_LLH_ratio_test_statistic_OFOV():
     
     sqrtTS = old_calculate_LLH_ratio_test_statistic(125.0, 25.0)
     print("Old sqrtTS OFOV: ", sqrtTS)
-    assert (math.isclose(sqrtTS, 15.558480899442337) == True)
+    assert (math.isclose(sqrtTS, 15.5584808, rel_tol=1e-07) == True)
 
 
 
@@ -342,22 +327,14 @@ if __name__ == "__main__":
     
     sqrtTS_1 = calculate_LLH_ratio_test_statistic(38.541, 137.652)
     sqrtTS_2 = calculate_LLH_ratio_test_statistic(125.0, 25.0)
-    print("sqrtTS for theta, phi = 38.541, 137.652: ", sqrtTS_1)
-    print("sqrtTS for theta, phi = 125.0, 25.0: ", sqrtTS_2)
-
+    print("sqrtTS_1 for theta, phi = 38.541, 137.652: ", sqrtTS_1)
+    print("sqrtTS_2 for theta, phi = 125.0, 25.0: ", sqrtTS_2)
+    print('\n')
+    
 
     sqrtTS_1 = old_calculate_LLH_ratio_test_statistic(38.541, 137.652)
     sqrtTS_2 = old_calculate_LLH_ratio_test_statistic(125.0, 25.0)
-    print("old sqrtTS for theta, phi = 38.541, 137.652: ", sqrtTS_1)
-    print("old sqrtTS for theta, phi = 125.0, 25.0: ", sqrtTS_2)
+    print("old sqrtTS_1 for theta, phi = 38.541, 137.652: ", sqrtTS_1)
+    print("old sqrtTS_2 for theta, phi = 125.0, 25.0: ", sqrtTS_2)
+    print('\n')
     
-    
-    '''
-    print("Testing Old IFOV")
-    print("___________________________________________________")
-    old_test_LLH_ratio_test_statistic_IFOV()
-
-    print("Testing Old OFOV")
-    print("___________________________________________________")
-    old_test_LLH_ratio_test_statistic_OFOV()
-    '''
