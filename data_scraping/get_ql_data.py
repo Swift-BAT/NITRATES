@@ -10,7 +10,9 @@ from astropy.time import Time
 from astropy.table import Table, vstack, unique
 import sys
 
-sys.path.append("/storage/work/jjd330/local/bat_data/BatML/data_scraping/")
+#sys.path.append("/storage/work/jjd330/local/bat_data/BatML/data_scraping/")
+sys.path.append("/gpfs/group/jak51/default/nitrates_realtime/NITRATES/data_scraping/")
+
 from db_ql_funcs import get_conn, get_ql_db_tab, write_new_obsid_line,\
                     update_obsid_line
 
@@ -125,7 +127,7 @@ def cli():
     parser = argparse.ArgumentParser()
     parser.add_argument('--save_dir', type=str,\
             help="Directory to save data to",\
-            default='/storage/work/jjd330/local/bat_data/realtime_workdir/')
+            default='/gpfs/group/jak51/default/realtime_workdir/')
     parser.add_argument('--dbfname', type=str,\
             help="Name of the sqlite database",\
             default=None)
@@ -143,7 +145,7 @@ def main(args):
     # then download the files and record the file_names
     # also get the start and stop times of the event data and record them
 
-    log_fname = os.path.join(args.save_dir, 'get_quicklook_data2.log')
+    log_fname = os.path.join(args.save_dir, 'get_quicklook_data2_test.log')
 
     logging.basicConfig(filename=log_fname, level=logging.INFO,\
                     format='%(asctime)s-' '%(levelname)s- %(message)s')

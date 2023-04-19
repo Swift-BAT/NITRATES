@@ -31,7 +31,7 @@ def cli():
             default=None)
     parser.add_argument('--fp_dir', type=str,\
             help="Directory where the detector footprints are",
-            default='/storage/work/jjd330/local/bat_data/rtfp_dir_npy/')
+            default='/gpfs/group/jak51/default/rtfp_dir_npy')
     parser.add_argument('--Nrate_jobs', type=int,\
             help="Total number of jobs",
             default=16)
@@ -109,13 +109,13 @@ def cli():
             action='store_true')
     parser.add_argument('--pbs_fname', type=str,\
             help="Name of pbs script",\
-            default='/storage/work/jjd330/local/bat_data/BatML/submission_scripts/pyscript_template.pbs')
+            default='/gpfs/group/jak51/default/nitrates_realtime/NITRATES/submission_scripts/pyscript_template.pbs')
     parser.add_argument('--pbs_rhel7_fname', type=str,\
             help="Name of pbs script",\
-            default='/storage/work/jjd330/local/bat_data/BatML/submission_scripts/pyscript_template_rhel7.pbs')
+            default='/gpfs/group/jak51/default/nitrates_realtime/NITRATES/submission_scripts/pyscript_template_rhel7.pbs')
     parser.add_argument('--pbs_arr_fname', type=str,\
             help="Name of pbs script",\
-            default='/storage/home/jjd330/work/local/NITRATES/submission_scripts/pyscript_template_array.pbs')
+            default='/gpfs/group/jak51/default/nitrates_realtime/NITRATES/submission_scripts/pyscript_template_array.pbs')
     parser.add_argument('--min_pc', type=float,\
             help="Min partical coding fraction to use",\
             default=0.1)
@@ -1016,7 +1016,7 @@ def main(args):
 
     to = ['delauj2@gmail.com', 'aaron.tohu@gmail.com',
             'g3raman@psu.edu', 'jak51@psu.edu']
-    subject = 'BATML ' + args.GWname
+    subject = ' BATML ' + args.GWname
     body = "Got data and starting analysis"
     try:
         send_email(subject, body, to)
