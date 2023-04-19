@@ -361,6 +361,10 @@ def do_init_bkg_wPSs(bkg_mod, llh_obj, src_tab, rt_obj, GTI, sig_twind,\
 
         llh_obj.set_model(comp_mod)
 
+        ######Added here to test if we need to even do this type of operation:
+        #im_steps=1
+        #Nprocs=1
+        ###################
         bf_nllh, bf_params, TS_nulls = bkg_withPS_fit(src_tab, comp_mod,\
                                       llh_obj, bkg_t0s, bkg_t1s,\
                                       test_null=True, im_steps=im_steps,\
