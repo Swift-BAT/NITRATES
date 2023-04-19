@@ -101,7 +101,7 @@ def add_imxy2src_tab(src_tab, attfile, t0):
     src_tab['imy'] = imys
     return src_tab
 
-def get_srcs_infov(attfile, t0, pcfname=None, pcmin=5e-2):
+def get_srcs_infov(attfile, t0, pcfname=None, pcmin=1e-3):
 
     brt_src_tab = Table.read(bright_source_table_fname)
     add_imxy2src_tab(brt_src_tab, attfile, t0)
@@ -365,6 +365,7 @@ def do_init_bkg_wPSs(bkg_mod, llh_obj, src_tab, rt_obj, GTI, sig_twind,\
         #im_steps=1
         #Nprocs=1
         ###################
+
         bf_nllh, bf_params, TS_nulls = bkg_withPS_fit(src_tab, comp_mod,\
                                       llh_obj, bkg_t0s, bkg_t1s,\
                                       test_null=True, im_steps=im_steps,\

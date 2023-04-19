@@ -35,7 +35,7 @@ from ..models.models import CompoundModel, Point_Source_Model_Binned_Rates, Sig_
                      Bkg_Model_wFlatA, Source_Model_InFoV, Source_Model_InOutFoV
 from ..lib.coord_conv_funcs import theta_phi2imxy, imxy2theta_phi
 from ..lib.gti_funcs import mk_gti_bl, union_gtis
-
+from ..llh_analysis.do_manage2 import get_in_res_fnames
 
 # need to read rate fits from DB
 # and read twinds
@@ -482,7 +482,7 @@ def analysis_for_imxy_square(imx0, imx1, imy0, imy1, bkg_bf_params_list,\
 #                     parss_[bkg_name+'_'+pname] = val
 #                 sig_miner.set_fixed_params(list(parss_.keys()), values=list(parss_.values()))
                 
-                sig_bkg_mod.set_bkg_params(bkg_bf_params_list[0])
+                sig_bkg_mod.set_bkg_params(bkg_bf_params_list[i])
 
                 t0 = tbins0[i]
                 t1 = tbins1[i]
@@ -529,9 +529,9 @@ def analysis_for_imxy_square(imx0, imx1, imy0, imy1, bkg_bf_params_list,\
             t0 = tbins0[i]
             t1 = tbins1[i]
             dt = t1 - t0
-            sig_llh_obj.set_time(tbins0[i], tbins1[i])
             
             sig_bkg_mod.set_bkg_params(bkg_bf_params_list[i])
+            sig_llh_obj.set_time(tbins0[i], tbins1[i])
             
 #             for pname,val in bkg_bf_params_list[i].items():
 #                 pars_[bkg_name+'_'+pname] = val
@@ -621,13 +621,12 @@ def analysis_for_imxy_square(imx0, imx1, imy0, imy1, bkg_bf_params_list,\
         del sig_mod
         return res_df, None
 
-
 #@profile
-def do_analysis(square_tab, ev_data, flux_mod, rt_dir,\
+def do_analysis(proc_num, square_tab, ev_data, flux_mod, rt_dir,\
                 ebins0, ebins1, bl_dmask,\
                 trigger_time, work_dir,\
                 bkg_fname, keep_all, TS2keep=4.5,\
-                minTS2scan=6.0):
+                minTS2scan=6.0, ignore_started=False):
 
 
     nebins = len(ebins0)
@@ -677,7 +676,7 @@ def do_analysis(square_tab, ev_data, flux_mod, rt_dir,\
         already_started = False
         if fname0 in fnames:
             already_started = True
-        if already_started:
+        if already_started and not ignore_started:
             logging.info("Already started")
             continue
 
@@ -912,6 +911,24 @@ def main(args):
                         trigtime, work_dir, args.bkg_fname, args.keep_all,\
                         TS2keep=args.TS2keep, minTS2scan=args.minTS2scan)
 
+    shuffled_square_tab = square_tab.sample(frac=1)
+
+    for ind,row in shuffled_square_tab.iterrows():
+        # see if already completed
+        res_fname = 'res_%d_%d_.csv' %(row['squareID'],row['proc_group'])
+        fnames = get_in_res_fnames(work_dir)
+        if res_fname in fnames:
+            continue
+        # send only the row for this squareID
+        bl = (shuffled_square_tab['squareID']==row['squareID'])
+        
+        logging.info('squareID: %d no results yet, starting analysis'%(row['squareID']))
+            
+        do_analysis(row['proc_group'], shuffled_square_tab[bl], ev_data, flux_mod, rt_dir,\
+                        ebins0, ebins1, bl_dmask,\
+                        trigtime, work_dir, args.bkg_fname, args.keep_all,\
+                        TS2keep=args.TS2keep, minTS2scan=args.minTS2scan,\
+                        ignore_started=True)
 
 
 if __name__ == "__main__":

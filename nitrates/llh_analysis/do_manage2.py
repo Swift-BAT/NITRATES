@@ -31,7 +31,7 @@ def cli():
             default=None)
     parser.add_argument('--fp_dir', type=str,\
             help="Directory where the detector footprints are",
-            default='/storage/work/jjd330/local/bat_data/rtfp_dir_npy/')
+            default='/gpfs/group/jak51/default/rtfp_dir_npy')
     parser.add_argument('--Nrate_jobs', type=int,\
             help="Total number of jobs",
             default=16)
@@ -109,10 +109,13 @@ def cli():
             action='store_true')
     parser.add_argument('--pbs_fname', type=str,\
             help="Name of pbs script",\
-            default='/storage/work/jjd330/local/bat_data/BatML/submission_scripts/pyscript_template.pbs')
+            default='/gpfs/group/jak51/default/nitrates_realtime/NITRATES/submission_scripts/pyscript_template.pbs')
     parser.add_argument('--pbs_rhel7_fname', type=str,\
             help="Name of pbs script",\
-            default='/storage/work/jjd330/local/bat_data/BatML/submission_scripts/pyscript_template_rhel7.pbs')
+            default='/gpfs/group/jak51/default/nitrates_realtime/NITRATES/submission_scripts/pyscript_template_rhel7.pbs')
+    parser.add_argument('--pbs_arr_fname', type=str,\
+            help="Name of pbs script",\
+            default='/gpfs/group/jak51/default/nitrates_realtime/NITRATES/submission_scripts/pyscript_template_array.pbs')
     parser.add_argument('--min_pc', type=float,\
             help="Min partical coding fraction to use",\
             default=0.1)
@@ -800,7 +803,7 @@ def get_ssh_client(server, retries=5):
 
 def sub_jobs(njobs, name, pyscript, pbs_fname, queue='open',\
                 workdir=None, qos=None, q=None, ssh=True, extra_args=None,\
-                ppn=1, rhel7=False):
+                ppn=1, rhel7=False, array=True):
 
     hostname = socket.gethostname()
 
@@ -863,6 +866,23 @@ def sub_jobs(njobs, name, pyscript, pbs_fname, queue='open',\
     cmds = []
     jobids = []
 
+    if array and not ssh:
+        if njobs > 1:
+            cmd_ = 'workdir=%s,njobs=%d,pyscript=%s,extra_args="%s" -t 0-%d' %(workdir,njobs,pyscript,extra_args,njobs-1)
+        else:
+            cmd_ = 'workdir=%s,njobs=%d,pyscript=%s,extra_args="%s"' %(workdir,njobs,pyscript,extra_args)
+        cmd = base_sub_cmd + cmd_
+        logging.info("Trying to submit: ")
+        logging.info(cmd)
+
+        try:
+            os.system(cmd)
+            # subprocess.check_call(cmd, shell=True)
+        except Exception as E:
+            logging.error(E)
+            logging.error("Messed up with ")
+            logging.error(cmd)
+        return
     for i in range(njobs):
 
         # cmd_ = 'jobid=%d,workdir=%s,njobs=%d,pyscript=%s' %(i,workdir,njobs,pyscript)
@@ -996,7 +1016,7 @@ def main(args):
 
     to = ['delauj2@gmail.com', 'aaron.tohu@gmail.com',
             'g3raman@psu.edu', 'jak51@psu.edu']
-    subject = 'BATML ' + args.GWname
+    subject = ' BATML ' + args.GWname
     body = "Got data and starting analysis"
     try:
         send_email(subject, body, to)
@@ -1116,29 +1136,19 @@ def main(args):
     # just set this to 16 for now
     Nratejobs = 24
 
+    pbs_script = args.pbs_arr_fname
 
     if args.do_bkg:
         logging.info("Submitting bkg estimation job now")
         # try:
         if args.archive:
             extra_args = "--archive --twind %.3f"%(args.twind)
-            if args.rhel7:
-                sub_jobs(1, 'BKG_'+args.GWname, args.BKGpyscript,\
-                        args.pbs_rhel7_fname, queue=args.queue, ppn=4,\
-                        extra_args=extra_args, qos=None, rhel7=args.rhel7, q=args.q)
-            else:
-                sub_jobs(1, 'BKG_'+args.GWname, args.BKGpyscript,\
-                        args.pbs_fname, queue=args.queue, ppn=4,\
+            sub_jobs(1, 'BKG_'+args.GWname, args.BKGpyscript,\
+                        pbs_script, queue=args.queue, ppn=4,\
                         extra_args=extra_args, qos=None, rhel7=args.rhel7, q=args.q)
         else:
-            if args.rhel7:
-                sub_jobs(1, 'BKG_'+args.GWname, args.BKGpyscript,\
-                        args.pbs_rhel7_fname, queue=args.queue,\
-                        ppn=4, qos=None, rhel7=args.rhel7, q=args.q)
-            else:
-                sub_jobs(1, 'BKG_'+args.GWname, args.BKGpyscript,\
-                        args.pbs_fname,\
-                        queue=args.queue,\
+            sub_jobs(1, 'BKG_'+args.GWname, args.BKGpyscript,\
+                        pbs_script, queue=args.queue,\
                         ppn=4, qos=None, rhel7=args.rhel7, q=args.q)
         logging.info("Job submitted")
         # except Exception as E:
@@ -1175,13 +1185,9 @@ def main(args):
     if args.do_rates:
         logging.info("Submitting %d rates jobs now"%(Nratejobs))
         # try:
-        if args.rhel7:
-            sub_jobs(Nratejobs, 'RATES_'+args.GWname, args.RATEpyscript,\
-                        args.pbs_rhel7_fname, queue=args.queue, qos=args.qos,\
-                        extra_args=extra_args, rhel7=args.rhel7, q=args.q)
-        else:
-            sub_jobs(Nratejobs, 'RATES_'+args.GWname, args.RATEpyscript,\
-                        args.pbs_fname, queue=args.queue, qos=args.qos,\
+        
+        sub_jobs(Nratejobs, 'RATES_'+args.GWname, args.RATEpyscript,\
+                        pbs_script, queue=args.queue, qos=args.qos,\
                         extra_args=extra_args, rhel7=args.rhel7, q=args.q)
         logging.info("Jobs submitted")
         # except Exception as E:
@@ -1339,21 +1345,12 @@ def main(args):
     # also maybe add some emails in here for progress and info and errors
     if args.do_llh:
         logging.info("Submitting %d in FoV Jobs now"%(Njobs_in))
-        if args.rhel7:
-            sub_jobs(Njobs_in, 'LLHin_'+args.GWname, args.LLHINpyscript,\
-                        args.pbs_rhel7_fname, queue=args.queue, qos=args.qos,\
+        sub_jobs(Njobs_in, 'LLHin_'+args.GWname, args.LLHINpyscript,\
+                        pbs_script, queue=args.queue, qos=args.qos,\
                         extra_args=extra_args, rhel7=args.rhel7, q=args.q)
-            logging.info("Submitting %d out of FoV Jobs now"%(Njobs_out))
-            sub_jobs(Njobs_out, 'LLHo_'+args.GWname, args.LLHOUTpyscript,\
-                        args.pbs_rhel7_fname, queue=args.queue, qos=args.qos,\
-					 	rhel7=args.rhel7, q=args.q)
-        else:
-            sub_jobs(Njobs_in, 'LLHin_'+args.GWname, args.LLHINpyscript,\
-                        args.pbs_fname, queue=args.queue, qos=args.qos,\
-                        extra_args=extra_args, rhel7=args.rhel7, q=args.q)
-            logging.info("Submitting %d out of FoV Jobs now"%(Njobs_out))
-            sub_jobs(Njobs_out, 'LLHo_'+args.GWname, args.LLHOUTpyscript,\
-                        args.pbs_fname, queue=args.queue, qos=args.qos,\
+        logging.info("Submitting %d out of FoV Jobs now"%(Njobs_out))
+        sub_jobs(Njobs_out, 'LLHo_'+args.GWname, args.LLHOUTpyscript,\
+                        pbs_script, queue=args.queue, qos=args.qos,\
 					 	rhel7=args.rhel7, q=args.q)
         logging.info("Jobs submitted, now going to monitor progress")
 

@@ -157,13 +157,13 @@ def cli():
     parser = argparse.ArgumentParser()
     parser.add_argument('--save_dir', type=str,\
             help="Directory to save data to",\
-            default='/storage/work/jjd330/local/bat_data/realtime_workdir/')
+            default='/gpfs/group/jak51/default/realtime_workdir/')
     parser.add_argument('--dbfname', type=str,\
             help="Name of the sqlite database",\
             default=None)
     parser.add_argument('--htmldir', type=str,\
             help="bash script to run analysis",
-            default="/storage/work/j/jjd330/local/bat_data/realtime_workdir/LVC_BAT/")
+            default="/gpfs/group/jak51/default/realtime_workdir/htmls")
     parser.add_argument('--loglevel', type=int,\
             help="loglevel, 10=debug, 20=info",
             default=20)
@@ -180,7 +180,7 @@ def main(args):
     # then download the files and record the file_names
     # also get the start and stop times of the event data and record them
 
-    log_fname = os.path.join(args.save_dir, 'get_trig_event_data.log')
+    log_fname = os.path.join(args.save_dir, 'get_trig_event_data_test.log')
 
     logging.basicConfig(filename=log_fname, level=args.loglevel,\
                     format='%(asctime)s-' '%(levelname)s- %(message)s')

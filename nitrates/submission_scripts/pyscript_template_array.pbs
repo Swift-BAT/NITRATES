@@ -1,0 +1,54 @@
+#!/bin/bash
+
+#PBS -l nodes=1:ppn=1
+#PBS -l walltime=48:00:00
+#PBS -l mem=8gb
+#PBS -l pmem=6gb
+
+echo "#-#-#Job started on `hostname` at `date` "
+echo This job runs on the following processors:
+echo `cat $PBS_NODEFILE`
+
+module load anaconda3
+# change this to whatever your env name is
+# source activate py310
+source activate py38_cluster
+
+# HEADAS=/storage/work/jjd330/heasoft/heasoft-6.24/x86_64-pc-linux-gnu-libc2.12
+# export HEADAS
+# . $HEADAS/headas-init.sh
+#
+# # CALDB stuff
+# CALDB=/storage/work/jjd330/caldb_files; export CALDB
+# source $CALDB/software/tools/caldbinit.sh
+#
+# export HEADASNOQUERY=
+# export HEADASPROMPT=/dev/null
+#
+# export PFILES="/tmp/$$.tmp/pfiles;$HEADAS/syspfiles"
+
+
+# change batml_path to wherever the code is 
+#batml_path='/storage/home/jjd330/work/local/NITRATES/'
+#ht_path=$batml_path'HeasoftTools/'
+
+batml_path='/gpfs/group/jak51/default/nitrates_realtime/NITRATES/'
+ht_path=$batml_path'HeasoftTools/'
+
+export PYTHONPATH=$batml_path:$PYTHONPATH
+export PYTHONPATH=$ht_path:$PYTHONPATH
+
+echo $PBS_ARRAYID
+echo ${workdir}
+echo ${njobs}
+echo ${pyscript}
+echo ${extra_args}
+
+cd ${workdir}
+
+if [[ "$njobs" -eq 1 ]]; then
+python $batml_path${pyscript} --job_id 0 --Njobs ${njobs} ${extra_args}
+else
+python $batml_path${pyscript} --job_id $PBS_ARRAYID --Njobs ${njobs} ${extra_args}
+fi
+echo "#-#-#Job Ended at `date`"

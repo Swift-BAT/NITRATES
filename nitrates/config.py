@@ -49,6 +49,7 @@ ELEMENT_CROSS_SECTION_DNAME = os.path.join(dir, "data",'element_cross_sections')
 # Table of bright known sources from the Trans Monitor
 bright_source_table_fname = os.path.join(dir, "data",'bright_src_cat.fits')
 
+
 EBINS0 = [15., 24., 35., 48., 64., 84., 120., 171.5, 245.]
 EBINS1 = [24., 35., 48., 64., 84., 120., 171.5, 245., 350.]
 
@@ -89,6 +90,7 @@ drm_quad_dir='/gpfs/scratch/jjd330/bat_data/drms4quads/'
 #this has alot of hardcoded paths
 #'/storage/work/jjd330/local/bat_data/BatML/HeasoftTools/run_ftool.sh' #referenced in gen_tools.py
 
+
 # rt_dir='/gpfs/scratch/jjd330/bat_data/ray_traces_detapp_npy/'
 # #drm_dir='/gpfs/scratch/jjd330/bat_data/drms/'
 # solid_angle_dpi_fname='/storage/work/jjd330/local/bat_data/solid_angle_dpi.npy'
@@ -98,6 +100,7 @@ drm_quad_dir='/gpfs/scratch/jjd330/bat_data/drms4quads/'
 #HEADAS_INIT="/storage/work/jjd330/heasoft/heasoft-6.21/x86_64-unknown-linux-gnu-libc2.12/headas-init.sh"
 #CALDB="/storage/work/jjd330/caldb_files"
 #CALDB_INIT="/storage/work/jjd330/caldb_files/software/tools/caldbinit.sh"
+
 
 # EBINS0 = [14., 24., 36.3, 55.4, 80.0, 120.7]
 # EBINS1 = [24., 36.3, 55.4, 80.0, 120.7, 194.9]
