@@ -11,8 +11,8 @@ echo `cat $PBS_NODEFILE`
 
 module load anaconda3
 # change this to whatever your env name is
-source activate py310
-
+# source activate py310
+source activate py38_cluster
 
 # HEADAS=/storage/work/jjd330/heasoft/heasoft-6.24/x86_64-pc-linux-gnu-libc2.12
 # export HEADAS
@@ -29,7 +29,10 @@ source activate py310
 
 
 # change batml_path to wherever the code is 
-batml_path='/storage/home/jjd330/work/local/NITRATES/'
+#batml_path='/storage/home/jjd330/work/local/NITRATES/'
+#ht_path=$batml_path'HeasoftTools/'
+
+batml_path='/gpfs/group/jak51/default/nitrates_realtime/NITRATES/'
 ht_path=$batml_path'HeasoftTools/'
 
 export PYTHONPATH=$batml_path:$PYTHONPATH
