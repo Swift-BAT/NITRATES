@@ -95,10 +95,9 @@ python $batml_path'do_data_setup.py' --work_dir $workdir --trig_time $trigtime -
 if [ -f "filter_evdata.fits" ]; then
 
     python $batml_path'do_full_rates.py' --min_tbin $mintbin > full_rates.out 2>&1 &
-   #python $batml_path'do_manage2.py' --GWname $gwname --rhel7 --do_bkg --do_rates --do_llh --queue $queue --N_infov_jobs $NinFOVjobs --N_outfov_jobs $NoutFOVjobs > manager.out 2>&1 &
+    #python $batml_path'do_manage2.py' --GWname $gwname --rhel7 --do_bkg --do_rates --do_llh --queue $queue --N_infov_jobs $NinFOVjobs --N_outfov_jobs $NoutFOVjobs > manager.out 2>&1 &
     qsub /gpfs/group/jak51/default/nitrates_realtime/NITRATES/submission_scripts/launch_g3.pbs -v workdir=$workdir,gwname=$gwname -A jak51_b_g_bc_default -N launch -l feature=rhel7
 
 fi
 
-tar czf $gwname.tar.gz /gpfs/group/jak51/default/realtime_workdir/$gwname
 cd $curdir

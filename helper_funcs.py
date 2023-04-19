@@ -17,7 +17,7 @@ else:
     from email import encoders
 
 
-pass_fname = 'pass.txt'
+pass_fname = '/gpfs/group/jak51/default/nitrates_realtime/NITRATES/pass.txt'
 try:
     with open(pass_fname, 'r') as f:
         pas = f.read().strip()
