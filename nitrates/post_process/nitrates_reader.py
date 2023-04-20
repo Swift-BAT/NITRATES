@@ -281,9 +281,11 @@ def read_results_dirs(paths, api_token, figures=True, test=False):
     
     if test:
         config_id = 99
+        print(f'Config: {config_id}')
     else:
         #assume default search configuration
         config_id = 0
+        print(f'Config: {config_id}')
     
     api=API(api_token = api_token)
 
@@ -419,10 +421,10 @@ def read_results_dirs(paths, api_token, figures=True, test=False):
 
             # Full Rate Results
             try:
-                dfs = [grab_full_rate_results(paths[i], trig_ids[i])]
+                dfs = [grab_full_rate_results(paths[i], trig_ids[i],config_id=config_id)]
                 full_rate_results = pd.concat(dfs, axis=0, ignore_index=True)
-                api.post_nitrates_results(trigger=trig_ids[i],config_id=config_id,result_type='n_FULLRATE',result_data=full_rate_results)
-
+                result=api.post_nitrates_results(trigger=trig_ids[i],config_id=config_id,result_type='n_FULLRATE',result_data=full_rate_results)
+                print(result)
                 if figures:
                     rates = grab_full_rate_results(paths[i],trig_ids[i])
                     plot=plotly_waterfall_seeds(rates,trig_ids[i])
@@ -439,9 +441,10 @@ def read_results_dirs(paths, api_token, figures=True, test=False):
 
             # Split Rate Results
             try:
-                dfs = [grab_split_rate_results(paths[i], files[i], trig_ids[i], att_qs[i], sctimes[i])]
+                dfs = [grab_split_rate_results(paths[i], files[i], trig_ids[i], att_qs[i], sctimes[i],config_id=config_id)]
                 split_rate_results = pd.concat(dfs, axis=0, ignore_index=True)
-                api.post_nitrates_results(trigger=trig_ids[i],config_id=config_id,result_type='n_SPLITRATE',result_data=split_rate_results)
+                result=api.post_nitrates_results(trigger=trig_ids[i],config_id=config_id,result_type='n_SPLITRATE',result_data=split_rate_results)
+                print(result)
 
                 if figures:
                     splitrates = grab_split_rate_results(paths[i], files[i], trig_ids[i], att_qs[i], sctimes[i], top_n=1000000, notDB=True)
@@ -457,12 +460,12 @@ def read_results_dirs(paths, api_token, figures=True, test=False):
 
             # Out of FoV Results
             try:
-                res_out_tab=grab_out_fov_results(paths[i], files[i], trig_ids[i], att_qs[i], sctimes[i],notDB=True)
+                res_out_tab=grab_out_fov_results(paths[i], files[i], trig_ids[i], att_qs[i], sctimes[i],notDB=True,config_id=config_id)
                 table64= res_out_tab.loc[res_out_tab['TS'].nlargest(64).index]
                 dfos = [table64]
                 out_fov_results = pd.concat(dfos, axis=0, ignore_index=True)
-                api.post_nitrates_results(trigger=trig_ids[i],config_id=config_id,result_type='n_OUTFOV',result_data=out_fov_results)
-                print('Uploaded OFOV results :)')
+                result=api.post_nitrates_results(trigger=trig_ids[i],config_id=config_id,result_type='n_OUTFOV',result_data=out_fov_results)
+                print(result)
                 if figures:
                     #make the plot, and upload it!
                     plot = plotly_dlogl_sky(trig_ids[i],res_out_tab)
@@ -477,13 +480,12 @@ def read_results_dirs(paths, api_token, figures=True, test=False):
 
             # In FoV Results
             try:
-                res_in_tab=grab_in_fov_results(paths[i], files[i], trig_ids[i], att_qs[i], sctimes[i])
+                res_in_tab=grab_in_fov_results(paths[i], files[i], trig_ids[i], att_qs[i], sctimes[i],config_id=config_id)
                 table64 = res_in_tab.loc[res_in_tab['TS'].nlargest(64).index]
                 dfis = [table64]
                 in_fov_results = pd.concat(dfis, axis=0, ignore_index=True)
-                api.post_nitrates_results(trigger=trig_ids[i],config_id=config_id,result_type='n_INFOV',result_data=in_fov_results)
-
-                print('Uploaded IFOV results :)')
+                result=api.post_nitrates_results(trigger=trig_ids[i],config_id=config_id,result_type='n_INFOV',result_data=in_fov_results)
+                print(result)
             except Exception as e:
                 print('Failed to ingest IFOV results :(')
                 print(e)
@@ -495,9 +497,8 @@ def read_results_dirs(paths, api_token, figures=True, test=False):
                 in_fov_results = res_in_tab
                 dfs = [get_dlogls_inout(in_fov_results,out_fov_results,trig_ids[i],config_id=config_id)]
                 top_results=pd.concat(dfs,axis=0,ignore_index=True)
-                api.post_nitrates_results(trigger=trig_ids[i],config_id=config_id,result_type='n_TOP',result_data=top_results)
-
-                print('Uploaded top results :)')
+                result=api.post_nitrates_results(trigger=trig_ids[i],config_id=config_id,result_type='n_TOP',result_data=top_results)
+                print(result)
             except Exception as e:
                 print('Failed to ingest top results :(')
                 print(e)             
