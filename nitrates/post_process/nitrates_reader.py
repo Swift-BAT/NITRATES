@@ -343,7 +343,7 @@ def read_results_dirs(paths, api_token, figures=True, test=False):
                 failed[path] = "No data setup log found! Or issue with data setup log."
                 continue
 
-            datetimes[i] = datetime(2023,5,3,1,1,1,tzinfo=timezone.utc)
+            #datetimes[i] = datetime(2023,5,3,1,1,1,tzinfo=timezone.utc)
             try:
             # If a trigtime within 1 second of this time is in the database, associate the file with the trigger
                 existing_trig = api.get_trig(datetimes[i].isoformat())['trigger_id']
