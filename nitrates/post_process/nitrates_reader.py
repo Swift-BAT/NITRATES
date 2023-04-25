@@ -4,12 +4,15 @@ import pandas as pd
 import subprocess
 import json
 import numpy as np
+import sqlite3
 
 from math import floor
 from datetime import datetime, timedelta, timezone
 import pytz
 from astropy.io import fits
 from ..lib.coord_conv_funcs import imxy2theta_phi, convert_theta_phi2radec
+from ..lib.sqlite_funcs import get_conn
+from ..lib.dbread_funcs import get_info_tab
 
 #Assume all nitrates archival jobs are running on computers with US/Eastern timestamps
 tzlocal = pytz.timezone("US/Eastern")
@@ -304,44 +307,45 @@ def read_results_dirs(paths, api_token, figures=True, test=False):
     failed = {}
     for i, path in enumerate(paths):
         try:
-            # Grabbing timestamps from data log
             print('***********************************************')
             print(f'Starting {path}')
+
+
+            # Grabbing trigger time from results.db
+            try:
+                conn = get_conn(os.path.join(path,'results.db'))
+                info_tab = get_info_tab(conn)
+                datetimes[i] = datetime.fromisoformat(info_tab['trigtimeUTC'][0])
+                datetimes[i]=datetimes[i].replace(tzinfo=timezone.utc)
+                sctimes[i] = Clock(utctime=datetimes[i]).met
+            except Exception as e:
+                print("Can not find triggertime in results.db. Exiting")
+                failed[path] = "Can not find triggertime in results.db."
+                print(e)
+                continue
+
+            # Grabbing timestamps from data log
             try:
                 with open(os.path.join(path, 'data_setup.log')) as fob:
                     x = fob.read()
-                    # Captures date after DEBUG, which is the trigtime
-                    try:
-                        datetimes[i] = datetime.fromisoformat(re.search(r"DEBUG- (\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+)\n", x)[1])
-                    except Exception as e:
-                        print("Can not find triggertime in data_setup.log. Exiting")
-                        failed[path] = "Can not find triggertime in data_setup.log."
-                        continue
-                    datetimes[i]=datetimes[i].replace(tzinfo=timezone.utc)
-                    #print(datetimes[i].replace(tzinfo=timezone.utc).timestamp())
-                    sctimes[i] = Clock(utctime=datetimes[i]).met
                     evdatafound=None
                     try:
                         evdatafoundlocal = datetime.fromisoformat(re.search(r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d+-INFO-\s+[0-9]+ event files found", x)[1])
                         evdatafound= tzlocal.localize(evdatafoundlocal).astimezone(utc)
                     except Exception as e:
-                        print('No EvData found in log. Exiting')
+                        print('No EvData found timestamp in log. Trying to continue ')
                         print(e)
-                        failed[path] = "No EvData found in log."
-                        continue
+
                     alldatafound=None
                     try:
                         alldatafoundlocal = datetime.fromisoformat(re.search(r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d+-INFO-\s+Finally got all the data",x)[1])
                         alldatafound = tzlocal.localize(alldatafoundlocal).astimezone(utc)
                     except Exception as e:
-                        print('No All Data found in log')
-                        failed[path] = "No All Data found in log."
+                        print('No All Data found timestamp in log. Trying to continue')
                         print(e)
             except Exception as e:
-                print('No data setup log found! Or issue with data setup log. Exiting')
+                print('No data setup log found! Or issue with data setup log. Non-critical, trying to continue')
                 print (e)
-                failed[path] = "No data setup log found! Or issue with data setup log."
-                continue
 
             #datetimes[i] = datetime(2023,5,3,1,1,1,tzinfo=timezone.utc)
             try:
@@ -398,7 +402,7 @@ def read_results_dirs(paths, api_token, figures=True, test=False):
             start, bkgstart,splitstart,splitdone,Nsquares,Ntbins,Ntotseeds,OFOVfilesTot,IFOVfilesTot ,submitIFOVstamp, NjobsIFOV,submitOFOVstamp,NjobsOFOV,OFOVDone,IFOVDone, OFOVfilesDone, IFOVfilesDone = read_manager_log(path)
             
             try:
-                api.post_log(trigger = trig_ids[i],config_id=config_id,EvDataFound=evdatafound.isoformat(),AllDataFound=alldatafound.isoformat(),
+                api.post_log(trigger = trig_ids[i],config_id=config_id,EvDataFound=evdatafound.isoformat() if evdatafound else None,AllDataFound=alldatafound.isoformat() if alldatafound else None,
                 NITRATESstart=start.isoformat(),BkgStart=bkgstart.isoformat(),SplitRatesStart=splitstart.isoformat(),SplitRatesDone=splitdone.isoformat(),SquareSeeds=Nsquares,
                 TimeBins=Ntbins,TotalSeeds=Ntotseeds,IFOVStart=submitIFOVstamp.isoformat(),IFOVjobs=NjobsIFOV,IFOVDone=IFOVDone.isoformat(),
                 OFOVStart=submitOFOVstamp.isoformat(),OFOVjobs=NjobsOFOV,OFOVDone=OFOVDone.isoformat(), OFOVfilesTot = OFOVfilesTot, OFOVfilesDone=OFOVfilesDone,
