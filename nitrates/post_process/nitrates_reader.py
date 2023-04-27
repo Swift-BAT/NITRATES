@@ -282,7 +282,12 @@ def read_results_dirs(paths, api_token, figures=True, config_id=0):
     except ImportError:
         return print('swiftools and EchoAPI required, exiting.')
     
-    print(f'Config: {config_id}')
+    config_values=[0,1,2,99] #see https://guano.swift.psu.edu/configs
+
+    if config_id in config_values:
+        print(f'Config: {config_id}')
+    else:
+        raise ValueError(f'The value {config_id} is not a valid configuration id value. See https://guano.swift.psu.edu/configs for more information.')    
     
     api=API(api_token = api_token)
 
