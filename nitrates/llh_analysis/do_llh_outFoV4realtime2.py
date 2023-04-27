@@ -36,7 +36,7 @@ from ..llh_analysis.LLH import LLH_webins2
 from ..models.models import CompoundModel, Point_Source_Model_Binned_Rates, Sig_Bkg_Model,\
                      Bkg_Model_wFlatA, Source_Model_InFoV, Source_Model_InOutFoV
 from ..lib.coord_conv_funcs import theta_phi2imxy, imxy2theta_phi
-from ..llh_analysis.do_manage2 import get_in_res_fnames
+from ..llh_analysis.do_manage2 import get_out_res_fnames
 
 # need to read rate fits from DB
 # and read twinds
