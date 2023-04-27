@@ -274,7 +274,7 @@ def get_dlogls_inout(res_tab, res_out_tab,trigger_id,config_id=0,imdistthresh=0.
     df=df.sort_values(by=['maxTS'],ascending=False)
     return df
 
-def read_results_dirs(paths, api_token, figures=True, test=False):
+def read_results_dirs(paths, api_token, figures=True, config_id=0):
 
     try:
         from swifttools.swift_too import Clock
@@ -282,13 +282,7 @@ def read_results_dirs(paths, api_token, figures=True, test=False):
     except ImportError:
         return print('swiftools and EchoAPI required, exiting.')
     
-    if test:
-        config_id = 99
-        print(f'Config: {config_id}')
-    else:
-        #assume default search configuration
-        config_id = 0
-        print(f'Config: {config_id}')
+    print(f'Config: {config_id}')
     
     api=API(api_token = api_token)
 
