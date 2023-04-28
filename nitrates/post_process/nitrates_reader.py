@@ -278,7 +278,7 @@ def read_results_dirs(paths, api_token, figures=True, config_id=0):
 
     try:
         from swifttools.swift_too import Clock
-        from .EchoAPI import API
+        from EchoAPI import API
     except ImportError:
         return print('swiftools and EchoAPI required, exiting.')
     
@@ -349,10 +349,21 @@ def read_results_dirs(paths, api_token, figures=True, config_id=0):
             #datetimes[i] = datetime(2023,5,3,1,1,1,tzinfo=timezone.utc)
             try:
             # If a trigtime within 1 second of this time is in the database, associate the file with the trigger
-                existing_trig = api.get_trig(datetimes[i].isoformat())['trigger_id']
+                response = api.get_trig(datetimes[i].isoformat())
             except Exception as e:
-                print('Failed to query triggers.')
+                print('Failed to query triggers from API.')
                 print(e)
+                failed[path]='Failed to query triggers from API.'
+                continue
+
+            try:
+                existing_trig = response['trigger_id']
+            except Exception as e:
+                print(e)
+                print(response)
+                failed[path]=response
+                continue
+
 
             if existing_trig:
                 print('Already existing trigger!')
