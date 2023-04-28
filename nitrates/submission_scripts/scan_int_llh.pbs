@@ -1,0 +1,33 @@
+#!/bin/bash
+
+#PBS -l nodes=1:ppn=1
+#PBS -l walltime=48:00:00
+#PBS -l mem=4gb
+
+echo "#-#-#Job started on `hostname` at `date` "
+echo This job runs on the following processors:
+echo `cat $PBS_NODEFILE`
+
+module load python/2.7.14-anaconda5.0.1
+
+source activate myenv
+
+export PYTHONPATH=$batml_path:$PYTHONPATH
+export PYTHONPATH=$ht_path:$PYTHONPATH
+
+
+batml_path='/storage/work/jjd330/local/bat_data/BatML/'
+ht_path=$batml_path'HeasoftTools/'
+
+export PYTHONPATH=$batml_path:$PYTHONPATH
+export PYTHONPATH=$ht_path:$PYTHONPATH
+
+echo ${jobid}
+echo ${workdir}
+echo ${njobs}
+
+cd ${workdir}
+
+python $batml_path'do_intllh_scan.py' --job_id ${jobid}
+
+echo "#-#-#Job Ended at `date`"
