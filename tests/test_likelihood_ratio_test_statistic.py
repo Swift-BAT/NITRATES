@@ -44,8 +44,8 @@ from nitrates.llh_analysis.LLH import LLH_webins2
 # as in the Example_LLH_setup_fixed_dirs.ipynb notebook. Here, we specify the
 # theta and phi values of the source signal as arguments.
 def old_calculate_LLH_ratio_test_statistic(theta, phi):
-
-    work_dir = os.path.join(os.getcwd(), 'nitrates_resp_dir')
+    script_dir = os.path.dirname(__file__)
+    work_dir = os.path.join(script_dir, 'nitrates_resp_dir')
     rt_dir = os.path.join(work_dir,'ray_traces_detapp_npy')
     nitrates.config.COMP_FLOR_RESP_DNAME = os.path.join(work_dir,'comp_flor_resps')
     nitrates.config.HP_FLOR_RESP_DNAME = os.path.join(work_dir,'hp_flor_resps')
@@ -167,8 +167,8 @@ def old_calculate_LLH_ratio_test_statistic(theta, phi):
 
 # Modifying previous test function to handle new LLH_webins2 class
 def calculate_LLH_ratio_test_statistic(theta, phi):
-
-    work_dir = os.path.join(os.getcwd(), 'nitrates_resp_dir')
+    script_dir = os.path.dirname(__file__)
+    work_dir = os.path.join(script_dir, 'nitrates_resp_dir')
     rt_dir = os.path.join(work_dir,'ray_traces_detapp_npy')
     nitrates.config.COMP_FLOR_RESP_DNAME = os.path.join(work_dir,'comp_flor_resps')
     nitrates.config.HP_FLOR_RESP_DNAME = os.path.join(work_dir,'hp_flor_resps')
