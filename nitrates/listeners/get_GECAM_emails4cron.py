@@ -13,40 +13,66 @@ from ..lib.hp_funcs import err_circle2prob_map
 
 def cli():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--run_analysis', \
-                        help="Start analysis if there's a new event", \
-                        action='store_true')
-    parser.add_argument('--dbfname', type=str, \
-                        help="database file name",
-                        default="/storage/home/gzr5209/work/realtime_workdir_NITRATES/GECAM.db")
-    parser.add_argument('--logfname', type=str, \
-                        help="log file name",
-                        default="/storage/home/gzr5209/work/realtime_workdir_NITRATES/GECAMemail_parse.log")
-    parser.add_argument('--user', type=str, \
-                        help="email receiving emails",
-                        default="amon.bat.psu@gmail.com")
-    parser.add_argument('--pas', type=str, \
-                        help="password for email receiving emails",
-                        default='wgiymjqcyapafqfp')
-    parser.add_argument('--imap_server', type=str, \
-                        help="server for email receiving emails",
-                        default="imap.gmail.com")
-    parser.add_argument('--script_path', type=str, \
-                        help="bash script to run analysis",
-                        default="/storage/home/gzr5209/work/BatML_code_work/NITRATES/run_stuff_grb2_vc_realtime.sh")
-    parser.add_argument('--workdir', type=str, \
-                        help="bash script to run analysis",
-                        default="/storage/home/gzr5209/work/realtime_workdir_NITRATES/")
-    parser.add_argument('--htmldir', type=str, \
-                        help="bash script to run analysis",
-                        default="/storage/home/gzr5209/work/realtime_workdir_NITRATES/GECAM_BAT/")
+    parser.add_argument(
+        "--run_analysis",
+        help="Start analysis if there's a new event",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--dbfname",
+        type=str,
+        help="database file name",
+        default="/storage/home/gzr5209/work/realtime_workdir_NITRATES/GECAM.db",
+    )
+    parser.add_argument(
+        "--logfname",
+        type=str,
+        help="log file name",
+        default="/storage/home/gzr5209/work/realtime_workdir_NITRATES/GECAMemail_parse.log",
+    )
+    parser.add_argument(
+        "--user",
+        type=str,
+        help="email receiving emails",
+        default="amon.bat.psu@gmail.com",
+    )
+    parser.add_argument(
+        "--pas",
+        type=str,
+        help="password for email receiving emails",
+        default="wgiymjqcyapafqfp",
+    )
+    parser.add_argument(
+        "--imap_server",
+        type=str,
+        help="server for email receiving emails",
+        default="imap.gmail.com",
+    )
+    parser.add_argument(
+        "--script_path",
+        type=str,
+        help="bash script to run analysis",
+        default="/storage/home/gzr5209/work/BatML_code_work/NITRATES/run_stuff_grb2_vc_realtime.sh",
+    )
+    parser.add_argument(
+        "--workdir",
+        type=str,
+        help="bash script to run analysis",
+        default="/storage/home/gzr5209/work/realtime_workdir_NITRATES/",
+    )
+    parser.add_argument(
+        "--htmldir",
+        type=str,
+        help="bash script to run analysis",
+        default="/storage/home/gzr5209/work/realtime_workdir_NITRATES/GECAM_BAT/",
+    )
 
     args = parser.parse_args()
     return args
 
 
 def mk_frb_db(conn):
-    sql_command = '''CREATE TABLE FRB
+    sql_command = """CREATE TABLE FRB
             (FRBid TEXT PRIMARY KEY NOT NULL,
             name TEXT,
             timeUTC TEXT,
@@ -58,7 +84,7 @@ def mk_frb_db(conn):
             flux REAL,
             observatory TEXT,
             EventType TEXT,
-            importance REAL);'''
+            importance REAL);"""
 
     conn.execute(sql_command)
 
@@ -83,26 +109,26 @@ def get_imap_conn(user, pas, server):
     return M
 
 
-def get_LVC_email_nums(M, box='INBOX'):
+def get_LVC_email_nums(M, box="INBOX"):
     rv, _ = M.select(box)
 
-    rv, data = M.search(None, '(SUBJECT "LVC Subthreshold")', '(UNSEEN)')
+    rv, data = M.search(None, '(SUBJECT "LVC Subthreshold")', "(UNSEEN)")
 
     return data[0].split()
 
 
-def get_FRB_email_nums(M, box='INBOX'):
+def get_FRB_email_nums(M, box="INBOX"):
     rv, _ = M.select(box)
 
-    rv, data = M.search(None, '(SUBJECT "NEW FRB TRIGGER")', '(UNSEEN)')
+    rv, data = M.search(None, '(SUBJECT "NEW FRB TRIGGER")', "(UNSEEN)")
 
     return data[0].split()
 
 
-def get_GECAM_email_nums(M, box='INBOX'):
+def get_GECAM_email_nums(M, box="INBOX"):
     rv, _ = M.select(box)
 
-    rv, data = M.search(None, '(SUBJECT "GCN/GECAM_FLIGHT_NOTICE")', '(UNSEEN)')
+    rv, data = M.search(None, '(SUBJECT "GCN/GECAM_FLIGHT_NOTICE")', "(UNSEEN)")
 
     return data[0].split()
 
@@ -111,7 +137,7 @@ def fetch_parse_GECAM_emails(M, nums):
     data_dicts = []
 
     for num in nums:
-        rv, data = M.fetch(num, '(RFC822)')
+        rv, data = M.fetch(num, "(RFC822)")
         print(data[0][1])
         msg = email.message_from_string(data[0][1])
         print(msg)
@@ -119,24 +145,35 @@ def fetch_parse_GECAM_emails(M, nums):
         data_dict = {}
         print(m)
         # for line in m.get_payload().split('\n'):
-        for line in m.split('\n'):
+        for line in m.split("\n"):
             if len(line.split(":")) < 2:
                 continue
-            if line.split()[0] in ['From:', 'Date:', 'To:', 'Subject:']:
+            if line.split()[0] in ["From:", "Date:", "To:", "Subject:"]:
                 continue
             k = line.split(":")[0].strip("<td>").strip("</td>").strip()
-            if 'TRIGGER_DATE' in k:
+            if "TRIGGER_DATE" in k:
                 val0 = line.split(":")[1].strip().strip("<td>").strip("</td>").strip()
-                val0 += ":" + line.split(":")[2].strip().strip("<td>").strip("</td>").strip()
-                val0 += ":" + line.split(":")[3].strip().strip("<td>").strip("</td>").strip()
-            elif 'TRIG_RA' in k or 'TRIG_DEC' in k or 'TRIG_ERROR' in k or 'TRIGGER_DUR' in k:
+                val0 += (
+                    ":"
+                    + line.split(":")[2].strip().strip("<td>").strip("</td>").strip()
+                )
+                val0 += (
+                    ":"
+                    + line.split(":")[3].strip().strip("<td>").strip("</td>").strip()
+                )
+            elif (
+                "TRIG_RA" in k
+                or "TRIG_DEC" in k
+                or "TRIG_ERROR" in k
+                or "TRIGGER_DUR" in k
+            ):
                 val0 = line.split(":")[1].strip().strip("<td>").strip("</td>").strip()
                 val0 = val0.split()[0]
             else:
                 val0 = line.split(":")[1].strip().strip("<td>").strip("</td>").strip()
             try:
                 val = float(val0)
-                if 'TRIGGER_DUR' in k:
+                if "TRIGGER_DUR" in k:
                     val /= 1000.0
             except:
                 val = val0
@@ -146,7 +183,7 @@ def fetch_parse_GECAM_emails(M, nums):
         data_dicts.append(data_dict)
         logging.debug("data_dict")
         logging.debug(data_dict)
-        logging.debug('%d of %d emails parsed' % (len(data_dicts), len(nums)))
+        logging.debug("%d of %d emails parsed" % (len(data_dicts), len(nums)))
 
     return data_dicts
 
@@ -155,7 +192,7 @@ def fetch_parse_FRB_emails(M, nums):
     data_dicts = []
 
     for num in nums:
-        rv, data = M.fetch(num, '(RFC822)')
+        rv, data = M.fetch(num, "(RFC822)")
         print(data[0][1])
         msg = email.message_from_string(data[0][1])
         print(msg)
@@ -163,10 +200,10 @@ def fetch_parse_FRB_emails(M, nums):
         data_dict = {}
         print(m)
         # for line in m.get_payload().split('\n'):
-        for line in m.split('\n'):
+        for line in m.split("\n"):
             if len(line.split()) != 2:
                 continue
-            if line.split()[0] in ['From:', 'Date:', 'To:', 'Subject:']:
+            if line.split()[0] in ["From:", "Date:", "To:", "Subject:"]:
                 continue
             k = line.split()[0][:-1]
             val0 = line.split()[1]
@@ -184,7 +221,7 @@ def fetch_parse_FRB_emails(M, nums):
         data_dicts.append(data_dict)
         logging.debug("data_dict")
         logging.debug(data_dict)
-        logging.debug('%d of %d emails parsed' % (len(data_dicts), len(nums)))
+        logging.debug("%d of %d emails parsed" % (len(data_dicts), len(nums)))
 
     return data_dicts
 
@@ -193,14 +230,14 @@ def fetch_parse_LVC_emails(M, nums):
     data_dicts = []
 
     for num in nums:
-        rv, data = M.fetch(num, '(RFC822)')
+        rv, data = M.fetch(num, "(RFC822)")
         msg = email.message_from_string(data[0][1])
         m = msg.get_payload()[0]
         data_dict = {}
-        for line in m.get_payload().split('\n'):
+        for line in m.get_payload().split("\n"):
             if len(line.split()) != 2:
                 continue
-            if line.split()[0] in ['From:', 'Date:', 'To:', 'Subject:']:
+            if line.split()[0] in ["From:", "Date:", "To:", "Subject:"]:
                 continue
             k = line.split()[0][:-1]
             val0 = line.split()[1]
@@ -208,24 +245,24 @@ def fetch_parse_LVC_emails(M, nums):
                 val = float(val0)
             except:
                 val = val0
-            if k == 't_0':
-                k = 'GPSTime'
-                apyt = Time(val, format='gps', scale='utc')
-                data_dict['isot'] = apyt.isot
+            if k == "t_0":
+                k = "GPSTime"
+                apyt = Time(val, format="gps", scale="utc")
+                data_dict["isot"] = apyt.isot
             data_dict[k] = val
 
-        if 'GPSTime' in data_dict.keys():
+        if "GPSTime" in data_dict.keys():
             data_dicts.append(data_dict)
             if len(data_dicts) % 25 == 0:
-                logging.debug('%d of %d emails parsed' % (len(data_dicts), len(nums)))
+                logging.debug("%d of %d emails parsed" % (len(data_dicts), len(nums)))
 
     return data_dicts
 
 
-def get_LVC_skymap_email_nums(M, box='INBOX'):
+def get_LVC_skymap_email_nums(M, box="INBOX"):
     rv, _ = M.select(box)
 
-    rv, data = M.search(None, '(SUBJECT "LVC Skymap")', '(UNSEEN)')
+    rv, data = M.search(None, '(SUBJECT "LVC Skymap")', "(UNSEEN)")
 
     return data[0].split()
 
@@ -234,14 +271,14 @@ def fetch_parse_LVC_skymap_emails(M, nums, dname):
     data_dicts = []
 
     for num in nums:
-        rv, data = M.fetch(num, '(RFC822)')
+        rv, data = M.fetch(num, "(RFC822)")
         msg = email.message_from_string(data[0][1])
         m = msg.get_payload()[0]
         data_dict = {}
-        for line in m.get_payload().split('\n'):
+        for line in m.get_payload().split("\n"):
             #             if len(line.split()) != 2:
             #                 continue
-            if line.split()[0] in ['From:', 'Date:', 'To:', 'Subject:']:
+            if line.split()[0] in ["From:", "Date:", "To:", "Subject:"]:
                 continue
             k = line.split()[0][:-1]
             val0 = line.split()[-1]
@@ -252,23 +289,23 @@ def fetch_parse_LVC_skymap_emails(M, nums, dname):
                 val = float(val0)
             except:
                 val = val0
-            if 'Eve' in k:
-                k = 'UnixTime'
+            if "Eve" in k:
+                k = "UnixTime"
                 #                 apyt = Time(val, format='gps', scale='utc')
-                apyt = Time(val, format='unix', scale='utc')
-                data_dict['isot'] = apyt.isot
+                apyt = Time(val, format="unix", scale="utc")
+                data_dict["isot"] = apyt.isot
             data_dict[k] = val
 
-        if 'UnixTime' in data_dict.keys():
+        if "UnixTime" in data_dict.keys():
             data_dicts.append(data_dict)
 
-        direc = os.path.join(dname, data_dict['SID'])
+        direc = os.path.join(dname, data_dict["SID"])
 
         for part in msg.walk():
             # this part comes from the snipped I don't understand yet...
-            if part.get_content_maintype() == 'multipart':
+            if part.get_content_maintype() == "multipart":
                 continue
-            if part.get('Content-Disposition') is None:
+            if part.get("Content-Disposition") is None:
                 continue
             fileName = part.get_filename()
             fname = os.path.join(direc, fileName)
@@ -277,7 +314,7 @@ def fetch_parse_LVC_skymap_emails(M, nums, dname):
             if not os.path.exists(direc):
                 os.mkdir(direc)
             logging.info("Downloading file")
-            fp = open(fname, 'wb')
+            fp = open(fname, "wb")
             #     skmap = fits.open(part.get_payload(decode=True))
             #     print skmap
             fp.write(part.get_payload(decode=True))
@@ -289,8 +326,11 @@ def fetch_parse_LVC_skymap_emails(M, nums, dname):
 
 
 def main(args):
-    logging.basicConfig(filename=args.logfname, level=logging.DEBUG, \
-                        format='%(asctime)s-' '%(levelname)s- %(message)s')
+    logging.basicConfig(
+        filename=args.logfname,
+        level=logging.DEBUG,
+        format="%(asctime)s-" "%(levelname)s- %(message)s",
+    )
 
     table_name = "GECAM"
 
@@ -358,7 +398,7 @@ def main(args):
 
     if db_exists:
         logging.info("Reached here 3")
-        ID_bl = ~np.isin(df_new['TRIGGER_UID'], df_old['TRIGGER_UID'])
+        ID_bl = ~np.isin(df_new["TRIGGER_UID"], df_old["TRIGGER_UID"])
         # df_new = pd.concat([df_old, df_new])
 
     new_trig_ids = []
@@ -375,35 +415,34 @@ def main(args):
             # if len(NewTrigger_df) > 1:
             # idx = NewTrigger_df.groupby(['SID'])['far'].transform(min) == NewTrigger_df['far']
             for index, row in NewTrigger_df.iterrows():
-                new_trig_ids.append(row['TRIGGER_UID'])
-                new_trig_times.append(row['TRIGGER_DATE'])
-                ras.append(row['TRIG_RA'])
-                decs.append(row['TRIG_DEC'])
-                pos_errors.append(row['TRIG_ERROR'])
-                trig_durs.append(row['TRIGGER_DUR'])
+                new_trig_ids.append(row["TRIGGER_UID"])
+                new_trig_times.append(row["TRIGGER_DATE"])
+                ras.append(row["TRIG_RA"])
+                decs.append(row["TRIG_DEC"])
+                pos_errors.append(row["TRIG_ERROR"])
+                trig_durs.append(row["TRIGGER_DUR"])
 
         Nnewtrigs = len(new_trig_ids)
 
         logging.info(str(Nnewtrigs) + " new events")
 
         if Nnewtrigs == 0:  # and len(df_new) == len(df_old):
-
             return
     else:
         if len(df_new) > 0:
             New_Trigger = True
-            new_trig_ids = df_new['TRIGGER_UID']
-            new_trig_times = df_new['TRIGGER_DATE']
-            ras = df_new['TRIG_RA']
-            decs = df_new['TRIG_DEC']
-            pos_errors = df_new['TRIG_ERROR']
-            trig_durs = df_new['TRIGGER_DUR']
+            new_trig_ids = df_new["TRIGGER_UID"]
+            new_trig_times = df_new["TRIGGER_DATE"]
+            ras = df_new["TRIG_RA"]
+            decs = df_new["TRIG_DEC"]
+            pos_errors = df_new["TRIG_ERROR"]
+            trig_durs = df_new["TRIGGER_DUR"]
             Nnewtrigs = len(new_trig_ids)
             logging.info(str(Nnewtrigs) + " new events")
 
     logging.info("Appending the sql table")
     try:
-        df_new.to_sql(table_name, conn, if_exists='append', index=False)
+        df_new.to_sql(table_name, conn, if_exists="append", index=False)
     except Exception as E:
         logging.error(E)
         logging.error(traceback.format_exc())
@@ -411,7 +450,7 @@ def main(args):
         conn.close()
         conn = get_conn(args.dbfname)
         try:
-            df_new.to_sql(table_name, conn, if_exists='append', index=False)
+            df_new.to_sql(table_name, conn, if_exists="append", index=False)
         except Exception as E:
             logging.error(E)
             logging.error(traceback.format_exc())
@@ -429,18 +468,18 @@ def main(args):
 
     if args.run_analysis and New_Trigger:
         for i, trigID in enumerate(new_trig_ids):
-            trid_id_str = 'G' + str(trigID)
+            trid_id_str = "G" + str(trigID)
             logging.info("Running analysis for " + str(trigID))
             direc = os.path.join(args.workdir, trid_id_str)
             if not os.path.exists(direc):
                 os.mkdir(direc)
-            script_out_path = os.path.join(direc, 'run_stuff_out.log')
+            script_out_path = os.path.join(direc, "run_stuff_out.log")
 
             sky_map = err_circle2prob_map(ras[i], decs[i], pos_errors[i], sys_err=4.0)
-            sk_fname = os.path.join(direc, 'skymap.fits')
+            sk_fname = os.path.join(direc, "skymap.fits")
             hp.write_map(sk_fname, sky_map, nest=True, overwrite=True)
 
-            with open(script_out_path, 'w') as f:
+            with open(script_out_path, "w") as f:
                 logging.info("process args: ")
                 process_args = [args.script_path, new_trig_times[i], trid_id_str]
                 # if trig_durs[i] < 0.3:

@@ -3,23 +3,26 @@ import argparse
 import logging, traceback
 import time
 
-from ..lib.dbread_funcs import get_info_tab, guess_dbfname, get_files_tab,\
-                            get_twinds_tab
+from ..lib.dbread_funcs import (
+    get_info_tab,
+    guess_dbfname,
+    get_files_tab,
+    get_twinds_tab,
+)
 from ..lib.sqlite_funcs import get_conn
-#from dbread import get_files_tab
-from ..lib.helper_funcs import send_email, send_email_attach
-#from plot_funcs import mk_rates_plot
 
+# from dbread import get_files_tab
+from ..lib.helper_funcs import send_email, send_email_attach
+
+# from plot_funcs import mk_rates_plot
 
 
 def cli():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dbfname', type=str,\
-            help="Name to save the database to",\
-            default=None)
-    parser.add_argument('--gwname', type=str,\
-            help="GW identifier",\
-            default=None)
+    parser.add_argument(
+        "--dbfname", type=str, help="Name to save the database to", default=None
+    )
+    parser.add_argument("--gwname", type=str, help="GW identifier", default=None)
     args = parser.parse_args()
     return args
 
@@ -37,12 +40,10 @@ def is_there_event_data(conn):
 
 
 def email_stuff():
-
     return
 
 
 def main(args):
-
     # have several functions that are run on each loop
     # the function can stop once it already did it's job
     # like making a plot of the rates, if there's a rate plot
@@ -63,9 +64,11 @@ def main(args):
     # Have things like the plots and html tables put into
     # the realtime_workdir/results/S*/ folder
 
-    logging.basicConfig(filename='monitor.log', level=logging.DEBUG,\
-                    format='%(asctime)s-' '%(levelname)s- %(message)s')
-
+    logging.basicConfig(
+        filename="monitor.log",
+        level=logging.DEBUG,
+        format="%(asctime)s-" "%(levelname)s- %(message)s",
+    )
 
     script_start = time.time()
     dt = 0.0
@@ -80,29 +83,22 @@ def main(args):
     else:
         db_fname = args.dbfname
 
-    while dt < (24.*3600.):
-
+    while dt < (24.0 * 3600.0):
         conn = get_conn(db_fname)
 
         if not isev:
             isev = is_there_event_data(conn)
-            #if isev: should this be deleted? incomplete code
+            # if isev: should this be deleted? incomplete code
 
-
-        fnames = os.listdir('.')
+        fnames = os.listdir(".")
 
         #
 
-
         conn.close()
-        time.sleep(5*60.0)
-
-
-
+        time.sleep(5 * 60.0)
 
 
 if __name__ == "__main__":
-
     args = cli()
 
     main(args)

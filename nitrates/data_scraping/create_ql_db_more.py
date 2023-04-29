@@ -1,6 +1,6 @@
 import sqlite3
 
-sql_tab_qltdrss = '''CREATE TABLE SwiftQLtdrss
+sql_tab_qltdrss = """CREATE TABLE SwiftQLtdrss
             (obsid TEXT PRIMARY KEY NOT NULL,
             METstart REAL,
             METstop REAL,
@@ -11,9 +11,9 @@ sql_tab_qltdrss = '''CREATE TABLE SwiftQLtdrss
             TrigTime REAL,
             eventURL TEXT,
             eventFname TEXT
-            );'''
-            
-db_fname = 'BATQL.db'
+            );"""
+
+db_fname = "BATQL.db"
 
 conn = sqlite3.connect(db_fname)
 

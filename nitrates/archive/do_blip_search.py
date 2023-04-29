@@ -6,50 +6,44 @@ import logging, traceback, time
 
 from ..lib.funcs2run_bat_tools import std_grb, do_bkg, do_pc, do_search_mp
 from ..lib.sqlite_funcs import get_conn, timeID2time_dur, write_cat2db
-from ..lib.dbread_funcs import get_top_rate_timeIDs, get_files_tab,\
-                            guess_dbfname, get_info_tab
+from ..lib.dbread_funcs import (
+    get_top_rate_timeIDs,
+    get_files_tab,
+    guess_dbfname,
+    get_info_tab,
+)
 from ..config import EBINS0, EBINS1
-
-
-
 
 
 def cli():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--evfname', type=str,\
-            help="Event data file",
-            default=None)
-    parser.add_argument('--dmask', type=str,\
-            help="Detmask fname",
-            default=None)
-    parser.add_argument('--dbfname', type=str,\
-            help="Name of the database",\
-            default=None)
-    parser.add_argument('--Nimgs', type=int,\
-            help="Number of images to make",\
-            default=50)
-    parser.add_argument('--Nproc', type=int,\
-            help="Number of procs to use",\
-            default=2)
+    parser.add_argument("--evfname", type=str, help="Event data file", default=None)
+    parser.add_argument("--dmask", type=str, help="Detmask fname", default=None)
+    parser.add_argument(
+        "--dbfname", type=str, help="Name of the database", default=None
+    )
+    parser.add_argument(
+        "--Nimgs", type=int, help="Number of images to make", default=50
+    )
+    parser.add_argument("--Nproc", type=int, help="Number of procs to use", default=2)
     args = parser.parse_args()
     return args
 
 
-
-
 def main(args):
+    fname = "blip_search"
 
+    logging.basicConfig(
+        filename=fname + ".log",
+        level=logging.DEBUG,
+        format="%(asctime)s-" "%(levelname)s- %(message)s",
+    )
 
-    fname = 'blip_search'
-
-    logging.basicConfig(filename=fname+'.log', level=logging.DEBUG,\
-                    format='%(asctime)s-' '%(levelname)s- %(message)s')
-
-    f = open(fname+'.pid', 'w')
+    f = open(fname + ".pid", "w")
     f.write(str(os.getpid()))
     f.close()
 
-    logging.info("Wrote pid: %d" %(os.getpid()))
+    logging.info("Wrote pid: %d" % (os.getpid()))
 
     time_starting = time.time()
 
@@ -63,7 +57,6 @@ def main(args):
     logging.info("ebins1:")
     logging.info(ebins1)
 
-
     if args.dbfname is None:
         db_fname = guess_dbfname()
         if isinstance(db_fname, list):
@@ -71,22 +64,22 @@ def main(args):
     else:
         db_fname = args.dbfname
 
-    logging.info('Connecting to DB: ' + db_fname)
+    logging.info("Connecting to DB: " + db_fname)
     conn = get_conn(db_fname)
 
     info_tab = get_info_tab(conn)
-    logging.info('Got info table')
+    logging.info("Got info table")
 
-    trig_time = info_tab['trigtimeMET'][0]
-    min_ev_time = info_tab['tstartMET'][0]
+    trig_time = info_tab["trigtimeMET"][0]
+    min_ev_time = info_tab["tstartMET"][0]
 
     files_tab = get_files_tab(conn)
-    logging.info('Got files table')
+    logging.info("Got files table")
 
-    work_dir = files_tab['workDir'][0]
-    ev_fname = files_tab['evfname'][0]
-    dmask = files_tab['detmask'][0]
-    att_fname = files_tab['attfname'][0]
+    work_dir = files_tab["workDir"][0]
+    ev_fname = files_tab["evfname"][0]
+    dmask = files_tab["detmask"][0]
+    att_fname = files_tab["attfname"][0]
 
     Nimgs = args.Nimgs
 
@@ -100,9 +93,12 @@ def main(args):
     dpi_bkg_fnames = []
     logging.info("Making the bkg DPIs")
     for i in range(Nebins):
-        dpi_bkg_fnames.append(do_bkg(bkg_t0, bkg_t1, ev_fname,\
-                            dmask, work_dir, e0=ebins0[i], e1=ebins1[i]))
-    logging.info("DPI bkg from MET %.3f - %.3f" %(bkg_t0, bkg_t1))
+        dpi_bkg_fnames.append(
+            do_bkg(
+                bkg_t0, bkg_t1, ev_fname, dmask, work_dir, e0=ebins0[i], e1=ebins1[i]
+            )
+        )
+    logging.info("DPI bkg from MET %.3f - %.3f" % (bkg_t0, bkg_t1))
 
     timeIDs = get_top_rate_timeIDs(conn, N=Nimgs)
     conn.close()
@@ -113,21 +109,38 @@ def main(args):
     for i in range(Nimgs):
         times[i], dts[i] = timeID2time_dur(timeIDs[i], trig_time)
 
-
-    logging.info("Starting image creation and search for %d time frames" %(Nimgs))
+    logging.info("Starting image creation and search for %d time frames" % (Nimgs))
 
     if args.Nproc > 1:
-
-        do_search_mp(args.Nproc, times, dts, ev_fname, dpi_bkg_fnames, pc_fname,\
-                    att_fname, dmask, work_dir, e0=ebins0, e1=ebins1,\
-                    db_fname=db_fname, timeIDs=timeIDs)
+        do_search_mp(
+            args.Nproc,
+            times,
+            dts,
+            ev_fname,
+            dpi_bkg_fnames,
+            pc_fname,
+            att_fname,
+            dmask,
+            work_dir,
+            e0=ebins0,
+            e1=ebins1,
+            db_fname=db_fname,
+            timeIDs=timeIDs,
+        )
 
     else:
         for i in range(Nimgs):
-
-            cat_fname = std_grb(times[i], dts[i], ev_fname, dpi_bkg_fname,\
-                                att_fname, dmask, work_dir, pc=pc_fname)
-            logging.info("Finished search of time frame %d of %d" %((i+1),Nimgs))
+            cat_fname = std_grb(
+                times[i],
+                dts[i],
+                ev_fname,
+                dpi_bkg_fname,
+                att_fname,
+                dmask,
+                work_dir,
+                pc=pc_fname,
+            )
+            logging.info("Finished search of time frame %d of %d" % ((i + 1), Nimgs))
 
             conn = get_conn(db_fname)
             try:
@@ -136,7 +149,9 @@ def main(args):
             except Exception as E:
                 logging.error(str(E))
                 logging.error(traceback.format_exc())
-                logging.warning("Failed to write results from " + cat_fname + " into DB")
+                logging.warning(
+                    "Failed to write results from " + cat_fname + " into DB"
+                )
                 logging.info("Trying again")
                 conn.close()
                 time.sleep(1.0)
@@ -147,7 +162,9 @@ def main(args):
                 except Exception as E:
                     logging.error(str(E))
                     logging.error(traceback.format_exc())
-                    logging.error("Failed to write results from " + cat_fname + " into DB")
+                    logging.error(
+                        "Failed to write results from " + cat_fname + " into DB"
+                    )
                     logging.error("And not trying again")
             conn.close()
 
@@ -155,7 +172,6 @@ def main(args):
 
 
 if __name__ == "__main__":
-
     args = cli()
 
     main(args)

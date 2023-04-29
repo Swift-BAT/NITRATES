@@ -18,34 +18,39 @@ from ..lib.hp_funcs import err_circle2prob_map
 
 # run as nohup python $batml_path'listen4notices.py' > /storage/work/jjd330/local/bat_data/realtime_workdir/listen4gcns_out.log 2>&1 &
 
-#workdir='/storage/work/j/jjd330/local/bat_data/realtime_workdir/'
-workdir='/gpfs/group/jak51/default/realtime_workdir/'
-#open queue
-#script_path='/gpfs/group/jak51/default/nitrates_realtime/NITRATES/run_stuff_grb2_open.sh'
-#basic cores
-script_path='/gpfs/group/jak51/default/nitrates_realtime/NITRATES/run_stuff_grb2_vc.sh'
+# workdir='/storage/work/j/jjd330/local/bat_data/realtime_workdir/'
+workdir = "/gpfs/group/jak51/default/realtime_workdir/"
+# open queue
+# script_path='/gpfs/group/jak51/default/nitrates_realtime/NITRATES/run_stuff_grb2_open.sh'
+# basic cores
+script_path = (
+    "/gpfs/group/jak51/default/nitrates_realtime/NITRATES/run_stuff_grb2_vc.sh"
+)
 
-INTEGRAL = [gcn.notice_types.INTEGRAL_SPIACS,
-            gcn.notice_types.INTEGRAL_WAKEUP,
-            gcn.notice_types.INTEGRAL_WEAK]
+INTEGRAL = [
+    gcn.notice_types.INTEGRAL_SPIACS,
+    gcn.notice_types.INTEGRAL_WAKEUP,
+    gcn.notice_types.INTEGRAL_WEAK,
+]
 
-FERMI = [gcn.notice_types.FERMI_GBM_FLT_POS,
-        gcn.notice_types.FERMI_GBM_GND_POS,
-        gcn.notice_types.FERMI_GBM_FIN_POS,
-        gcn.notice_types.FERMI_GBM_GND_POS,
-        ]
+FERMI = [
+    gcn.notice_types.FERMI_GBM_FLT_POS,
+    gcn.notice_types.FERMI_GBM_GND_POS,
+    gcn.notice_types.FERMI_GBM_FIN_POS,
+    gcn.notice_types.FERMI_GBM_GND_POS,
+]
 
 MAXI = [gcn.notice_types.MAXI_UNKNOWN]
 
 CALET = [gcn.notice_types.CALET_GBM_FLT_LC]
 
-HAWC = [171]#gcn.notice_types.HAWC_BURST_MONITOR]
+HAWC = [171]  # gcn.notice_types.HAWC_BURST_MONITOR]
 
-IC = [173, 174]#gcn.notice_types.ICECUBE_ASTROTRACK_GOLD,
-        # gcn.notice_types.ICECUBE_ASTROTRACK_BRONZE]
+IC = [173, 174]  # gcn.notice_types.ICECUBE_ASTROTRACK_GOLD,
+# gcn.notice_types.ICECUBE_ASTROTRACK_BRONZE]
 
-GECAM = [gcn.notice_types.GECAM_FLT,
-        gcn.notice_types.GECAM_GND]
+GECAM = [gcn.notice_types.GECAM_FLT, gcn.notice_types.GECAM_GND]
+
 
 # Function to call every time a GCN is received.
 # Run only for notices of type
@@ -60,36 +65,34 @@ GECAM = [gcn.notice_types.GECAM_FLT,
     gcn.notice_types.FERMI_GBM_GND_POS,
     gcn.notice_types.MAXI_UNKNOWN,
     gcn.notice_types.CALET_GBM_FLT_LC,
-    171, 173, 174,
+    171,
+    173,
+    174,
     # gcn.notice_types.HAWC_BURST_MONITOR,
     # gcn.notice_types.ICECUBE_ASTROTRACK_GOLD,
     # gcn.notice_types.ICECUBE_ASTROTRACK_BRONZE,
-    )
+)
 def process_gcn(payload, root):
+    print(root.attrib["role"])
 
-    print(root.attrib['role'])
-
-    role = root.attrib['role']
+    role = root.attrib["role"]
 
     notice_type = gcn.handlers.get_notice_type(root)
 
     try:
-
-        eventtime = root.find('.//ISOTime').text
+        eventtime = root.find(".//ISOTime").text
         print(eventtime)
 
-
     except Exception as E:
-
         body = str(E)
-        body += '\n' + traceback.format_exc()
-        subject = 'listen4notices.py error on ' + socket.gethostname()
+        body += "\n" + traceback.format_exc()
+        subject = "listen4notices.py error on " + socket.gethostname()
         send_error_email(subject, body)
 
     # Read all of the VOEvent parameters from the "What" section.
-    params = {elem.attrib['name']:
-              elem.attrib['value']
-              for elem in root.iterfind('.//Param')}
+    params = {
+        elem.attrib["name"]: elem.attrib["value"] for elem in root.iterfind(".//Param")
+    }
 
     # rev = params['Pkt_Ser_Num']
     new_alert = False
@@ -97,33 +100,33 @@ def process_gcn(payload, root):
     min_tbin = "0.256"
 
     try:
-        name = ''
+        name = ""
         if notice_type in MAXI:
-            name = 'M'+params['EVENT_ID_NUM']
+            name = "M" + params["EVENT_ID_NUM"]
         elif notice_type in HAWC:
             try:
-                name = 'H' + params['run_id'] + params['event_id']
+                name = "H" + params["run_id"] + params["event_id"]
             except Exception as E:
                 logger.error(E)
                 logger.warning("Couldn't get a position")
                 logger.info(params)
-                name = 'H' + eventtime
+                name = "H" + eventtime
         elif notice_type in IC:
             try:
-                name = 'IC' + params['run_id'] + params['event_id']
+                name = "IC" + params["run_id"] + params["event_id"]
             except Exception as E:
                 logger.error(E)
                 logger.warning("Couldn't get a position")
                 logger.info(params)
-                name = 'IC' + eventtime
+                name = "IC" + eventtime
         elif notice_type in INTEGRAL:
-            name = 'I' + params['TrigID']
+            name = "I" + params["TrigID"]
         elif notice_type in FERMI:
-            name = 'F' + params['TrigID']
+            name = "F" + params["TrigID"]
         elif notice_type in CALET:
-            name = 'C' + params['TrigID']
+            name = "C" + params["TrigID"]
         elif notice_type in GECAM:
-            name = 'G' + params['TRIGGER_UID']
+            name = "G" + params["TRIGGER_UID"]
         else:
             name = eventtime
 
@@ -132,34 +135,33 @@ def process_gcn(payload, root):
             os.mkdir(direc)
             new_alert = True
         rev = 0
-        fname = os.path.join(direc, name + '_' + str(rev) + '.xml')
+        fname = os.path.join(direc, name + "_" + str(rev) + ".xml")
         while True:
             if os.path.exists(fname):
                 rev += 1
-                fname = os.path.join(direc, name + '_' + str(rev) + '.xml')
+                fname = os.path.join(direc, name + "_" + str(rev) + ".xml")
             else:
                 break
-        with open(fname, 'wb') as f:
+        with open(fname, "wb") as f:
             f.write(payload)
-        with open(fname, 'rb') as f:
+        with open(fname, "rb") as f:
             v = vp.load(f)
 
     except Exception as E:
-
         body = str(E)
-        body += '\n' + traceback.format_exc()
+        body += "\n" + traceback.format_exc()
         logger.error(body)
-        subject = 'listen4notices.py error on ' + socket.gethostname()
+        subject = "listen4notices.py error on " + socket.gethostname()
         send_error_email(subject, body)
 
     has_pos = False
     try:
-        pos2d=vp.convenience.get_event_position(v)
+        pos2d = vp.convenience.get_event_position(v)
         ra = pos2d.ra
         dec = pos2d.dec
         pos_error = pos2d.err
-        logger.info('ra: %.3f, dec: %.3f, pos_error: %.3f'%(ra,dec,pos_error))
-        if np.isclose(ra,0) and np.isclose(dec,0) and np.isclose(pos_error,0):
+        logger.info("ra: %.3f, dec: %.3f, pos_error: %.3f" % (ra, dec, pos_error))
+        if np.isclose(ra, 0) and np.isclose(dec, 0) and np.isclose(pos_error, 0):
             # do something
             has_pos = False
         elif notice_type in CALET:
@@ -170,55 +172,52 @@ def process_gcn(payload, root):
                 sky_map = err_circle2prob_map(ra, dec, pos_error, sys_err=1.0)
             else:
                 sky_map = err_circle2prob_map(ra, dec, pos_error)
-            sk_fname = os.path.join(direc, 'skymap.fits')
+            sk_fname = os.path.join(direc, "skymap.fits")
             hp.write_map(sk_fname, sky_map, nest=True, overwrite=True)
 
     except Exception as E:
         logger.error(E)
         logger.warning("Couldn't get a position")
 
-
     try:
-
-        if role == 'test':
-
+        if role == "test":
             # eventtime = "2019-06-16T0"
             # eventtime += str(np.random.randint(0,high=9))
             # eventtime += ":33:27.059"
             try:
-                subj = "Test GCN Notice: Alert Type " + params['NOTICE_TYPE']
+                subj = "Test GCN Notice: Alert Type " + params["NOTICE_TYPE"]
             except:
                 subj = "Test GCN Notice"
             body = "Test GCN event\n"
             # channel = 'test-alerts'
-            mail_fname = 'mailing_list.txt'
+            mail_fname = "mailing_list.txt"
         else:
             try:
-                subj = "GCN Notice: Alert Type " + params['NOTICE_TYPE']
+                subj = "GCN Notice: Alert Type " + params["NOTICE_TYPE"]
             except:
                 subj = "GCN Notice"
             # subj = "GW event: Maybe Real Alert Type " + params['AlertType']
             body = "GW Notice\n"
             # channel = 'alerts'
-            mail_fname = 'mailing_list.txt'
+            mail_fname = "mailing_list.txt"
         body += "Starting analysis\n"
-        body += "role: " + role + '\n'
-        body += "IVORN: " + str(root.attrib['ivorn']) + '\n'
-        body += "IsoTime: " + eventtime + '\n'
+        body += "role: " + role + "\n"
+        body += "IVORN: " + str(root.attrib["ivorn"]) + "\n"
+        body += "IsoTime: " + eventtime + "\n"
 
         for key, value in list(params.items()):
             body += key
-            body += '='
+            body += "="
             body += value
-            body += '\n'
+            body += "\n"
 
         # GraceID = str(params['GraceID'])
 
         to = []
 
-        f = open(mail_fname, 'r')
+        f = open(mail_fname, "r")
         for line in f:
-            to.append(line.split('\n')[0])
+            to.append(line.split("\n")[0])
         f.close()
         print(to)
 
@@ -227,74 +226,66 @@ def process_gcn(payload, root):
         # slack_message(':gw: ' +body, channel ,attachment=None)
 
     except Exception as E:
-
         body = str(E)
-        body += '\n' + traceback.format_exc()
+        body += "\n" + traceback.format_exc()
         # print body
         logger.error(body)
         # subject = 'listen4notices.py error on ' + socket.gethostname()
         # send_error_email(subject, body)
 
     try:
-        if 'Time_Scale' in list(params.keys()):
-            tscale = float(params['Time_Scale'])
+        if "Time_Scale" in list(params.keys()):
+            tscale = float(params["Time_Scale"])
             if tscale < 0.4:
-                min_tbin = '0.128'
+                min_tbin = "0.128"
             if tscale > 2.0:
-                min_tbin = '0.512'
-        elif 'Data_Timescale' in list(params.keys()):
-            tscale = float(params['Data_Timescale'])
+                min_tbin = "0.512"
+        elif "Data_Timescale" in list(params.keys()):
+            tscale = float(params["Data_Timescale"])
             if tscale < 0.3:
-                min_tbin = '0.128'
+                min_tbin = "0.128"
             if tscale > 2.0:
-                min_tbin = '0.512'
-        elif 'Trig_Timescale' in list(params.keys()):
-            tscale = float(params['Trig_Timescale'])
+                min_tbin = "0.512"
+        elif "Trig_Timescale" in list(params.keys()):
+            tscale = float(params["Trig_Timescale"])
             if tscale < 0.3:
-                min_tbin = '0.128'
+                min_tbin = "0.128"
             if tscale > 2.0:
-                min_tbin = '0.512'
+                min_tbin = "0.512"
     except Exception as E:
         logger.error(E)
         logger.warning("Coulnd't find a time scale")
 
-
     try:
-
-
-        script_out_path= os.path.join(direc,'run_stuff_out.log')
+        script_out_path = os.path.join(direc, "run_stuff_out.log")
 
         if new_alert and not (role == "test"):
-
-            with open(script_out_path, 'w') as f:
+            with open(script_out_path, "w") as f:
                 process_args = [script_path, eventtime, name, min_tbin]
                 subprocess.Popen(process_args, stdout=f, stderr=f)
 
-
     except Exception as E:
         body = str(E)
-        body += '\n' + traceback.format_exc()
+        body += "\n" + traceback.format_exc()
         try:
-            graceID = params['GraceID']
-            body += '\nGraceID: ' + graceID
+            graceID = params["GraceID"]
+            body += "\nGraceID: " + graceID
         except:
             logger.warn("error and doesn't know GraceID")
         logger.error(body)
-        subject = 'listen4notices.py error on ' + socket.gethostname()
+        subject = "listen4notices.py error on " + socket.gethostname()
         send_error_email(subject, body)
 
 
-
 if __name__ == "__main__":
-
-    logger = logging.getLogger('gcn_notice_logger')
+    logger = logging.getLogger("gcn_notice_logger")
     logger.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s')
+    formatter = logging.Formatter("%(asctime)s %(levelname)s: %(message)s")
 
-    log_fname = os.path.join(workdir, 'gcn_listner.log')
-    pid_fname = os.path.join(workdir, 'gcn_listner.pid')
-    with open(pid_fname, 'wb') as f:
-        f.write(str(os.getpid()).encode('utf-8'))
+    log_fname = os.path.join(workdir, "gcn_listner.log")
+    pid_fname = os.path.join(workdir, "gcn_listner.pid")
+    with open(pid_fname, "wb") as f:
+        f.write(str(os.getpid()).encode("utf-8"))
     fh = logging.FileHandler(filename=log_fname)
     fh.setLevel(logging.INFO)
     fh.setFormatter(formatter)
@@ -310,5 +301,5 @@ if __name__ == "__main__":
     she.setFormatter(formatter)
     logger.addHandler(she)
 
-    print('PID: ', os.getpid())
+    print("PID: ", os.getpid())
     gcn.listen(handler=process_gcn, log=logger)
