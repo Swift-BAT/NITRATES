@@ -8,14 +8,14 @@ charset-normalizer==2.0.12
 cryptography==37.0.4
 cycler==0.11.0
 emcee==3.1.2
-healpy==1.15.0
+healpy==1.15.1
 idna==3.3
 iso8601==1.0.2
 kiwisolver==1.3.1
 llvmlite>=0.36.0
 lxml==4.9.1
 matplotlib>=3.3.4
-numba==0.53.1
+numba==0.56.4
 numpy<=1.23.5
 orderedmultidict==1.0.1
 pandas>=1.3.5
