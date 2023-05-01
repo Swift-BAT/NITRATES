@@ -11,50 +11,81 @@ import argparse
 import logging, traceback
 
 from ..lib.time_funcs import met2astropy, utc2met, met2utc_str, apy_time2met
-from ..lib.sqlite_funcs import get_conn, setup_tab_info, setup_tab_twinds,\
-                setup_files_tab, setup_tab_twind_status
-from ..lib.dbread_funcs import get_info_tab, get_twinds_tab,\
-                        get_full_sqlite_table_as_df, guess_dbfname
+from ..lib.sqlite_funcs import (
+    get_conn,
+    setup_tab_info,
+    setup_tab_twinds,
+    setup_files_tab,
+    setup_tab_twind_status,
+)
+from ..lib.dbread_funcs import (
+    get_info_tab,
+    get_twinds_tab,
+    get_full_sqlite_table_as_df,
+    guess_dbfname,
+)
 from ..lib.event2dpi_funcs import filter_evdata, mask_detxy
-from ..lib.dmask_funcs import combine_detmasks, get_hotpix_map, find_rate_spike_dets2mask
+from ..lib.dmask_funcs import (
+    combine_detmasks,
+    get_hotpix_map,
+    find_rate_spike_dets2mask,
+)
 from ..lib.funcs2run_bat_tools import do_pc
 from ..lib.coord_conv_funcs import convert_radec2imxy, convert_imxy2radec
 from ..lib.wcs_funcs import world2val
 from ..lib.hp_funcs import pc_gwmap2good_pix
-from ..lib.gti_funcs import add_bti2gti, bti2gti, gti2bti, union_gtis, flags2gti,\
-                        get_btis_for_glitches, check_if_in_GTI,\
-                        find_and_remove_cr_glitches
+from ..lib.gti_funcs import (
+    add_bti2gti,
+    bti2gti,
+    gti2bti,
+    union_gtis,
+    flags2gti,
+    get_btis_for_glitches,
+    check_if_in_GTI,
+    find_and_remove_cr_glitches,
+)
 from ..data_scraping.db_ql_funcs import get_gainoff_fname
 from ..HeasoftTools.bat_tool_funcs import bateconvert
 
 
-def query_data_metslice(conn, met0, met1, table_name='SwiftQLevent'):
-
+def query_data_metslice(conn, met0, met1, table_name="SwiftQLevent"):
     sql = """SELECT * FROM %s
         Where METstart < '%s'
-        and METstop > '%s' """\
-    %(table_name, met0, met1)
+        and METstop > '%s' """ % (
+        table_name,
+        met0,
+        met1,
+    )
 
     df = pd.read_sql(sql, conn)
     return df
 
 
-def query_data_utcslice(conn, utc0, utc1, table_name='SwiftQLevent'):
-
+def query_data_utcslice(conn, utc0, utc1, table_name="SwiftQLevent"):
     sql = """SELECT * FROM %s
         Where UTCstart < '%s'
-        and UTCstop > '%s' """\
-    %(table_name, utc0, utc1)
+        and UTCstop > '%s' """ % (
+        table_name,
+        utc0,
+        utc1,
+    )
 
     df = pd.read_sql(sql, conn)
 
     return df
 
 
-def evfnames2write(evfnames, dmask, save_dir, acs_tab, save_fname='filter_evdata.fits',\
-                   emin=14.0, emax=500.0, tmin=0.0, tmax=np.inf):
-
-
+def evfnames2write(
+    evfnames,
+    dmask,
+    save_dir,
+    acs_tab,
+    save_fname="filter_evdata.fits",
+    emin=14.0,
+    emax=500.0,
+    tmin=0.0,
+    tmax=np.inf,
+):
     tabs = []
     gti_pnts = []
     gti_slews = []
@@ -62,73 +93,76 @@ def evfnames2write(evfnames, dmask, save_dir, acs_tab, save_fname='filter_evdata
     all_gtis = []
     for evf in evfnames:
         tab = Table.read(evf)
-        if 'bevshpo' in evf or 'filter_evdata' in evf:
-            tab['SLEW'] = np.zeros(len(tab), dtype=np.int)
+        if "bevshpo" in evf or "filter_evdata" in evf:
+            tab["SLEW"] = np.zeros(len(tab), dtype=np.int)
             gti_pnts.append(Table.read(evf, hdu=2))
-        elif 'bevshsl' in evf:
-            tab['SLEW'] = np.ones(len(tab), dtype=np.int)
+        elif "bevshsl" in evf:
+            tab["SLEW"] = np.ones(len(tab), dtype=np.int)
             gti_slews.append(Table.read(evf, hdu=2))
-        elif 'bevshsp' in evf:
-            tab['SLEW'] = 2*np.ones(len(tab), dtype=np.int)
+        elif "bevshsp" in evf:
+            tab["SLEW"] = 2 * np.ones(len(tab), dtype=np.int)
             gti_slewpnts.append(Table.read(evf, hdu=2))
         else:
-            tab['SLEW'] = 2*np.ones(len(tab), dtype=np.int)
+            tab["SLEW"] = 2 * np.ones(len(tab), dtype=np.int)
             gti_slewpnts.append(Table.read(evf, hdu=2))
         tabs.append(tab)
     ev_data = vstack(tabs)
-    ev_data.sort(keys='TIME')
+    ev_data.sort(keys="TIME")
 
     ev_data0 = filter_evdata(ev_data, dmask, emin, emax, tmin, tmax)
 
     if len(gti_pnts) > 0:
         gti_pnt = vstack(gti_pnts)
-        gti_pnt.sort(keys='START')
+        gti_pnt.sort(keys="START")
         all_gtis.append(gti_pnt)
     else:
-        gti_pnt = Table(names=('START', 'STOP'))
-    gti_pnt_hdu = fits.BinTableHDU(gti_pnt, name='GTI_POINTING')
+        gti_pnt = Table(names=("START", "STOP"))
+    gti_pnt_hdu = fits.BinTableHDU(gti_pnt, name="GTI_POINTING")
     if len(gti_slews) > 0:
         gti_slew = vstack(gti_slews)
-        gti_slew.sort(keys='START')
+        gti_slew.sort(keys="START")
         all_gtis.append(gti_slew)
     else:
-        gti_slew = Table(names=('START', 'STOP'))
-    gti_slew_hdu = fits.BinTableHDU(gti_slew, name='GTI_SLEW')
+        gti_slew = Table(names=("START", "STOP"))
+    gti_slew_hdu = fits.BinTableHDU(gti_slew, name="GTI_SLEW")
     if len(gti_slewpnts) > 0:
         gti_slewpnt = vstack(gti_slewpnts)
-        gti_slewpnt.sort(keys='START')
+        gti_slewpnt.sort(keys="START")
         all_gtis.append(gti_slewpnt)
-        gti_pnt_ = flags2gti(acs_tab['TIME'], acs_tab['FLAGS'][:,0])
+        gti_pnt_ = flags2gti(acs_tab["TIME"], acs_tab["FLAGS"][:, 0])
         bti_pnt = gti2bti(gti_pnt_)
         gti_data_pnt = add_bti2gti(bti_pnt, gti_slewpnt)
         gti_pnts.append(gti_data_pnt)
         gti_pnt = vstack(gti_pnts)
-        gti_pnt.sort(keys='START')
-        gti_pnt_hdu = fits.BinTableHDU(gti_pnt, name='GTI_POINTING')
+        gti_pnt.sort(keys="START")
+        gti_pnt_hdu = fits.BinTableHDU(gti_pnt, name="GTI_POINTING")
     else:
-        gti_slewpnt = Table(names=('START', 'STOP'))
-    gti_slewpnt_hdu = fits.BinTableHDU(gti_slewpnt, name='GTI_SLEW_POINTING')
+        gti_slewpnt = Table(names=("START", "STOP"))
+    gti_slewpnt_hdu = fits.BinTableHDU(gti_slewpnt, name="GTI_SLEW_POINTING")
 
     if len(all_gtis) > 1:
         gti_tot = union_gtis(all_gtis)
     else:
         gti_tot = all_gtis[0]
 
-    glitch_btis = get_btis_for_glitches(ev_data0, gti_tot['START'][0], gti_tot['STOP'][-1])
+    glitch_btis = get_btis_for_glitches(
+        ev_data0, gti_tot["START"][0], gti_tot["STOP"][-1]
+    )
     for bti in glitch_btis:
         logging.info("Found glitch bti: ")
         logging.info(bti)
         gti_pnt = add_bti2gti(bti, gti_pnt)
-        gti_pnt_hdu = fits.BinTableHDU(gti_pnt, name='GTI_POINTING')
-
+        gti_pnt_hdu = fits.BinTableHDU(gti_pnt, name="GTI_POINTING")
 
     ev_data0 = find_and_remove_cr_glitches(ev_data0, gti_pnt)
 
-    ev_hdu = fits.BinTableHDU(ev_data0, name='EVENTS')
-    gti_tot_hdu = fits.BinTableHDU(gti_tot, name='GTI')
+    ev_hdu = fits.BinTableHDU(ev_data0, name="EVENTS")
+    gti_tot_hdu = fits.BinTableHDU(gti_tot, name="GTI")
 
     primary_hdu = fits.PrimaryHDU()
-    hdu_list = fits.HDUList([primary_hdu, ev_hdu, gti_tot_hdu, gti_pnt_hdu, gti_slew_hdu, gti_slewpnt_hdu])
+    hdu_list = fits.HDUList(
+        [primary_hdu, ev_hdu, gti_tot_hdu, gti_pnt_hdu, gti_slew_hdu, gti_slewpnt_hdu]
+    )
     ev_fname = os.path.join(save_dir, save_fname)
     hdu_list.writeto(ev_fname, overwrite=True)
 
@@ -136,17 +170,16 @@ def evfnames2write(evfnames, dmask, save_dir, acs_tab, save_fname='filter_evdata
 
 
 def get_event_failed_trigs(args, UTCFINIT_guess=-24.0):
-
     conn_data = get_conn(args.data_dbfname)
 
     trig_time = args.trig_time
     MET = False
-    if 'T' in trig_time:
-        apy_trig_time = Time(args.trig_time, format='isot')
+    if "T" in trig_time:
+        apy_trig_time = Time(args.trig_time, format="isot")
         logging.debug("trig_time: ")
         logging.debug(apy_trig_time)
-    elif '-' in args.trig_time:
-        apy_trig_time = Time(args.trig_time, format='iso')
+    elif "-" in args.trig_time:
+        apy_trig_time = Time(args.trig_time, format="iso")
         logging.debug("trig_time: ")
         logging.debug(apy_trig_time)
     else:
@@ -164,8 +197,9 @@ def get_event_failed_trigs(args, UTCFINIT_guess=-24.0):
     logging.debug("t_bounds: ")
     logging.debug(t_bounds)
 
-    ev_data_table = query_data_metslice(conn_data, t_bounds[0],\
-                            t_bounds[1], table_name='SwiftQLtdrss')
+    ev_data_table = query_data_metslice(
+        conn_data, t_bounds[0], t_bounds[1], table_name="SwiftQLtdrss"
+    )
 
     N_evfiles = len(ev_data_table)
     # logging.info(str(N_evfiles) + " event files found")
@@ -173,49 +207,48 @@ def get_event_failed_trigs(args, UTCFINIT_guess=-24.0):
         return
     logging.info(str(N_evfiles) + " failed trig event files found")
 
-
-    times2cover = np.arange(int(met_trig_time)-30,int(met_trig_time)+30)
+    times2cover = np.arange(int(met_trig_time) - 30, int(met_trig_time) + 30)
     times_coverd = np.zeros(len(times2cover), dtype=np.bool)
 
     ev_fnames = []
     for index, row in ev_data_table.iterrows():
-        evfile = fits.open(row['eventFname'])
-        min_ev_time = np.min(evfile[1].data['TIME'])
-        max_ev_time = np.max(evfile[1].data['TIME'])
-        bl = (times2cover>min_ev_time)&(times2cover<max_ev_time)
+        evfile = fits.open(row["eventFname"])
+        min_ev_time = np.min(evfile[1].data["TIME"])
+        max_ev_time = np.max(evfile[1].data["TIME"])
+        bl = (times2cover > min_ev_time) & (times2cover < max_ev_time)
         times_coverd[bl] = True
         if np.sum(bl) > 0:
-            if not 'ENERGY' in evfile[1].data.columns.names:
+            if not "ENERGY" in evfile[1].data.columns.names:
                 try:
                     go_fname = get_gainoff_fname(conn_data, met_trig_time)
-                    infile = row['eventFname']
-                    outfile = infile + '2'
+                    infile = row["eventFname"]
+                    outfile = infile + "2"
                     bateconvert(infile, outfile, go_fname)
                     ev_fnames.append(outfile)
-                    utcf = fits.open(go_fname)[1].header['UTCFINIT']
-                    fits.setval(outfile, 'UTCFINIT', value=utcf, ext=1)
+                    utcf = fits.open(go_fname)[1].header["UTCFINIT"]
+                    fits.setval(outfile, "UTCFINIT", value=utcf, ext=1)
                 except Exception as E:
                     logging.warning("Trouble running bateconvert")
                     logging.error(E)
                     logging.error(traceback.format_exc())
             else:
-                ev_fnames.append(row['eventFname'])
+                ev_fnames.append(row["eventFname"])
 
     ev_fnames = list(np.unique(np.array(ev_fnames)))
     logging.info("Good Event Fnames: ")
     logging.info(ev_fnames)
     if len(ev_fnames) > 1:
         for i, evfname in enumerate(ev_fnames):
-            exposure = fits.open(evfname)[2].header['EXPOSURE']
-            gti = Table.read(evfname, hdu='GTI')
+            exposure = fits.open(evfname)[2].header["EXPOSURE"]
+            gti = Table.read(evfname, hdu="GTI")
             for row in gti:
-                for j in range(i+1, len(ev_fnames)):
-                    exp = fits.open(ev_fnames[j])[2].header['EXPOSURE']
-                    gti_ = Table.read(ev_fnames[j], hdu='GTI')
+                for j in range(i + 1, len(ev_fnames)):
+                    exp = fits.open(ev_fnames[j])[2].header["EXPOSURE"]
+                    gti_ = Table.read(ev_fnames[j], hdu="GTI")
                     for row_ in gti_:
-                        if row_['START'] >= (row['STOP']-1e-3):
+                        if row_["START"] >= (row["STOP"] - 1e-3):
                             continue
-                        if row_['STOP'] <= (row['START']+1e-3):
+                        if row_["STOP"] <= (row["START"] + 1e-3):
                             continue
                         if exposure >= exp:
                             ev_fnames.pop(j)
@@ -223,43 +256,38 @@ def get_event_failed_trigs(args, UTCFINIT_guess=-24.0):
                             ev_fnames.pop(i)
                         break
 
-
     logging.info("Good Event Fnames: ")
     logging.info(ev_fnames)
 
-
-
-
-
-    if np.sum(times_coverd) < .85*len(times_coverd):
+    if np.sum(times_coverd) < 0.85 * len(times_coverd):
         return
     else:
         return ev_fnames
 
 
-
-
 def get_event(args):
-
     if args.evfname is not None:
         evfname = args.evfname
         return [evfname]
     elif args.Obsid_Dir is not None:
-        bat_ev_dir = os.path.join(args.Obsid_Dir, 'bat','event')
-        bat_ev_fnames = [os.path.join(bat_ev_dir, fname) for fname in\
-                        os.listdir(bat_ev_dir) if 'bevtr' not in fname]
+        bat_ev_dir = os.path.join(args.Obsid_Dir, "bat", "event")
+        bat_ev_fnames = [
+            os.path.join(bat_ev_dir, fname)
+            for fname in os.listdir(bat_ev_dir)
+            if "bevtr" not in fname
+        ]
         return bat_ev_fnames
     else:
         conn_data = get_conn(args.data_dbfname)
 
         trig_time = args.trig_time
         MET = False
-        if 'T' in trig_time:
-            apy_trig_time = Time(args.trig_time, format='isot')
+        if "T" in trig_time:
+            apy_trig_time = Time(args.trig_time, format="isot")
             logging.debug("trig_time: ")
             logging.debug(apy_trig_time)
-        elif '-' in args.trig_time:
-            apy_trig_time = Time(args.trig_time, format='iso')
+        elif "-" in args.trig_time:
+            apy_trig_time = Time(args.trig_time, format="iso")
             logging.debug("trig_time: ")
             logging.debug(apy_trig_time)
         else:
@@ -268,40 +296,35 @@ def get_event(args):
             logging.debug("met_trig_time: ")
             logging.debug(met_trig_time)
 
-
         if MET:
             t_buff = 60.0
             # t_bounds = (met_trig_time - t_buff, met_trig_time + t_buff)
             t_bounds = (met_trig_time + t_buff, met_trig_time - t_buff)
             logging.debug("t_bounds: ")
             logging.debug(t_bounds)
-            ev_data_table = query_data_metslice(conn_data,\
-                                                t_bounds[0],\
-                                                t_bounds[1])
+            ev_data_table = query_data_metslice(conn_data, t_bounds[0], t_bounds[1])
         else:
-            t0 = Time(51910, format='mjd')
-            t_buff = TimeDelta(60.0, format='sec')
+            t0 = Time(51910, format="mjd")
+            t_buff = TimeDelta(60.0, format="sec")
             # t_bounds = (apy_trig_time - t_buff, apy_trig_time + t_buff)
             t_bounds = (apy_trig_time + t_buff, apy_trig_time - t_buff)
             logging.debug("t_bounds: ")
             logging.debug(t_bounds)
-            ev_data_table = query_data_utcslice(conn_data,\
-                                                t_bounds[0],\
-                                                t_bounds[1])
+            ev_data_table = query_data_utcslice(conn_data, t_bounds[0], t_bounds[1])
 
         N_evfiles = len(ev_data_table)
         # logging.info(str(N_evfiles) + " event files found")
         if N_evfiles == 0:
             return
-        idx = ev_data_table.groupby(['eventFname'])['ver'].transform(max)\
-                == ev_data_table['ver']
+        idx = (
+            ev_data_table.groupby(["eventFname"])["ver"].transform(max)
+            == ev_data_table["ver"]
+        )
         ev_data_table = ev_data_table[idx]
         N_evfiles = len(ev_data_table)
         logging.info(str(N_evfiles) + " event files found")
-        tstarts = Time(ev_data_table.UTCstart.values.astype(np.str),\
-                        format='isot')
-        tstops = Time(ev_data_table.UTCstop.values.astype(np.str),\
-                        format='isot')
+        tstarts = Time(ev_data_table.UTCstart.values.astype(np.str), format="isot")
+        tstops = Time(ev_data_table.UTCstop.values.astype(np.str), format="isot")
         logging.info("Tstarts: ")
         logging.info(tstarts.isot)
         logging.info("Tstopts: ")
@@ -309,7 +332,7 @@ def get_event(args):
         if not MET:
             for index, row in ev_data_table.iterrows():
                 try:
-                    evfile = fits.open(row['eventFname'])
+                    evfile = fits.open(row["eventFname"])
                     met_trig_time = utc2met(apy_trig_time.isot, evfile)
                     break
                 except Exception as E:
@@ -318,22 +341,22 @@ def get_event(args):
                     logging.error(traceback.format_exc())
 
         # times2cover = np.arange(int(met_trig_time)-45,int(met_trig_time)+45)
-        times2cover = np.arange(int(met_trig_time)-30,int(met_trig_time)+30)
+        times2cover = np.arange(int(met_trig_time) - 30, int(met_trig_time) + 30)
         times_coverd = np.zeros(len(times2cover), dtype=np.bool)
 
         ev_fnames = []
         for index, row in ev_data_table.iterrows():
-            evfile = fits.open(row['eventFname'])
-            min_ev_time = np.min(evfile[1].data['TIME'])
-            max_ev_time = np.max(evfile[1].data['TIME'])
-            bl = (times2cover>min_ev_time)&(times2cover<max_ev_time)
+            evfile = fits.open(row["eventFname"])
+            min_ev_time = np.min(evfile[1].data["TIME"])
+            max_ev_time = np.max(evfile[1].data["TIME"])
+            bl = (times2cover > min_ev_time) & (times2cover < max_ev_time)
             times_coverd[bl] = True
             if np.sum(bl) > 0:
-                if not 'ENERGY' in evfile[1].data.columns.names:
+                if not "ENERGY" in evfile[1].data.columns.names:
                     try:
                         go_fname = get_gainoff_fname(conn_data, met_trig_time)
-                        infile = row['eventFname']
-                        outfile = infile + '2'
+                        infile = row["eventFname"]
+                        outfile = infile + "2"
                         bateconvert(infile, outfile, go_fname)
                         ev_fnames.append(outfile)
                     except Exception as E:
@@ -341,7 +364,7 @@ def get_event(args):
                         logging.error(E)
                         logging.error(traceback.format_exc())
                 else:
-                    ev_fnames.append(row['eventFname'])
+                    ev_fnames.append(row["eventFname"])
 
         logging.debug("Good Event Fnames: ")
         logging.debug(ev_fnames)
@@ -351,15 +374,10 @@ def get_event(args):
         logging.info("Good Event Fnames: ")
         logging.info(ev_fnames)
 
-        if np.sum(times_coverd) < .85*len(times_coverd):
+        if np.sum(times_coverd) < 0.85 * len(times_coverd):
             return
         else:
             return ev_fnames
-
-
-
-
-
 
         # ev_fnames = ev_data_table['eventFname'].values
         # good_ev_fnames = []
@@ -418,61 +436,62 @@ def get_dmask(args, evdata):
     """
 
     if args.dmask is not None:
-        if 'bdecb' in args.dmask:
-            det_enb_mask = fits.open(args.dmask)[1].data['FLAG'][-1]
+        if "bdecb" in args.dmask:
+            det_enb_mask = fits.open(args.dmask)[1].data["FLAG"][-1]
         else:
             return fits.open(args.dmask)[0].data
 
     elif args.Obsid_Dir is not None:
-        bat_hk_dir = os.path.join(args.Obsid_Dir, 'bat','hk')
-        bdecb_fname = [os.path.join(bat_hk_dir, fname) for fname in\
-                        os.listdir(bat_hk_dir) if 'bdecb' in fname][0]
-        det_enb_mask = fits.open(bdecb_fname)[1].data['FLAG'][-1]
-
+        bat_hk_dir = os.path.join(args.Obsid_Dir, "bat", "hk")
+        bdecb_fname = [
+            os.path.join(bat_hk_dir, fname)
+            for fname in os.listdir(bat_hk_dir)
+            if "bdecb" in fname
+        ][0]
+        det_enb_mask = fits.open(bdecb_fname)[1].data["FLAG"][-1]
 
     if args.dmask is None and args.Obsid_Dir is None:
-
-        min_ev_time = np.min(evdata['TIME'])
-        max_ev_time = np.max(evdata['TIME'])
-        mid_ev_time = (min_ev_time + max_ev_time)/2.
+        min_ev_time = np.min(evdata["TIME"])
+        max_ev_time = np.max(evdata["TIME"])
+        mid_ev_time = (min_ev_time + max_ev_time) / 2.0
 
         enb_dname = args.enb_dname
 
-        enb_fnames = [fname for fname in os.listdir(enb_dname)\
-                            if '.fits' in fname]
+        enb_fnames = [fname for fname in os.listdir(enb_dname) if ".fits" in fname]
 
-        enb_t0s = [1e4*float(fname.split('_')[0]) for fname in enb_fnames]
-        enb_t1s = [1e4*float((fname.split('_')[1]).split('.')[0])\
-                        for fname in enb_fnames]
+        enb_t0s = [1e4 * float(fname.split("_")[0]) for fname in enb_fnames]
+        enb_t1s = [
+            1e4 * float((fname.split("_")[1]).split(".")[0]) for fname in enb_fnames
+        ]
 
-        max_dt0 = 30*60.0
-        max_dt1 = 90*60.0
-
+        max_dt0 = 30 * 60.0
+        max_dt1 = 90 * 60.0
 
         enb_tab = None
         for i in range(len(enb_fnames)):
             if (mid_ev_time > enb_t0s[i]) and (mid_ev_time < enb_t1s[i]):
-                enb_tab = Table.read(os.path.join(args.enb_dname,enb_fnames[i]))
+                enb_tab = Table.read(os.path.join(args.enb_dname, enb_fnames[i]))
 
         if enb_tab is None:
             return
 
-        best_ind = np.argmin(np.abs(mid_ev_time - enb_tab['TIME']))
-        if np.abs(mid_ev_time - enb_tab['TIME'][best_ind]) > max_dt1:
+        best_ind = np.argmin(np.abs(mid_ev_time - enb_tab["TIME"]))
+        if np.abs(mid_ev_time - enb_tab["TIME"][best_ind]) > max_dt1:
             return
-        det_enb_mask = enb_tab['FLAG'][best_ind]
-        if np.abs(mid_ev_time - enb_tab['TIME'][best_ind]) > max_dt0:
-            logging.warn("Using enb/disb map that's from more than half an hour off of trigtime")
+        det_enb_mask = enb_tab["FLAG"][best_ind]
+        if np.abs(mid_ev_time - enb_tab["TIME"][best_ind]) > max_dt0:
+            logging.warn(
+                "Using enb/disb map that's from more than half an hour off of trigtime"
+            )
 
     dmask_enb_glob = det_enb_mask
 
-    
-    bl_dmask_enb_glob = (dmask_enb_glob==0)
+    bl_dmask_enb_glob = dmask_enb_glob == 0
     ndets_enb_glob = np.sum(bl_dmask_enb_glob)
 
     mask_zeros = False
     # if len(evdata) > 1e5:
-    if len(evdata)/float(ndets_enb_glob) > 14:
+    if len(evdata) / float(ndets_enb_glob) > 14:
         mask_zeros = True
     hotpix_map = get_hotpix_map(evdata, bl_dmask_enb_glob, mask_zeros=mask_zeros)
 
@@ -482,16 +501,17 @@ def get_dmask(args, evdata):
 
 
 def get_att(args, MET_time):
-
     if args.att_fname is not None:
         return Table.read(args.att_fname)
 
     if args.Obsid_Dir is not None:
-        aux_dir = os.path.join(args.Obsid_Dir, 'auxil')
-        att_fname = [os.path.join(aux_dir, fname) for fname in\
-                        os.listdir(aux_dir) if 'pat' in fname][0]
+        aux_dir = os.path.join(args.Obsid_Dir, "auxil")
+        att_fname = [
+            os.path.join(aux_dir, fname)
+            for fname in os.listdir(aux_dir)
+            if "pat" in fname
+        ][0]
         return Table.read(att_fname)
-
 
     # min_ev_time = np.min(evdata['TIME'])
     # max_ev_time = np.max(evdata['TIME'])
@@ -499,12 +519,10 @@ def get_att(args, MET_time):
 
     att_dname = args.att_dname
 
-    att_fnames = [fname for fname in os.listdir(att_dname)\
-                        if '.fits' in fname]
+    att_fnames = [fname for fname in os.listdir(att_dname) if ".fits" in fname]
 
-    att_t0s = [1e4*float(fname.split('_')[0]) for fname in att_fnames]
-    att_t1s = [1e4*float((fname.split('_')[1]).split('.')[0])\
-                    for fname in att_fnames]
+    att_t0s = [1e4 * float(fname.split("_")[0]) for fname in att_fnames]
+    att_t1s = [1e4 * float((fname.split("_")[1]).split(".")[0]) for fname in att_fnames]
 
     max_dt = 30.0
 
@@ -516,33 +534,33 @@ def get_att(args, MET_time):
     if att_fname is None:
         return
 
-    att_tab = Table.read(os.path.join(args.att_dname,att_fname))
-    min_dt = np.min(np.abs(MET_time - att_tab['TIME']))
-    logging.info("Min att dt from trigtime is %.2f"%(min_dt))
+    att_tab = Table.read(os.path.join(args.att_dname, att_fname))
+    min_dt = np.min(np.abs(MET_time - att_tab["TIME"]))
+    logging.info("Min att dt from trigtime is %.2f" % (min_dt))
     if min_dt > max_dt:
         return
     return att_tab
 
-def get_acs(args, trigtime):
 
+def get_acs(args, trigtime):
     if args.acs_fname is not None:
-        return Table.read(args.acs_fname, hdu='ACS_DATA')
+        return Table.read(args.acs_fname, hdu="ACS_DATA")
 
     if args.Obsid_Dir is not None:
-        aux_dir = os.path.join(args.Obsid_Dir, 'auxil')
-        att_fname = [os.path.join(aux_dir, fname) for fname in\
-                        os.listdir(aux_dir) if 'pat' in fname][0]
+        aux_dir = os.path.join(args.Obsid_Dir, "auxil")
+        att_fname = [
+            os.path.join(aux_dir, fname)
+            for fname in os.listdir(aux_dir)
+            if "pat" in fname
+        ][0]
         return Table.read(att_fname, hdu=2)
-
 
     acs_dname = args.acs_dname
 
-    acs_fnames = [fname for fname in os.listdir(acs_dname)\
-                        if '.fits' in fname]
+    acs_fnames = [fname for fname in os.listdir(acs_dname) if ".fits" in fname]
 
-    acs_t0s = [1e4*float(fname.split('_')[0]) for fname in acs_fnames]
-    acs_t1s = [1e4*float((fname.split('_')[1]).split('.')[0])\
-                    for fname in acs_fnames]
+    acs_t0s = [1e4 * float(fname.split("_")[0]) for fname in acs_fnames]
+    acs_t1s = [1e4 * float((fname.split("_")[1]).split(".")[0]) for fname in acs_fnames]
 
     max_dt = 30.0
 
@@ -554,98 +572,103 @@ def get_acs(args, trigtime):
     if acs_fname is None:
         return
 
-    acs_tab = Table.read(os.path.join(args.acs_dname,acs_fname))
-    min_dt = np.min(np.abs(trigtime - acs_tab['TIME']))
+    acs_tab = Table.read(os.path.join(args.acs_dname, acs_fname))
+    min_dt = np.min(np.abs(trigtime - acs_tab["TIME"]))
     if min_dt > max_dt:
         return
     return acs_tab
 
 
-
-
-
-
-
-
-
-
 def cli():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--drm_dir', type=str,\
-            help="drm_directory",
-            default='/gpfs/group/jak51/default/responses/drms/')
-    parser.add_argument('--rt_dir', type=str,\
-            help="rt_directory",\
-            default=None)
-    parser.add_argument('--work_dir', type=str,\
-            help="Directory to work in",\
-            default=None)
-    parser.add_argument('--data_dbfname', type=str,\
-            help="DB file name with information on the BAT data already downloaded from the QL site",
-            default="/gpfs/group/jak51/default/nitrates_realtime/NITRATES/data_scraping/BATQL.db")
-    parser.add_argument('--att_dname', type=str,\
-            help="Directory name that contains merged attfiles over chunks of time",
-            default="/gpfs/group/jak51/default/realtime_workdir/merged_atts/")
-    parser.add_argument('--acs_dname', type=str,\
-            help="Directory name that contains merged acsfiles over chunks of time",
-            default="/gpfs/group/jak51/default/realtime_workdir/merged_acs/")
-    parser.add_argument('--enb_dname', type=str,\
-            help="Directory name that contains merged enable/disable files over chunks of time",
-            default="/gpfs/group/jak51/default/realtime_workdir/merged_enbs/")
-    parser.add_argument('--evfname', type=str,\
-            help="Event data file",
-            default=None)
-    parser.add_argument('--dmask', type=str,\
-            help="detmask file name",
-            default=None)
-    parser.add_argument('--obsid', type=str,\
-            help="Obsid",
-            default=None)
-    parser.add_argument('--Obsid_Dir', type=str,\
-            help="Obsid directory to find data files",
-            default=None)
-    parser.add_argument('--dbfname', type=str,\
-            help="File name of the analysis database",\
-            default=None)
-    parser.add_argument('--att_fname', type=str,\
-            help="Fname for that att file",\
-            default=None)
-    parser.add_argument('--acs_fname', type=str,\
-            help="Fname for the acs file",\
-            default=None)
-    parser.add_argument('--trig_time', type=str,\
-            help="Time of trigger, in either MET or a datetime string")
-    parser.add_argument('--search_twind', type=float,\
-            help="Time to search +/- around trig_time in secs",\
-            default=15)
-    parser.add_argument('--min_tbin', type=float,\
-            help="Smallest tbin size to use",\
-            default=0.256)
-    parser.add_argument('--min_dt', type=float,\
-            help="Min time from trigger to do",\
-            default=None)
-    parser.add_argument('--Ntdbls', type=int,\
-            help="Number of times to double tbin size",\
-            default=4)
-    parser.add_argument('--min_pc', type=float,\
-            help="Min partical coding fraction to use",\
-            default=0.1)
+    parser.add_argument(
+        "--drm_dir",
+        type=str,
+        help="drm_directory",
+        default="/gpfs/group/jak51/default/responses/drms/",
+    )
+    parser.add_argument("--rt_dir", type=str, help="rt_directory", default=None)
+    parser.add_argument(
+        "--work_dir", type=str, help="Directory to work in", default=None
+    )
+    parser.add_argument(
+        "--data_dbfname",
+        type=str,
+        help="DB file name with information on the BAT data already downloaded from the QL site",
+        default="/gpfs/group/jak51/default/nitrates_realtime/NITRATES/data_scraping/BATQL.db",
+    )
+    parser.add_argument(
+        "--att_dname",
+        type=str,
+        help="Directory name that contains merged attfiles over chunks of time",
+        default="/gpfs/group/jak51/default/realtime_workdir/merged_atts/",
+    )
+    parser.add_argument(
+        "--acs_dname",
+        type=str,
+        help="Directory name that contains merged acsfiles over chunks of time",
+        default="/gpfs/group/jak51/default/realtime_workdir/merged_acs/",
+    )
+    parser.add_argument(
+        "--enb_dname",
+        type=str,
+        help="Directory name that contains merged enable/disable files over chunks of time",
+        default="/gpfs/group/jak51/default/realtime_workdir/merged_enbs/",
+    )
+    parser.add_argument("--evfname", type=str, help="Event data file", default=None)
+    parser.add_argument("--dmask", type=str, help="detmask file name", default=None)
+    parser.add_argument("--obsid", type=str, help="Obsid", default=None)
+    parser.add_argument(
+        "--Obsid_Dir", type=str, help="Obsid directory to find data files", default=None
+    )
+    parser.add_argument(
+        "--dbfname", type=str, help="File name of the analysis database", default=None
+    )
+    parser.add_argument(
+        "--att_fname", type=str, help="Fname for that att file", default=None
+    )
+    parser.add_argument(
+        "--acs_fname", type=str, help="Fname for the acs file", default=None
+    )
+    parser.add_argument(
+        "--trig_time",
+        type=str,
+        help="Time of trigger, in either MET or a datetime string",
+    )
+    parser.add_argument(
+        "--search_twind",
+        type=float,
+        help="Time to search +/- around trig_time in secs",
+        default=15,
+    )
+    parser.add_argument(
+        "--min_tbin", type=float, help="Smallest tbin size to use", default=0.256
+    )
+    parser.add_argument(
+        "--min_dt", type=float, help="Min time from trigger to do", default=None
+    )
+    parser.add_argument(
+        "--Ntdbls", type=int, help="Number of times to double tbin size", default=4
+    )
+    parser.add_argument(
+        "--min_pc", type=float, help="Min partical coding fraction to use", default=0.1
+    )
     args = parser.parse_args()
     return args
 
 
 def main(args):
-
-    logging.basicConfig(filename='data_setup.log', level=logging.DEBUG,\
-                    format='%(asctime)s-' '%(levelname)s- %(message)s')
-
+    logging.basicConfig(
+        filename="data_setup.log",
+        level=logging.DEBUG,
+        format="%(asctime)s-" "%(levelname)s- %(message)s",
+    )
 
     # Need to find the event, detmask, and att files
     # then prepare them for use if needed and save the new file
     # Ex: filtering event data and if dmask is a bdecb file then
     # combine it with the global mask and make a hotpix map to also
     # combine it with
-
 
     from ..config import rt_dir, drm_dir, bat_ml_dir
 
@@ -659,7 +682,7 @@ def main(args):
     loop_wait_time = 30.0
     loop_wait_err = 120.0
 
-    while dt < 24*3600:
+    while dt < 24 * 3600:
         try:
             dt = time.time() - start_time
 
@@ -679,13 +702,13 @@ def main(args):
                 for evf in evfname:
                     tabs.append(Table.read(evf))
                 ev_data = vstack(tabs)
-                ev_data.sort(keys='TIME')
+                ev_data.sort(keys="TIME")
 
             MET = False
-            if 'T' in args.trig_time:
-                trig_time = Time(args.trig_time, format='isot')
-            elif '-' in args.trig_time:
-                trig_time = Time(args.trig_time, format='iso')
+            if "T" in args.trig_time:
+                trig_time = Time(args.trig_time, format="isot")
+            elif "-" in args.trig_time:
+                trig_time = Time(args.trig_time, format="iso")
             else:
                 trig_time = float(args.trig_time)
                 MET = True
@@ -697,10 +720,10 @@ def main(args):
                 trigtimeMET = utc2met(trig_time.isot, evfname[0])
                 trigtimeUTC = trig_time.iso
 
-
             # ev_data0 = filter_evdata(ev_data[1].data, None, 14.0, 350.0, 0., np.inf)
-            ev_data0 = filter_evdata(ev_data, None, 14.0, 500.0,\
-                                    trigtimeMET-2e3, trigtimeMET+2e3)
+            ev_data0 = filter_evdata(
+                ev_data, None, 14.0, 500.0, trigtimeMET - 2e3, trigtimeMET + 2e3
+            )
 
             att_tab = get_att(args, trigtimeMET)
             if att_tab is None:
@@ -714,7 +737,6 @@ def main(args):
                 time.sleep(loop_wait_time)
                 continue
 
-
             dmask = get_dmask(args, ev_data0)
             if dmask is None:
                 logging.info("No dmask yet")
@@ -727,27 +749,24 @@ def main(args):
             logging.error(traceback.format_exc())
             time.sleep(loop_wait_err)
 
-
     logging.info("Finally got all the data")
 
     ev_fname = evfnames2write(evfname, dmask, args.work_dir, acs_tab)
 
     try:
         mask_vals = mask_detxy(dmask, ev_data0)
-        blev = (mask_vals==0.)
+        blev = mask_vals == 0.0
         bad_dets = find_rate_spike_dets2mask(ev_data0[blev])
         logging.debug("Bad Dets List: ")
         logging.debug(bad_dets)
         for bad_det in bad_dets:
-            dmask[bad_det[0],bad_det[1]] = 1
+            dmask[bad_det[0], bad_det[1]] = 1
     except Exception as E:
         logging.warning("Messed up getting bad dets from rate spikes")
         logging.error(E)
         logging.error(traceback.format_exc())
 
-
-
-    GTI_pnt = Table.read(ev_fname, hdu='GTI_POINTING')
+    GTI_pnt = Table.read(ev_fname, hdu="GTI_POINTING")
 
     # evdata = ev_data0[(ev_data0['ENERGY']<195.)]
     # evdata = filter_evdata(ev_data0, dmask, 14., 195., 0., np.inf)
@@ -767,18 +786,17 @@ def main(args):
     logging.info(ev_fname)
     # evdata.write(ev_fname, overwrite=True)
 
-    att_fname = os.path.join(args.work_dir, 'attitude.fits')
+    att_fname = os.path.join(args.work_dir, "attitude.fits")
     att_tab.write(att_fname, overwrite=True)
     logging.info("Wrote att file to")
     logging.info(att_fname)
 
-    acs_fname = os.path.join(args.work_dir, 'acs.fits')
+    acs_fname = os.path.join(args.work_dir, "acs.fits")
     acs_tab.write(acs_fname, overwrite=True)
     logging.info("Wrote acs file to")
     logging.info(acs_fname)
 
-
-    dmask_fname = os.path.join(args.work_dir, 'detmask.fits')
+    dmask_fname = os.path.join(args.work_dir, "detmask.fits")
     hdu = fits.PrimaryHDU(dmask)
     hdu.writeto(dmask_fname, overwrite=True)
     logging.info("Wrote dmask to")
@@ -788,28 +806,35 @@ def main(args):
 
     trig_time = args.trig_time
     MET = False
-    if 'T' in trig_time:
-        trig_time = Time(args.trig_time, format='isot')
-    elif '-' in args.trig_time:
-        trig_time = Time(args.trig_time, format='iso')
+    if "T" in trig_time:
+        trig_time = Time(args.trig_time, format="isot")
+    elif "-" in args.trig_time:
+        trig_time = Time(args.trig_time, format="iso")
     else:
         trig_time = float(args.trig_time)
         MET = True
 
-
     setup_tab_info(conn, ev_fname, trig_time)
 
-    #not needed since this is defined in config.py. Only rt_dir is really needed but keeping it for now.
-    #if args.rt_dir is not None:
+    # not needed since this is defined in config.py. Only rt_dir is really needed but keeping it for now.
+    # if args.rt_dir is not None:
     #    rt_dir = args.rt_dir
-    #if args.drm_dir is not None:
+    # if args.drm_dir is not None:
     #    drm_dir = args.drm_dir
-    #else:
+    # else:
     #    drm_dir = '.'
 
     logging.info("Writing the Files table")
-    setup_files_tab(conn, ev_fname, att_fname, dmask_fname,\
-                    rt_dir, drm_dir, args.work_dir, bat_ml_dir)
+    setup_files_tab(
+        conn,
+        ev_fname,
+        att_fname,
+        dmask_fname,
+        rt_dir,
+        drm_dir,
+        args.work_dir,
+        bat_ml_dir,
+    )
 
     tab_info = get_info_tab(conn)
 
@@ -835,16 +860,20 @@ def main(args):
     #     logging.error(traceback.format_exc())
 
     try:
-        pc_fname = do_pc('detmask.fits', 'attitude.fits', args.work_dir, ovrsmp=2, detapp=True)
+        pc_fname = do_pc(
+            "detmask.fits", "attitude.fits", args.work_dir, ovrsmp=2, detapp=True
+        )
     except Exception as e:
         logging.error(e)
         logging.error("Error making PC")
 
-    sky_map_fnames = [fname for fname in os.listdir(args.work_dir) if\
-                    'cWB.fits.gz' in fname or 'bayestar' in fname\
-                    or 'skymap' in fname]
-    #this good_pix2scan file isnt used anymore, so commenting out this portion of code.
-    #if len(sky_map_fnames) > 0:
+    sky_map_fnames = [
+        fname
+        for fname in os.listdir(args.work_dir)
+        if "cWB.fits.gz" in fname or "bayestar" in fname or "skymap" in fname
+    ]
+    # this good_pix2scan file isnt used anymore, so commenting out this portion of code.
+    # if len(sky_map_fnames) > 0:
     #
     #    if check_if_in_GTI(GTI_pnt, tab_info['trigtimeMET'][0]-0.256,\
     #                    tab_info['trigtimeMET'][0]+0.256):
@@ -863,8 +892,8 @@ def main(args):
 
     logging.info("Done, exiting now")
 
-if __name__ == "__main__":
 
+if __name__ == "__main__":
     args = cli()
 
     main(args)

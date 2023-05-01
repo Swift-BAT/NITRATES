@@ -3,8 +3,7 @@ import logging, traceback, argparse
 
 
 def get_sql_tab_list():
-
-    sql_tab_qlevent = '''CREATE TABLE SwiftQLevent
+    sql_tab_qlevent = """CREATE TABLE SwiftQLevent
             (obsid TEXT,
             ver INTEGER,
             METstart REAL,
@@ -15,17 +14,15 @@ def get_sql_tab_list():
             eventFname TEXT,
             obs_mode TEXT,
             FOREIGN KEY(obsid) REFERENCES SwiftQLeventOBS(obsid)
-            );'''
+            );"""
 
-
-    sql_tab_qleventOBS = '''CREATE TABLE SwiftQLeventOBS
+    sql_tab_qleventOBS = """CREATE TABLE SwiftQLeventOBS
             (obsid TEXT PRIMARY KEY NOT NULL,
             ver INTEGER,
             obsDname TEXT
-            );'''
+            );"""
 
-
-    sql_tab_ql = '''CREATE TABLE SwiftQL
+    sql_tab_ql = """CREATE TABLE SwiftQL
             (obsid TEXT PRIMARY KEY NOT NULL,
             ver INTEGER,
             METstart REAL,
@@ -39,11 +36,9 @@ def get_sql_tab_list():
             GainOffFname TEXT,
             patFname TEXT,
             satFname TEXT
-            );'''
+            );"""
 
-
-
-    sql_tab_qltdrss = '''CREATE TABLE SwiftQLtdrss
+    sql_tab_qltdrss = """CREATE TABLE SwiftQLtdrss
             (obsid TEXT PRIMARY KEY NOT NULL,
             METstart REAL,
             METstop REAL,
@@ -54,16 +49,18 @@ def get_sql_tab_list():
             TrigTime REAL,
             eventURL TEXT,
             eventFname TEXT,
-            );'''
+            );"""
 
-    sql_tab_list = [sql_tab_qleventOBS,
-                    sql_tab_qlevent,
-                    sql_tab_ql]#, sql_tab_qltdrss]
+    sql_tab_list = [
+        sql_tab_qleventOBS,
+        sql_tab_qlevent,
+        sql_tab_ql,
+    ]  # , sql_tab_qltdrss]
 
     return sql_tab_list
 
-def create_tables(conn, sql_tab_list):
 
+def create_tables(conn, sql_tab_list):
     for sql_tab in sql_tab_list:
         conn.execute(sql_tab)
 
@@ -72,15 +69,17 @@ def create_tables(conn, sql_tab_list):
 
 def cli():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--db_fname', type=str,\
-            help="file name to create the database at",
-            default="BATQL.db")
+    parser.add_argument(
+        "--db_fname",
+        type=str,
+        help="file name to create the database at",
+        default="BATQL.db",
+    )
     args = parser.parse_args()
     return args
 
 
 if __name__ == "__main__":
-
     args = cli()
 
     conn = sqlite3.connect(args.db_fname)

@@ -1,12 +1,12 @@
 __all__ = [
-'LLH' ,
-'do_bkg_estimation_wPSs_mp2' ,
-'do_llh_inFoV4realtime' ,
-'do_llh_inFoV4realtime2' ,
-'do_llh_outFoV4realtime' ,
-'do_llh_outFoV4realtime2' ,
-'do_manage2' ,
-'minimizers'
+    "LLH",
+    "do_bkg_estimation_wPSs_mp2",
+    "do_llh_inFoV4realtime",
+    "do_llh_inFoV4realtime2",
+    "do_llh_outFoV4realtime",
+    "do_llh_outFoV4realtime2",
+    "do_manage2",
+    "minimizers",
 ]
 
 from .LLH import *

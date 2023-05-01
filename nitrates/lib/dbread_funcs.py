@@ -5,10 +5,9 @@ from astropy.io import fits
 import pandas as pd
 
 
-def guess_dbfname(dname='.'):
-
+def guess_dbfname(dname="."):
     fnames = os.listdir(dname)
-    db_fnames = [fname for fname in fnames if '.db' in fname]
+    db_fnames = [fname for fname in fnames if ".db" in fname]
     if len(db_fnames) == 1:
         return db_fnames[0]
     elif len(db_fnames) > 1:
@@ -31,7 +30,7 @@ def get_full_sqlite_table_as_df(conn, table_name):
     df DataFrame: The sqlite table as a pandas DataFrame
 
     """
-    sql = "select * from %s" %(table_name)
+    sql = "select * from %s" % (table_name)
     df = pd.read_sql(sql, conn)
     return df
 
@@ -50,6 +49,7 @@ def get_info_tab(conn):
     """
     df = pd.read_sql("select * from DataInfo", conn)
     return df
+
 
 def get_files_tab(conn):
     """
@@ -112,15 +112,14 @@ def get_rates_tab(conn):
     df = pd.read_sql("select * from Rates", conn)
     return df
 
-def get_top_rate_timeIDs(conn, N=10, TScut=None,\
-                ret_rate_tab=False, ret_TSs=False):
 
+def get_top_rate_timeIDs(conn, N=10, TScut=None, ret_rate_tab=False, ret_TSs=False):
     df = get_rates_tab(conn)
 
-    rates_twind_groups = df.groupby('timeID')
-    twind_maxs = rates_twind_groups.TS.aggregate('max')
+    rates_twind_groups = df.groupby("timeID")
+    twind_maxs = rates_twind_groups.TS.aggregate("max")
     if TScut is not None:
-        bl = (twind_maxs>=TScut)
+        bl = twind_maxs >= TScut
         top_twind_TSs = twind_maxs[bl].sort_values()
     else:
         top_twind_TSs = twind_maxs.sort_values().tail(N)
@@ -149,8 +148,10 @@ def get_blips_tab(conn):
     df = pd.read_sql("select * from Blips", conn)
     return df
 
-def query_blips_tab(conn, timeID=None, snr_min=-1e4,\
-                    snr_max=1e4, duration=None, pc_min=0.0):
+
+def query_blips_tab(
+    conn, timeID=None, snr_min=-1e4, snr_max=1e4, duration=None, pc_min=0.0
+):
     """
     Gets the Blips table with custom constrains
 
@@ -171,12 +172,13 @@ def query_blips_tab(conn, timeID=None, snr_min=-1e4,\
     """
     sql = "select * from Blips where "
     if timeID is not None:
-        sql += "timeID=%d and " %(timeID)
+        sql += "timeID=%d and " % (timeID)
     if duration is not None:
-        sql += "duration between %.3f and %.3f and "\
-        %(duration-1e-3, duration+1e-3)
-    sql += "pc>=%.2f and snr between %.2f and %.2f"\
-            %(pc_min, snr_min, snr_max)
+        sql += "duration between %.3f and %.3f and " % (
+            duration - 1e-3,
+            duration + 1e-3,
+        )
+    sql += "pc>=%.2f and snr between %.2f and %.2f" % (pc_min, snr_min, snr_max)
 
     df = pd.read_sql(sql, conn)
     return df
@@ -211,9 +213,10 @@ def get_seeds_tab(conn, proc_group=None):
     """
     sql = "select * from Seeds"
     if proc_group is not None:
-        sql += " where proc_group=%d" %(proc_group)
+        sql += " where proc_group=%d" % (proc_group)
     df = pd.read_sql(sql, conn)
     return df
+
 
 def get_square_tab(conn, proc_group=None):
     """
@@ -229,11 +232,9 @@ def get_square_tab(conn, proc_group=None):
     """
     sql = "select * from JobSquare"
     if proc_group is not None:
-        sql += " where proc_group=%d" %(proc_group)
+        sql += " where proc_group=%d" % (proc_group)
     df = pd.read_sql(sql, conn)
     return df
-
-
 
 
 def get_imgsig_tab(conn, proc_group=None):
@@ -250,6 +251,6 @@ def get_imgsig_tab(conn, proc_group=None):
     """
     sql = "select * from ImageSigs"
     if proc_group is not None:
-        sql += " where proc_group=%d" %(proc_group)
+        sql += " where proc_group=%d" % (proc_group)
     df = pd.read_sql(sql, conn)
     return df

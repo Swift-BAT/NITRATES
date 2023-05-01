@@ -11,61 +11,72 @@ from ..config import rt_dir, rates_resp_out_dir
 from ..response.ray_trace_funcs import RayTraces
 from ..lib.event2dpi_funcs import det2dpis, mask_detxy
 from ..models.models import Source_Model_InFoV, Source_Model_InOutFoV
-from ..response.response import Swift_Mask_Interactions, bldmask2batxys, get_fixture_struct, dpi_shape
+from ..response.response import (
+    Swift_Mask_Interactions,
+    bldmask2batxys,
+    get_fixture_struct,
+    dpi_shape,
+)
 from ..lib.coord_conv_funcs import imxy2theta_phi, theta_phi2imxy
 from ..models.flux_models import Cutoff_Plaw_Flux, Plaw_Flux
 from ..response.Polygons import Polygon2D
 
+
 def cli():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--Njobs', type=int,\
-            help="Number of jobs being run",
-            default=None)
-    parser.add_argument('--job_id', type=int,\
-            help="Job ID number",
-            default=-1)
+    parser.add_argument(
+        "--Njobs", type=int, help="Number of jobs being run", default=None
+    )
+    parser.add_argument("--job_id", type=int, help="Job ID number", default=-1)
     args = parser.parse_args()
     return args
 
 
 def get_bldmask_alldets():
-
-    detxs_by_sand0 = np.arange(0, 286-15, 18)
+    detxs_by_sand0 = np.arange(0, 286 - 15, 18)
     detxs_by_sand1 = detxs_by_sand0 + 15
 
-    detys_by_sand0 = np.arange(0, 173-7, 11)
+    detys_by_sand0 = np.arange(0, 173 - 7, 11)
     detys_by_sand1 = detys_by_sand0 + 7
 
-    all_good_detxs = np.ravel([np.arange(detxs_by_sand0[i], detxs_by_sand1[i]+1,\
-                                          1, dtype=np.int) for i in range(16)])
-    all_good_detys = np.ravel([np.arange(detys_by_sand0[i], detys_by_sand1[i]+1,\
-                                         1, dtype=np.int) for i in range(16)])
+    all_good_detxs = np.ravel(
+        [
+            np.arange(detxs_by_sand0[i], detxs_by_sand1[i] + 1, 1, dtype=np.int)
+            for i in range(16)
+        ]
+    )
+    all_good_detys = np.ravel(
+        [
+            np.arange(detys_by_sand0[i], detys_by_sand1[i] + 1, 1, dtype=np.int)
+            for i in range(16)
+        ]
+    )
 
     detxax = np.arange(286, dtype=np.int)
     detyax = np.arange(173, dtype=np.int)
     detx_dpi, dety_dpi = np.meshgrid(detxax, detyax)
-    bl_alldets = np.isin(detx_dpi, all_good_detxs)&np.isin(dety_dpi, all_good_detys)
+    bl_alldets = np.isin(detx_dpi, all_good_detxs) & np.isin(dety_dpi, all_good_detys)
     return bl_alldets
 
 
 def get_in_out_rates4EpeakGamma(sig_mod, Epeak, gamma):
-
-    flux_params = {'A':1.0, 'Epeak':Epeak, 'gamma':gamma}
+    flux_params = {"A": 1.0, "Epeak": Epeak, "gamma": gamma}
     sig_mod.set_flux_params(flux_params)
-#     in_fov_bl = sig_mod.resp_obj.mask_obj.does_int_mask
-    in_fov_bl = (sig_mod.resp_obj.mask_obj.does_int_mask)&\
-                (sig_mod.resp_obj.mask_obj.fix_trans[:,10]>0.99)
+    #     in_fov_bl = sig_mod.resp_obj.mask_obj.does_int_mask
+    in_fov_bl = (sig_mod.resp_obj.mask_obj.does_int_mask) & (
+        sig_mod.resp_obj.mask_obj.fix_trans[:, 10] > 0.99
+    )
     out_fov_bl = ~in_fov_bl
     rate_dpis = sig_mod.normed_rate_dpis
-    in_fov_rates = np.sum(rate_dpis[:,in_fov_bl], axis=1)/np.sum(in_fov_bl)
-    out_fov_rates = np.sum(rate_dpis[:,out_fov_bl], axis=1)/np.sum(out_fov_bl)
+    in_fov_rates = np.sum(rate_dpis[:, in_fov_bl], axis=1) / np.sum(in_fov_bl)
+    out_fov_rates = np.sum(rate_dpis[:, out_fov_bl], axis=1) / np.sum(out_fov_bl)
     return in_fov_rates, out_fov_rates
 
-def get_in_out_rates(sig_mod):
 
-    Epeaks = np.logspace(1, 3.2, 11*2+1)
+def get_in_out_rates(sig_mod):
+    Epeaks = np.logspace(1, 3.2, 11 * 2 + 1)
     print(Epeaks)
-    gammas = np.linspace(-0.2, 2.3, 4*5+1)
+    gammas = np.linspace(-0.2, 2.3, 4 * 5 + 1)
     print(gammas)
     Gs = np.meshgrid(Epeaks, gammas)
     Epeaks = Gs[0].ravel()
@@ -76,28 +87,29 @@ def get_in_out_rates(sig_mod):
     res_dicts = []
 
     for j in range(Npnts):
-
-        res_dict = {'Epeak':Epeaks[j], 'gamma':gammas[j]}
-        in_fov_rates, out_fov_rates = get_in_out_rates4EpeakGamma(sig_mod, Epeaks[j], gammas[j])
-        res_dict['RatesIn'] = in_fov_rates
-        res_dict['RatesOut'] = out_fov_rates
+        res_dict = {"Epeak": Epeaks[j], "gamma": gammas[j]}
+        in_fov_rates, out_fov_rates = get_in_out_rates4EpeakGamma(
+            sig_mod, Epeaks[j], gammas[j]
+        )
+        res_dict["RatesIn"] = in_fov_rates
+        res_dict["RatesOut"] = out_fov_rates
         res_dicts.append(res_dict)
 
     return res_dicts
 
 
 def mk_in_out_rates_tab_masks(sig_mod, theta, phi):
-
     dpi_shape = (173, 286)
 
     sig_mod.set_theta_phi(theta, phi)
-#     in_fov_bl = sig_mod.resp_obj.mask_obj.does_int_mask
-    in_fov_bl = (sig_mod.resp_obj.mask_obj.does_int_mask)&\
-                (sig_mod.resp_obj.mask_obj.fix_trans[:,10]>0.99)
+    #     in_fov_bl = sig_mod.resp_obj.mask_obj.does_int_mask
+    in_fov_bl = (sig_mod.resp_obj.mask_obj.does_int_mask) & (
+        sig_mod.resp_obj.mask_obj.fix_trans[:, 10] > 0.99
+    )
     out_fov_bl = ~in_fov_bl
     in_ndets = np.sum(in_fov_bl)
     if in_ndets > 100:
-        print("%d dets in FoV"%(in_ndets))
+        print("%d dets in FoV" % (in_ndets))
         return None, None, None
 
     mask_in = np.zeros(dpi_shape, dtype=np.bool)
@@ -111,8 +123,8 @@ def mk_in_out_rates_tab_masks(sig_mod, theta, phi):
 
     return tab, mask_in, mask_out
 
-def mk_npz_file_in_out_rates(sig_mod, hp_ind):
 
+def mk_npz_file_in_out_rates(sig_mod, hp_ind):
     dname = rates_resp_out_dir
     phi, lat = hp.pix2ang(2**2, hp_ind, lonlat=True, nest=True)
     theta = 90.0 - lat
@@ -121,26 +133,32 @@ def mk_npz_file_in_out_rates(sig_mod, hp_ind):
         return
     # imx, imy = theta_phi2imxy(theta, phi)
     # fname = 'resp_imx_%.3f_imy_%.3f_'%(np.round(imx,decimals=3),np.round(imy,decimals=3))
-    fname = 'resp_hpind_%d_'%(hp_ind)
-    Epeak = tab['Epeak']
-    gamma = tab['gamma']
-    RatesIn = tab['RatesIn']
-    RatesOut = tab['RatesOut']
-    save_fname = os.path.join(dname,fname)
+    fname = "resp_hpind_%d_" % (hp_ind)
+    Epeak = tab["Epeak"]
+    gamma = tab["gamma"]
+    RatesIn = tab["RatesIn"]
+    RatesOut = tab["RatesOut"]
+    save_fname = os.path.join(dname, fname)
     print(save_fname)
-    np.savez(save_fname, RatesIn=RatesIn, RatesOut=RatesOut, Epeak=Epeak,\
-             gamma=gamma, mask_in=mask_in, mask_out=mask_out)
-
-
+    np.savez(
+        save_fname,
+        RatesIn=RatesIn,
+        RatesOut=RatesOut,
+        Epeak=Epeak,
+        gamma=gamma,
+        mask_in=mask_in,
+        mask_out=mask_out,
+    )
 
 
 def main(args):
+    fname = "mk_outFoV_resp" + "_" + str(args.job_id)
 
-    fname = 'mk_outFoV_resp' + '_' + str(args.job_id)
-
-    logging.basicConfig(filename=fname+'.log', level=logging.DEBUG,\
-                    format='%(asctime)s-' '%(levelname)s- %(message)s')
-
+    logging.basicConfig(
+        filename=fname + ".log",
+        level=logging.DEBUG,
+        format="%(asctime)s-" "%(levelname)s- %(message)s",
+    )
 
     # xbins = np.linspace(-1.8, 1.8, 30+1)
     # ybins = np.linspace(-1.0, 1.0, 25+1)
@@ -177,16 +195,14 @@ def main(args):
     # print len(xs)
     # print len(ys)
 
-
-
     ebins0 = np.array([15.0, 24.0, 35.0, 48.0, 64.0])
-    ebins0 = np.append(ebins0, np.logspace(np.log10(84.0), np.log10(500.0), 5+1))[:-1]
+    ebins0 = np.append(ebins0, np.logspace(np.log10(84.0), np.log10(500.0), 5 + 1))[:-1]
     ebins0 = np.round(ebins0, decimals=1)[:-1]
     ebins1 = np.append(ebins0[1:], [350.0])
     nebins = len(ebins0)
 
     flux_mod = Cutoff_Plaw_Flux(E0=100.0)
-    flux_params = {'A':1.0, 'Epeak':1000.0, 'gamma':1.5}
+    flux_params = {"A": 1.0, "Epeak": 1000.0, "gamma": 1.5}
 
     rt_obj = RayTraces(rt_dir, max_nbytes=1e9)
 
@@ -197,28 +213,27 @@ def main(args):
     phis, lats = hp.pix2ang(2**2, hpinds, lonlat=True, nest=True)
     thetas = 90.0 - lats
 
-    bl = (thetas>40.0)
+    bl = thetas > 40.0
     hp_inds = hpinds[bl]
     phis = phis[bl]
     thetas = thetas[bl]
 
     Ntot_pnts = len(hp_inds)
     Npnts2do = 1 + int(Ntot_pnts / args.Njobs)
-    i0 = Npnts2do*args.job_id
+    i0 = Npnts2do * args.job_id
     i1 = i0 + Npnts2do
 
     for i in range(i0, i1):
+        logging.info("Starting %d of %d points" % (1 + i - i0, Npnts2do))
+        logging.info("hp_ind: %d" % (hp_inds[i]))
+        logging.info("theta, phi: %.3f, %.3f" % (thetas[i], phis[i]))
 
-        logging.info("Starting %d of %d points"%(1+i - i0, Npnts2do))
-        logging.info("hp_ind: %d"%(hp_inds[i]))
-        logging.info("theta, phi: %.3f, %.3f"%(thetas[i], phis[i]))
-
-        sig_mod = Source_Model_InOutFoV(flux_mod, [ebins0,ebins1], bl_alldets, rt_obj)
+        sig_mod = Source_Model_InOutFoV(flux_mod, [ebins0, ebins1], bl_alldets, rt_obj)
 
         mk_npz_file_in_out_rates(sig_mod, hp_inds[i])
 
-if __name__ == "__main__":
 
+if __name__ == "__main__":
     args = cli()
 
     main(args)

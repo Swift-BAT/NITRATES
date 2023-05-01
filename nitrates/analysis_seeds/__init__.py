@@ -1,9 +1,9 @@
 __all__ = [
-'bkg_linear_rates' ,
-'bkg_rate_estimation' ,
-'do_full_rates' ,
-'do_rates_mle_InOutFoV2' ,
-'mle_rates_for_realtime'
+    "bkg_linear_rates",
+    "bkg_rate_estimation",
+    "do_full_rates",
+    "do_rates_mle_InOutFoV2",
+    "mle_rates_for_realtime",
 ]
 
 from .bkg_linear_rates import *

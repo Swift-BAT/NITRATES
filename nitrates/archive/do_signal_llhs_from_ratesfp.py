@@ -9,16 +9,32 @@ import time
 import pandas as pd
 
 from ..analysis_seeds.bkg_rate_estimation import rate_obj_from_sqltab
-from ..lib.sqlite_funcs import get_conn, write_result, write_results,\
-                        timeID2time_dur, write_results_fromSigImg,\
-                        update_square_stat, write_square_res_line,\
-                        write_square_results
-from ..lib.dbread_funcs import get_rate_fits_tab, guess_dbfname,\
-                    get_seeds_tab, get_info_tab, get_files_tab,\
-                    get_square_tab, get_full_sqlite_table_as_df
+from ..lib.sqlite_funcs import (
+    get_conn,
+    write_result,
+    write_results,
+    timeID2time_dur,
+    write_results_fromSigImg,
+    update_square_stat,
+    write_square_res_line,
+    write_square_results,
+)
+from ..lib.dbread_funcs import (
+    get_rate_fits_tab,
+    guess_dbfname,
+    get_seeds_tab,
+    get_info_tab,
+    get_files_tab,
+    get_square_tab,
+    get_full_sqlite_table_as_df,
+)
 from ..config import EBINS0, EBINS1
 from ..models.flux_models import Plaw_Flux
-from ..llh_analysis.minimizers import NLLH_ScipyMinimize_Wjacob, imxy_grid_miner, NLLH_ScipyMinimize
+from ..llh_analysis.minimizers import (
+    NLLH_ScipyMinimize_Wjacob,
+    imxy_grid_miner,
+    NLLH_ScipyMinimize,
+)
 from ..lib.drm_funcs import DRMs
 from ..response.ray_trace_funcs import RayTraces
 from ..llh_analysis.LLH import LLH_webins
@@ -31,92 +47,108 @@ from ..models.models import Bkg_Model, Point_Source_Model, CompoundModel
 # then loop over all time windows
 # minimizing nllh and recording bf params
 
+
 def cli():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--evfname', type=str,\
-            help="Event data file",
-            default=None)
-    parser.add_argument('--dmask', type=str,\
-            help="Detmask fname",
-            default=None)
-    parser.add_argument('--job_id', type=int,\
-            help="ID to tell it what seeds to do",\
-            default=-1)
-    parser.add_argument('--dbfname', type=str,\
-            help="Name to save the database to",\
-            default=None)
-    parser.add_argument('--rt_dir', type=str,\
-            help="Directory with ray traces",\
-            default=None)
-    parser.add_argument('--pcfname', type=str,\
-            help="partial coding file name",\
-            default='pc_2.img')
-    parser.add_argument('--rate_fname', type=str,\
-            help="Rate results file name",\
-            default='rate_seeds.csv')
+    parser.add_argument("--evfname", type=str, help="Event data file", default=None)
+    parser.add_argument("--dmask", type=str, help="Detmask fname", default=None)
+    parser.add_argument(
+        "--job_id", type=int, help="ID to tell it what seeds to do", default=-1
+    )
+    parser.add_argument(
+        "--dbfname", type=str, help="Name to save the database to", default=None
+    )
+    parser.add_argument(
+        "--rt_dir", type=str, help="Directory with ray traces", default=None
+    )
+    parser.add_argument(
+        "--pcfname", type=str, help="partial coding file name", default="pc_2.img"
+    )
+    parser.add_argument(
+        "--rate_fname",
+        type=str,
+        help="Rate results file name",
+        default="rate_seeds.csv",
+    )
     args = parser.parse_args()
     return args
 
 
-def do_analysis(square_tab, rate_res_tab, pc_imxs, pc_imys,\
-                pl_flux, drm_obj, rt_dir,\
-                bkg_llh_obj, sig_llh_obj, bkg_rate_obj,\
-                conn, db_fname, trigger_time, work_dir, TSwrite=3.5):
-
+def do_analysis(
+    square_tab,
+    rate_res_tab,
+    pc_imxs,
+    pc_imys,
+    pl_flux,
+    drm_obj,
+    rt_dir,
+    bkg_llh_obj,
+    sig_llh_obj,
+    bkg_rate_obj,
+    conn,
+    db_fname,
+    trigger_time,
+    work_dir,
+    TSwrite=3.5,
+):
     conn.close()
 
     ebins0 = sig_llh_obj.ebins0
     ebins1 = sig_llh_obj.ebins1
     bl_dmask = sig_llh_obj.bl_dmask
 
-    bkg_miner = NLLH_ScipyMinimize('')
-    sig_miner = NLLH_ScipyMinimize_Wjacob('')
+    bkg_miner = NLLH_ScipyMinimize("")
+    sig_miner = NLLH_ScipyMinimize_Wjacob("")
 
     for square_ind, square_row in square_tab.iterrows():
-
-        logging.info("Starting squareID: %d"%(square_row['squareID']))
+        logging.info("Starting squareID: %d" % (square_row["squareID"]))
 
         rt_obj = RayTraces(rt_dir, max_nbytes=6e9)
 
-        im_bl = ((pc_imxs>=square_row['imx0'])&\
-                (pc_imxs<square_row['imx1'])&\
-                (pc_imys>=square_row['imy0'])&\
-                (pc_imys<square_row['imy1']))
+        im_bl = (
+            (pc_imxs >= square_row["imx0"])
+            & (pc_imxs < square_row["imx1"])
+            & (pc_imys >= square_row["imy0"])
+            & (pc_imys < square_row["imy1"])
+        )
         Npix = np.sum(im_bl)
-        logging.debug("%d Pixels to minimize at" %(Npix))
+        logging.debug("%d Pixels to minimize at" % (Npix))
         imxs = pc_imxs[im_bl]
         imys = pc_imys[im_bl]
 
         tab = Table()
         res_dfs2write = []
 
-        bl = (rate_res_tab['squareID']==square_row['squareID'])
+        bl = rate_res_tab["squareID"] == square_row["squareID"]
 
-        logging.info("%d timeIDs to do"%(np.sum(bl)))
+        logging.info("%d timeIDs to do" % (np.sum(bl)))
 
         rate_ress = rate_res_tab[bl]
 
         for rate_ind, rate_row in rate_ress.iterrows():
-
-            logging.debug("Starting timeID: %d, table index: %d"\
-                        %(rate_row['timeID'],rate_ind))
+            logging.debug(
+                "Starting timeID: %d, table index: %d" % (rate_row["timeID"], rate_ind)
+            )
 
             res_dict = {}
-            res_dict = {'squareID':square_row['squareID'],
-                        'timeID':rate_row['timeID']}
+            res_dict = {
+                "squareID": square_row["squareID"],
+                "timeID": rate_row["timeID"],
+            }
 
-            t0 = rate_row['time']
-            dt = rate_row['dur']
-            tmid = t0 + dt/2.
+            t0 = rate_row["time"]
+            dt = rate_row["dur"]
+            tmid = t0 + dt / 2.0
             t1 = t0 + dt
-            res_dict['time'] = t0
-            res_dict['duration'] = dt
+            res_dict["time"] = t0
+            res_dict["duration"] = dt
 
             bkg_llh_obj.set_time(t0, dt)
             sig_llh_obj.set_time(t0, dt)
 
-            bkg_mod = Bkg_Model(bkg_rate_obj, bl_dmask, t=tmid,\
-                            bkg_err_fact=2.0, use_prior=False)
+            bkg_mod = Bkg_Model(
+                bkg_rate_obj, bl_dmask, t=tmid, bkg_err_fact=2.0, use_prior=False
+            )
 
             logging.debug("bkg exp rates, errors")
             logging.debug(bkg_mod._rates)
@@ -127,36 +159,48 @@ def do_analysis(square_tab, rate_res_tab, pc_imxs, pc_imys,\
             bkg_miner.set_llh(bkg_llh_obj)
 
             bkg_miner.set_fixed_params(bkg_llh_obj.model.param_names)
-            bkg_params = {pname:bkg_llh_obj.model.param_dict[pname]['val'] for\
-                            pname in bkg_llh_obj.model.param_names}
+            bkg_params = {
+                pname: bkg_llh_obj.model.param_dict[pname]["val"]
+                for pname in bkg_llh_obj.model.param_names
+            }
             bkg_nllh = -bkg_llh_obj.get_llh(bkg_params)
-            res_dict['bkg_nllh'] = bkg_nllh
+            res_dict["bkg_nllh"] = bkg_nllh
 
-            sig_mod = Point_Source_Model(np.mean(imxs),\
-                                    np.mean(imys), 0.3,\
-                                    pl_flux, drm_obj,\
-                                    [ebins0,ebins1], rt_obj, bl_dmask,\
-                                    use_deriv=True)
-            sig_mod.drm_im_update = .2
+            sig_mod = Point_Source_Model(
+                np.mean(imxs),
+                np.mean(imys),
+                0.3,
+                pl_flux,
+                drm_obj,
+                [ebins0, ebins1],
+                rt_obj,
+                bl_dmask,
+                use_deriv=True,
+            )
+            sig_mod.drm_im_update = 0.2
             comp_mod = CompoundModel([bkg_mod, sig_mod])
             sig_llh_obj.set_model(comp_mod)
             sig_miner.set_llh(sig_llh_obj)
-            fixed_pars = [pname for pname in sig_miner.param_names if\
-                        ('A' not in pname) or ('gamma' not in pname)]
+            fixed_pars = [
+                pname
+                for pname in sig_miner.param_names
+                if ("A" not in pname) or ("gamma" not in pname)
+            ]
             sig_miner.set_fixed_params(fixed_pars)
-            sig_miner.set_fixed_params(['Signal_A', 'Signal_gamma'], fixed=False)
+            sig_miner.set_fixed_params(["Signal_A", "Signal_gamma"], fixed=False)
 
             TSs = np.zeros(Npix)
             sig_nllhs = np.zeros(Npix)
             As = np.zeros(Npix)
             gammas = np.zeros(Npix)
 
-
             for ii in range(Npix):
                 try:
-                    sig_miner.set_fixed_params(['Signal_imx', 'Signal_imy'], [imxs[ii],imys[ii]])
+                    sig_miner.set_fixed_params(
+                        ["Signal_imx", "Signal_imy"], [imxs[ii], imys[ii]]
+                    )
                     pars, nllh, res = sig_miner.minimize()
-                    TS = np.sqrt(2.*(bkg_nllh - nllh[0]))
+                    TS = np.sqrt(2.0 * (bkg_nllh - nllh[0]))
                     # if TS >= TS_min:
                     if np.isnan(TS):
                         TS = 0.0
@@ -169,7 +213,7 @@ def do_analysis(square_tab, rate_res_tab, pc_imxs, pc_imys,\
                     logging.error(E)
                     logging.error(traceback.format_exc())
                     logging.error("Failed to minimize seed: ")
-                    logging.error((imxs[ii],imys[ii]))
+                    logging.error((imxs[ii], imys[ii]))
 
             # best_ind = np.nanargmax(TSs)
             # res_dict['TS'] = TSs[best_ind]
@@ -182,16 +226,15 @@ def do_analysis(square_tab, rate_res_tab, pc_imxs, pc_imys,\
             #         'res_%d_%d_.fits' %(res_dict['timeID'],\
             #         res_dict['squareID']))
 
-
-            TSbl = (TSs>=TSwrite)
+            TSbl = TSs >= TSwrite
             if np.sum(TSbl) > 0:
-                logging.info("%d above TS of %.1f"%(np.sum(TSbl),TSwrite))
-                res_dict['TS'] = TSs[TSbl]
-                res_dict['imx'] = imxs[TSbl]
-                res_dict['imy'] = imys[TSbl]
-                res_dict['A'] = As[TSbl]
-                res_dict['ind'] = gammas[TSbl]
-                res_dict['sig_nllh'] = sig_nllhs[TSbl]
+                logging.info("%d above TS of %.1f" % (np.sum(TSbl), TSwrite))
+                res_dict["TS"] = TSs[TSbl]
+                res_dict["imx"] = imxs[TSbl]
+                res_dict["imy"] = imys[TSbl]
+                res_dict["A"] = As[TSbl]
+                res_dict["ind"] = gammas[TSbl]
+                res_dict["sig_nllh"] = sig_nllhs[TSbl]
                 # res_dict['fname'] = fname
                 res_dfs2write.append(pd.DataFrame(res_dict))
 
@@ -220,8 +263,7 @@ def do_analysis(square_tab, rate_res_tab, pc_imxs, pc_imys,\
             # tab['imx'] = imxs
             # tab['imy'] = imys
 
-        fname = os.path.join(work_dir,\
-                'res_%d_.csv' %(square_row['squareID']))
+        fname = os.path.join(work_dir, "res_%d_.csv" % (square_row["squareID"]))
 
         if len(res_dfs2write) > 0:
             res_df = pd.concat(res_dfs2write)
@@ -265,18 +307,17 @@ def do_analysis(square_tab, rate_res_tab, pc_imxs, pc_imys,\
         #             logging.error("Problem writing to DB")
         # conn.close()
 
-
-            # tab.write(fname, overwrite=True)
-
-
+        # tab.write(fname, overwrite=True)
 
 
 def main(args):
+    fname = "llh_analysis_from_rate_seeds_" + str(args.job_id)
 
-    fname = 'llh_analysis_from_rate_seeds_' + str(args.job_id)
-
-    logging.basicConfig(filename=fname+'.log', level=logging.DEBUG,\
-                    format='%(asctime)s-' '%(levelname)s- %(message)s')
+    logging.basicConfig(
+        filename=fname + ".log",
+        level=logging.DEBUG,
+        format="%(asctime)s-" "%(levelname)s- %(message)s",
+    )
 
     t_0 = time.time()
 
@@ -287,23 +328,23 @@ def main(args):
     else:
         db_fname = args.dbfname
 
-    logging.info('Connecting to DB')
+    logging.info("Connecting to DB")
     conn = get_conn(db_fname)
 
     info_tab = get_info_tab(conn)
-    logging.info('Got info table')
+    logging.info("Got info table")
 
     files_tab = get_files_tab(conn)
-    logging.info('Got files table')
+    logging.info("Got files table")
 
-    trigtime = info_tab['trigtimeMET'][0]
+    trigtime = info_tab["trigtimeMET"][0]
 
-    evfname = files_tab['evfname'][0]
+    evfname = files_tab["evfname"][0]
     ev_data = fits.open(evfname)[1].data
-    dmask_fname = files_tab['detmask'][0]
+    dmask_fname = files_tab["detmask"][0]
     dmask = fits.open(dmask_fname)[0].data
-    bl_dmask = (dmask==0.0)
-    logging.debug('Opened up event and detmask files')
+    bl_dmask = dmask == 0.0
+    logging.debug("Opened up event and detmask files")
     rate_fits_df = get_rate_fits_tab(conn)
     bkg_rates_obj = rate_obj_from_sqltab(rate_fits_df, 0, 1)
 
@@ -311,14 +352,14 @@ def main(args):
     proc_num = args.job_id
     # init classes up here
 
-    drm_dir = files_tab['drmDir'][0]
+    drm_dir = files_tab["drmDir"][0]
     if args.rt_dir is None:
-        rt_dir = files_tab['rtDir'][0]
+        rt_dir = files_tab["rtDir"][0]
     else:
         rt_dir = args.rt_dir
     drm_obj = DRMs(drm_dir)
     # rt_obj = RayTraces(rt_dir, max_nbytes=1e10)
-    work_dir = files_tab['workDir'][0]
+    work_dir = files_tab["workDir"][0]
 
     pl_flux = Plaw_Flux()
 
@@ -334,9 +375,9 @@ def main(args):
 
     PC = fits.open(args.pcfname)[0]
     pc = PC.data
-    w_t = WCS(PC.header, key='T')
+    w_t = WCS(PC.header, key="T")
 
-    pcbl = (pc>=0.1)
+    pcbl = pc >= 0.1
     pc_inds = np.where(pcbl)
     pc_imxs, pc_imys = w_t.all_pix2world(pc_inds[1], pc_inds[0], 0)
 
@@ -350,16 +391,26 @@ def main(args):
 
     logging.info("Read in Square and Rates Tables, now to do analysis")
 
-    do_analysis(square_tab, rate_res_tab, pc_imxs, pc_imys, pl_flux,\
-                    drm_obj, rt_dir,\
-                    bkg_llh_obj, sig_llh_obj, bkg_rates_obj,\
-                    conn, db_fname, trigtime, work_dir)
+    do_analysis(
+        square_tab,
+        rate_res_tab,
+        pc_imxs,
+        pc_imys,
+        pl_flux,
+        drm_obj,
+        rt_dir,
+        bkg_llh_obj,
+        sig_llh_obj,
+        bkg_rates_obj,
+        conn,
+        db_fname,
+        trigtime,
+        work_dir,
+    )
     conn.close()
 
 
-
 if __name__ == "__main__":
-
     args = cli()
 
     main(args)

@@ -12,56 +12,56 @@ PB_EDGEN = 0.35176069
 
 
 def pb_mu_low(energy):
-
-    pb_mu = PB_LCFF*(energy**PB_LIND)
+    pb_mu = PB_LCFF * (energy**PB_LIND)
 
     return pb_mu
 
-def pb_mu_high(energy):
 
-    mid = PB_HCFF*(energy**PB_HIND)
-    high = PB_VCFF*(energy**PB_VIND)
+def pb_mu_high(energy):
+    mid = PB_HCFF * (energy**PB_HIND)
+    high = PB_VCFF * (energy**PB_VIND)
     base = mid**PB_SMTH + high**PB_SMTH
-    power = 1./PB_SMTH
+    power = 1.0 / PB_SMTH
     pb_mu = base**power
 
     return pb_mu
 
+
 def trans(pb_mu, imx, imy):
+    cos_theta = 1.0 / np.sqrt(1.0 + imx**2 + imy**2)  # I think
 
-    cos_theta = 1./np.sqrt(1. + imx**2 + imy**2) # I think
+    t_pb = np.exp(-0.1 * pb_mu * PB_RHO / cos_theta)
 
-    t_pb = np.exp(-.1*pb_mu*PB_RHO/cos_theta)
+    t_pb_near = (cos_theta / (0.05 * pb_mu * PB_RHO)) * (
+        1.0 - np.exp(-0.05 * pb_mu * PB_RHO / cos_theta)
+    )
 
-    t_pb_near = (cos_theta/(.05*pb_mu*PB_RHO))*\
-            (1. - np.exp(-.05*pb_mu*PB_RHO/cos_theta))
+    t_pb_far = (cos_theta / (0.05 * pb_mu * PB_RHO)) * (
+        np.exp(-0.05 * pb_mu * PB_RHO / cos_theta)
+        - np.exp(-0.1 * pb_mu * PB_RHO / cos_theta)
+    )
 
-    t_pb_far = (cos_theta/(.05*pb_mu*PB_RHO))*\
-            (np.exp(-.05*pb_mu*PB_RHO/cos_theta)-\
-            np.exp(-.1*pb_mu*PB_RHO/cos_theta))
-
-
-    nonedge_fraction = (1.0-0.2*abs(imx))*(1.0-0.2*abs(imy))
+    nonedge_fraction = (1.0 - 0.2 * abs(imx)) * (1.0 - 0.2 * abs(imy))
     edge_fraction = 1.0 - nonedge_fraction
-    edge_fraction = PB_EDGEN*edge_fraction
+    edge_fraction = PB_EDGEN * edge_fraction
 
-    t_pb_overall = (1. - edge_fraction)*(1. - t_pb)+\
-                    edge_fraction*(t_pb_near - t_pb_far)
+    t_pb_overall = (1.0 - edge_fraction) * (1.0 - t_pb) + edge_fraction * (
+        t_pb_near - t_pb_far
+    )
 
     return t_pb_overall
 
-def get_pb_mu(energy):
 
+def get_pb_mu(energy):
     if np.isscalar(energy):
         energy = np.array([energy])
     pb_mu = pb_mu_low(energy)
-    pb_mu[(energy>88)] = pb_mu_high(energy[(energy>88)])
+    pb_mu[(energy > 88)] = pb_mu_high(energy[(energy > 88)])
 
     return pb_mu
 
 
 def get_pb_absortion(energy, imx, imy):
-
     pb_mu = get_pb_mu(energy)
 
     pb_absorb = trans(pb_mu, imx, imy)

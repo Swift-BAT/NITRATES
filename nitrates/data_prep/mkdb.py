@@ -8,58 +8,64 @@ import argparse
 import logging, traceback
 
 from ..lib.time_funcs import met2astropy
-from ..lib.sqlite_funcs import get_sql_tab_list, create_tables,\
-                get_conn, setup_tab_info, setup_tab_twinds,\
-                setup_files_tab, setup_tab_twind_status
+from ..lib.sqlite_funcs import (
+    get_sql_tab_list,
+    create_tables,
+    get_conn,
+    setup_tab_info,
+    setup_tab_twinds,
+    setup_files_tab,
+    setup_tab_twind_status,
+)
 from ..lib.dbread_funcs import get_info_tab, get_twinds_tab
 from ..lib.event2dpi_funcs import filter_evdata
 
 
-
 def cli():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--drm_dir', type=str,\
-            help="drm_directory",
-            default=None)
-    parser.add_argument('--rt_dir', type=str,\
-            help="rt_directory",\
-            default=None)
-    parser.add_argument('--work_dir', type=str,\
-            help="Directory to work in",\
-            default=None)
-    parser.add_argument('--data_dbfname', type=str,\
-            help="DB file name with information on the BAT data already downloaded from the QL site",
-            default="/gpfs/group/jak51/default/nitrates_realtime/NITRATES/data_scraping/BATQL.db")
-    parser.add_argument('--att_dname', type=str,\
-            help="Directory name that contains merged attfiles over chunks of time",
-            default="/gpfs/group/jak51/default/realtime_workdir/merged_atts/")
-    parser.add_argument('--enb_dname', type=str,\
-            help="Directory name that contains merged enable/disable files over chunks of time",
-            default="/gpfs/group/jak51/default/realtime_workdir/merged_enbs/")
-    parser.add_argument('--evfname', type=str,\
-            help="Event data file",
-            default=None)
-    parser.add_argument('--dmask', type=str,\
-            help="detmask file name",
-            default=None)
-    parser.add_argument('--obsid', type=str,\
-            help="Obsid",
-            default=None)
-    parser.add_argument('--dbfname', type=str,\
-            help="Name to save the database to",\
-            default=None)
-    parser.add_argument('--att_fname', type=str,\
-            help="Fname for that att file",\
-            default=None)
-    parser.add_argument('--trig_time', type=str,\
-            help="Time of trigger, in either MET or a datetime string")
+    parser.add_argument("--drm_dir", type=str, help="drm_directory", default=None)
+    parser.add_argument("--rt_dir", type=str, help="rt_directory", default=None)
+    parser.add_argument(
+        "--work_dir", type=str, help="Directory to work in", default=None
+    )
+    parser.add_argument(
+        "--data_dbfname",
+        type=str,
+        help="DB file name with information on the BAT data already downloaded from the QL site",
+        default="/gpfs/group/jak51/default/nitrates_realtime/NITRATES/data_scraping/BATQL.db",
+    )
+    parser.add_argument(
+        "--att_dname",
+        type=str,
+        help="Directory name that contains merged attfiles over chunks of time",
+        default="/gpfs/group/jak51/default/realtime_workdir/merged_atts/",
+    )
+    parser.add_argument(
+        "--enb_dname",
+        type=str,
+        help="Directory name that contains merged enable/disable files over chunks of time",
+        default="/gpfs/group/jak51/default/realtime_workdir/merged_enbs/",
+    )
+    parser.add_argument("--evfname", type=str, help="Event data file", default=None)
+    parser.add_argument("--dmask", type=str, help="detmask file name", default=None)
+    parser.add_argument("--obsid", type=str, help="Obsid", default=None)
+    parser.add_argument(
+        "--dbfname", type=str, help="Name to save the database to", default=None
+    )
+    parser.add_argument(
+        "--att_fname", type=str, help="Fname for that att file", default=None
+    )
+    parser.add_argument(
+        "--trig_time",
+        type=str,
+        help="Time of trigger, in either MET or a datetime string",
+    )
     args = parser.parse_args()
     return args
 
 
 def main(args):
-
-    if args.work_dir == '/gpfs/scratch/jjd330/bat_data/' and args.obsid is not None:
+    if args.work_dir == "/gpfs/scratch/jjd330/bat_data/" and args.obsid is not None:
         work_dir = os.path.join(args.work_dir, args.obsid)
     else:
         work_dir = args.work_dir
@@ -70,21 +76,24 @@ def main(args):
         os.mkdir(work_dir)
     os.chdir(work_dir)
 
-    logging.basicConfig(filename='making_db.log', level=logging.DEBUG,\
-                    format='%(asctime)s-' '%(levelname)s- %(message)s')
+    logging.basicConfig(
+        filename="making_db.log",
+        level=logging.DEBUG,
+        format="%(asctime)s-" "%(levelname)s- %(message)s",
+    )
 
     logging.info("Creating Database")
 
     if args.dbfname is None:
-        dbfname = 'results.db'
-    elif args.dbfname[-2:] != 'db':
-        dbfname = args.dbfname + '.db'
+        dbfname = "results.db"
+    elif args.dbfname[-2:] != "db":
+        dbfname = args.dbfname + ".db"
     else:
         dbfname = args.dbfname
 
     conn = get_conn(dbfname)
 
-    logging.info("Database %s created" %(dbfname))
+    logging.info("Database %s created" % (dbfname))
 
     sql_tab_list = get_sql_tab_list()
 
@@ -98,7 +107,6 @@ def main(args):
 
     # DB has been Initialized
     # Now it's time to wait for data
-
 
     # if args.att_fname is None:
     #     logging.info("Looking for att file")
@@ -200,11 +208,7 @@ def main(args):
     # setup_tab_twind_status(conn, timeIDs)
 
 
-
-
-
 if __name__ == "__main__":
-
     args = cli()
 
     main(args)
