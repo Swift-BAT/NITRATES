@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import numpy as np
 import pandas as pd
 from scipy import optimize, stats, interpolate
@@ -17,7 +18,7 @@ from event2dpi_funcs import det2dpis, mask_detxy
 from models import Bkg_Model_wSA, Bkg_Model_wFlatA, CompoundModel,\
                     Point_Source_Model_Binned_Rates
 from ray_trace_funcs import RayTraces, FootPrints
-
+import sys
 
 
 def cli():
@@ -31,6 +32,7 @@ def cli():
     parser.add_argument('--job_id', type=int,\
             help="Which job this is",
             default=-1)
+          #  default=sys.argv[1])
     parser.add_argument('--pix_fname', type=str,\
             help="Name of the file with good imx/y coordinates",\
             default='good_pix2scan.npy')
@@ -52,6 +54,7 @@ def cli():
     args = parser.parse_args()
     return args
 
+job_id=sys.argv[1]
 
 def parse_bkg_csv(bkg_fname, solid_angle_dpi, ebins0, ebins1, bl_dmask, rt_dir):
 
@@ -900,13 +903,13 @@ def main(args):
     nexps = len(exp_groups)
 
 
-    rates_resp_dir = '/gpfs/scratch/jjd330/bat_data/rates_resps/'
+    rates_resp_dir = '/home/shared/response/rates_resps/'
     rate_resp_arr = get_rates_resp_arr(rates_resp_dir)
 
     imxs = rate_resp_arr['imx']
     imys = rate_resp_arr['imy']
 
-    rates_resp_out_dir = '/gpfs/scratch/jjd330/bat_data/rates_resps_outFoV2/'
+    rates_resp_out_dir = '/home/shared/response/rates_resps_outFoV2/'
     rate_resp_out_arr = get_rates_resp_arr_outFoV(rates_resp_out_dir)
 
     hp_inds = rate_resp_out_arr['hp_ind']

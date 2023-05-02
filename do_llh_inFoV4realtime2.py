@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import numpy as np
 from astropy.io import fits
 from astropy.table import Table
@@ -7,7 +8,7 @@ import argparse
 import logging, traceback
 import time
 import pandas as pd
-from memory_profiler import profile
+#from memory_profiler import profile
 import gc
 from copy import copy, deepcopy
 

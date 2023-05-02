@@ -1,0 +1,11 @@
+universe   = vanilla
+executable = /home/shared/nitrates_new/NITRATES/do_rates_mle_InOutFoV2.py 
+error      = /home/shared/realtime_workdir/condor_test_rateslog.err
+output     = /home/shared/realtime_workdir/condor_test_rateslog.out
+log        = /home/shared/realtime_workdir/condor_test_rateslog.log
+getenv     = true
+request_memory = 8000
+request_cpus = 1
+arguments = --job_id $(Process)
+notification = never
+queue 24

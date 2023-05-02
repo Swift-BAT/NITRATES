@@ -1,0 +1,12 @@
+universe   = vanilla
+executable = /home/shared/nitrates_new/NITRATES/do_llh_inFoV4realtime2.py 
+error      = /home/shared/realtime_workdir/condor_test_infovlog.err
+output     = /home/shared/realtime_workdir/condor_test_infovlog.out
+log        = /home/shared/realtime_workdir/condor_test_infovlog.log
+getenv     = true
+request_memory = 8000
+request_cpus = 1
+arguments = --job_id $(Process)
+notification = never
+environment = Njobs_in=$(Njobs_in)
+queue $(Njobs_in)

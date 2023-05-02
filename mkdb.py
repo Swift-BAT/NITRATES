@@ -26,16 +26,16 @@ def cli():
             default=None)
     parser.add_argument('--work_dir', type=str,\
             help="Directory to work in",\
-            default='/gpfs/scratch/jjd330/bat_data/')
+            default='/home/shared/realtime_workdir/')
     parser.add_argument('--data_dbfname', type=str,\
             help="DB file name with information on the BAT data already downloaded from the QL site",
-            default="/storage/home/j/jjd330/work/local/bat_data/realtime_workdir/BATQL.db")
+            default="/home/shared/nitrates_new/NITRATES/data_scraping/BATQL.db")
     parser.add_argument('--att_dname', type=str,\
             help="Directory name that contains merged attfiles over chunks of time",
-            default="/storage/home/j/jjd330/work/local/bat_data/realtime_workdir/merged_atts/")
+            default="/home/shared/realtime_workdir/merged_atts/")
     parser.add_argument('--enb_dname', type=str,\
             help="Directory name that contains merged enable/disable files over chunks of time",
-            default="/storage/home/j/jjd330/work/local/bat_data/realtime_workdir/merged_enbs/")
+            default="/home/shared/realtime_workdir/merged_enbs/")
     parser.add_argument('--evfname', type=str,\
             help="Event data file",
             default=None)
@@ -59,7 +59,7 @@ def cli():
 
 def main(args):
 
-    if args.work_dir == '/gpfs/scratch/jjd330/bat_data/' and args.obsid is not None:
+    if args.work_dir == '/home/shared/realtime_workdir/' and args.obsid is not None:
         work_dir = os.path.join(args.work_dir, args.obsid)
     else:
         work_dir = args.work_dir

@@ -1,0 +1,10 @@
+universe   = vanilla
+executable = /home/shared/nitrates_new/NITRATES/do_bkg_estimation_wPSs_mp2.py
+error      = /home/shared/realtime_workdir/condor_test_log.err
+output     = /home/shared/realtime_workdir/condor_test_log.out
+log        = /home/shared/realtime_workdir/condor_test_log.log
+getenv     = true
+request_memory = 2000
+request_cpus = 1
+notification = never
+queue 1

@@ -9,7 +9,7 @@ from astropy.time import Time
 import numpy as np
 import sys
 import pandas as pd
-sys.path.append("/storage/work/jjd330/local/bat_data/BatML/data_scraping/")
+sys.path.append("/home/shared/nitrates_new/nitrates/data_scraping/")
 
 from db_ql_funcs import get_conn, get_qlevent_db_tab, write_new_obsid_line,\
                     update_obsid_line, get_db_tab, write_event_files2db
@@ -158,13 +158,13 @@ def cli():
     parser = argparse.ArgumentParser()
     parser.add_argument('--save_dir', type=str,\
             help="Directory to save data to",\
-            default='/storage/work/jjd330/local/bat_data/realtime_workdir/')
+            default='/home/shared/realtime_workdir/')
     parser.add_argument('--dbfname', type=str,\
             help="Name of the sqlite database",\
             default=None)
     parser.add_argument('--htmldir', type=str,\
             help="bash script to run analysis",
-            default="/storage/work/j/jjd330/local/bat_data/realtime_workdir/LVC_BAT/")
+            default="/home/shared/realtime_workdir/htmls/")
     parser.add_argument('--loglevel', type=int,\
             help="loglevel, 10=debug, 20=info",
             default=20)

@@ -24,8 +24,8 @@ from hp_funcs import pc_gwmap2good_pix
 from gti_funcs import add_bti2gti, bti2gti, gti2bti, union_gtis, flags2gti,\
                         get_btis_for_glitches, check_if_in_GTI,\
                         find_and_remove_cr_glitches
-sys.path.append('/storage/home/jjd330/work/local/bat_data/BatML/data_scraping/')
-sys.path.append('/storage/home/jjd330/work/local/bat_data/BatML/HeasoftTools/')
+sys.path.append('/home/shared/nitrates_new/NITRATES/data_scraping/')
+sys.path.append('/home/shared/nitrates_new/NITRATES/HeasoftTools/')
 from db_ql_funcs import get_gainoff_fname
 from bat_tool_funcs import bateconvert
 
@@ -433,7 +433,7 @@ def get_dmask(args, evdata, use_glob=False):
 
 
 
-    glob_dmask_fname = "/storage/work/j/jjd330/local/bat_data/swbbadpix20041120v008.fits.gz"
+    glob_dmask_fname = "/home/shared/response/swbbadpix20041120v008.fits.gz"
     global_dmask = fits.open(glob_dmask_fname)[-2].data
 
     if args.dmask is None and args.Obsid_Dir is None:
@@ -581,25 +581,25 @@ def cli():
     parser = argparse.ArgumentParser()
     parser.add_argument('--drm_dir', type=str,\
             help="drm_directory",
-            default=None)
+            default='/home/shared/response/drms/')
     parser.add_argument('--rt_dir', type=str,\
             help="rt_directory",\
             default=None)
     parser.add_argument('--work_dir', type=str,\
             help="Directory to work in",\
-            default='/gpfs/scratch/jjd330/bat_data/')
+            default='/home/shared/realtime_workdir/')
     parser.add_argument('--data_dbfname', type=str,\
             help="DB file name with information on the BAT data already downloaded from the QL site",
-            default="/storage/home/j/jjd330/work/local/bat_data/realtime_workdir/BATQL.db")
+            default="/home/shared/nitrates_new/NITRATES/submission_scripts/BATQL.db")
     parser.add_argument('--att_dname', type=str,\
             help="Directory name that contains merged attfiles over chunks of time",
-            default="/storage/home/j/jjd330/work/local/bat_data/realtime_workdir/merged_atts/")
+            default="/home/shared/realtime_workdir/merged_atts/")
     parser.add_argument('--acs_dname', type=str,\
             help="Directory name that contains merged acsfiles over chunks of time",
-            default="/storage/home/j/jjd330/work/local/bat_data/realtime_workdir/merged_acs/")
+            default="/home/shared/realtime_workdir/merged_acs/")
     parser.add_argument('--enb_dname', type=str,\
             help="Directory name that contains merged enable/disable files over chunks of time",
-            default="/storage/home/j/jjd330/work/local/bat_data/realtime_workdir/merged_enbs/")
+            default="/home/shared/realtime_workdir/merged_enbs/")
     parser.add_argument('--evfname', type=str,\
             help="Event data file",
             default=None)

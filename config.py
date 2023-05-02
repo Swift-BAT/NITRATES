@@ -1,6 +1,6 @@
 import os
 
-NITRATES_RESP_DIR="/Users/tparsota/Documents/BAT_SCRIPTS/NITRATES_BAT_RSP_FILES/" # env variable can be used or this can be set
+NITRATES_RESP_DIR="/home/shared/response/" # env variable can be used or this can be set
 if NITRATES_RESP_DIR is None:
     NITRATES_RESP_DIR=os.getenv('NITRATES_RESP_DIR')
 if NITRATES_RESP_DIR is None:
@@ -32,8 +32,8 @@ EBINS1 = [24., 35., 48., 64., 84., 120., 171.5, 245., 350.]
 ###   Old Stuff ###
 ###########################
 
-bat_ml_dir='/storage/work/jjd330/local/bat_data/BatML/'
-ftool_wrap='/storage/work/jjd330/local/bat_data/BatML/HeasoftTools/run_ftool.sh'
+bat_ml_dir='/home/shared/nitrates_new/NITRATES/'
+ftool_wrap='/home/shared/nitrates_new/NITRATES/HeasoftTools/run_ftool.sh'
 
 # rt_dir='/gpfs/scratch/jjd330/bat_data/ray_traces_detapp_npy/'
 # fp_dir = '/gpfs/scratch/jjd330/bat_data/footprints_npy/'
