@@ -140,7 +140,7 @@ def get_btis_for_glitches(evdata, tstart, tstop, tbin_size=16e-3):
     # bl_bad = (stds>10.0)&(stds2<2.5)
     bl_lowE_highSNR = stds > 10.0
     # bl_highE_lowSNR = (stds2<2.5)|((stds/stds2)>5)
-    bl_highE_lowSNR = (stds / stds2) > 3
+    bl_highE_lowSNR = (stds / np.abs(stds2)) > 3
     logging.debug("N_lowE_highSNR: " + str(np.sum(bl_lowE_highSNR)))
     if np.sum(bl_lowE_highSNR) > 0:
         logging.debug("LowE highSNRs: ")
