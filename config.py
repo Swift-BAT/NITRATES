@@ -43,10 +43,15 @@ ftool_wrap='/home/shared/nitrates_new/NITRATES/HeasoftTools/run_ftool.sh'
 # solid_angle_dpi_fname='/storage/work/jjd330/local/bat_data/solid_angle_dpi.npy'
 # bright_source_table_fname='/storage/work/jjd330/local/bat_data/BatML/bright_src_cat.fits'
 
-HEADAS="/storage/work/jjd330/heasoft/heasoft-6.21/x86_64-unknown-linux-gnu-libc2.12"
-HEADAS_INIT="/storage/work/jjd330/heasoft/heasoft-6.21/x86_64-unknown-linux-gnu-libc2.12/headas-init.sh"
-CALDB="/storage/work/jjd330/caldb_files"
-CALDB_INIT="/storage/work/jjd330/caldb_files/software/tools/caldbinit.sh"
+#HEADAS="/storage/work/jjd330/heasoft/heasoft-6.21/x86_64-unknown-linux-gnu-libc2.12"
+#HEADAS_INIT="/storage/work/jjd330/heasoft/heasoft-6.21/x86_64-unknown-linux-gnu-libc2.12/headas-init.sh"
+#CALDB="/storage/work/jjd330/caldb_files"
+#CALDB_INIT="/storage/work/jjd330/caldb_files/software/tools/caldbinit.sh"
+
+HEADAS='/home/gayathri/Softwares/heasoft-6.28/x86_64-pc-linux-gnu-libc2.31'
+HEADAS_INIT='/home/gayathri/Softwares/heasoft-6.28/x86_64-pc-linux-gnu-libc2.31/headas-init.sh'
+CALDB='/home/gayathri/Softwares/CALDB'
+CALDB_INIT='/home/gayathri/Softwares/CALDB/software/tools/caldbinit.sh'
 
 # EBINS0 = [14., 24., 36.3, 55.4, 80.0, 120.7]
 # EBINS1 = [24., 36.3, 55.4, 80.0, 120.7, 194.9]

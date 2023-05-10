@@ -1,23 +1,35 @@
 #!/bin/bash
 
-batml_path='/storage/home/jjd330/work/local/NITRATES/'
+#batml_path='/storage/home/jjd330/work/local/NITRATES/'
+batmal_path='/home/shared/nitratesnew/NITRATES/'
 ht_path=$batml_path'HeasoftTools/'
 sub_path=$batml_path'submission_scripts/'
 
-workdir='/gpfs/scratch/jjd330/bat_data/'
+#workdir='/gpfs/scratch/jjd330/bat_data/'
+workdir='/home/shared/nitrates_new/NITRATES/'
 #workdir='/storage/home/j/jjd330/work/local/bat_data/realtime_workdir/'
 
-drmdir='/storage/home/j/jjd330/work/local/bat_data/drms/'
+#drmdir='/storage/home/j/jjd330/work/local/bat_data/drms/'
+drmdir='/home/shared/response/drms/'
 
 export PYTHONPATH=$batml_path:$PYTHONPATH
 export PYTHONPATH=$ht_path:$PYTHONPATH
 
-HEADAS=/storage/work/jjd330/heasoft/heasoft-6.24/x86_64-pc-linux-gnu-libc2.12
+#HEADAS=/storage/work/jjd330/heasoft/heasoft-6.24/x86_64-pc-linux-gnu-libc2.12
+#export HEADAS
+#. $HEADAS/headas-init.sh
+
+HEADAS=/home/gayathri/Softwares/heasoft-6.28/x86_64-pc-linux-gnu-libc2.31
 export HEADAS
 . $HEADAS/headas-init.sh
 
+
 # CALDB stuff
-CALDB=/storage/work/jjd330/caldb_files; export CALDB
+#CALDB=/storage/work/jjd330/caldb_files; export CALDB
+#source $CALDB/software/tools/caldbinit.sh
+
+CALDB=/home/gayathri/Softwares/CALDB/
+export CALDB
 source $CALDB/software/tools/caldbinit.sh
 
 export HEADASNOQUERY=
@@ -78,7 +90,8 @@ cd $workdir
 python $batml_path'do_data_setup.py' --work_dir $workdir --trig_time $trigtime --search_twind $twind --min_dt $tmin --Ntdbls $Ntdbls --min_tbin $mintbin
 if [ -f "filter_evdata.fits" ]; then
     python $batml_path'do_full_rates.py' --min_tbin $mintbin > full_rates.out 2>&1 &
-    python $batml_path'do_manage2.py' --GWname $gwname --rhel7 --do_bkg --do_rates --do_llh --queue $queue --N_infov_jobs $NinFOVjobs --N_outfov_jobs $NoutFOVjobs > manager.out 2>&1 &
+#    python $batml_path'do_manage2.py' --GWname $gwname --rhel7 --do_bkg --do_rates --do_llh --queue $queue --N_infov_jobs $NinFOVjobs --N_outfov_jobs $NoutFOVjobs > manager.out 2>&1 &
+    python $batml_path'do_manage2.py' --GWname $gwname --rhel7 --do_bkg --do_rates --do_llh --N_infov_jobs $NinFOVjobs --N_outfov_jobs $NoutFOVjobs > manager.out 2>&1 &
 fi
 
 cd $curdir

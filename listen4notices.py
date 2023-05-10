@@ -17,8 +17,11 @@ from hp_funcs import err_circle2prob_map
 
 # run as nohup python $batml_path'listen4notices.py' > /storage/work/jjd330/local/bat_data/realtime_workdir/listen4gcns_out.log 2>&1 &
 
-workdir='/storage/work/j/jjd330/local/bat_data/realtime_workdir/'
-script_path='/storage/work/j/jjd330/local/bat_data/BatML/run_stuff_grb2.sh'
+#workdir='/storage/work/j/jjd330/local/bat_data/realtime_workdir/'
+#script_path='/storage/work/j/jjd330/local/bat_data/BatML/run_stuff_grb2.sh'
+
+workdir='/home/shared/realtime_workdir/'
+script_path='/home/shared/nitrates_new/NITRATES/run_stuff_grb2.sh'
 
 INTEGRAL = [gcn.notice_types.INTEGRAL_SPIACS,
             gcn.notice_types.INTEGRAL_WAKEUP,
@@ -284,7 +287,7 @@ if __name__ == "__main__":
     log_fname = os.path.join(workdir, 'gcn_listner.log')
     pid_fname = os.path.join(workdir, 'gcn_listner.pid')
     with open(pid_fname, 'wb') as f:
-        f.write(str(os.getpid()))
+        f.write(str(os.getpid()).encode('utf-8'))
     fh = logging.FileHandler(filename=log_fname)
     fh.setLevel(logging.INFO)
     fh.setFormatter(formatter)

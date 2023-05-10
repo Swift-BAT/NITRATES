@@ -42,6 +42,7 @@ evfname=$3
 dmask=$4
 attfname=$5
 
+#export gwname
 
 twind=20.0
 tmin=-20.0
@@ -86,6 +87,7 @@ python $batml_path'do_data_setup.py' --work_dir $workdir --trig_time $trigtime -
 if [ -f "filter_evdata.fits" ]; then
     python $batml_path'do_full_rates.py' --min_tbin $mintbin > full_rates.out 2>&1 &
     python $batml_path'do_manage2.py' --GWname $gwname --rhel7 --do_bkg --do_rates --do_llh > manager.out 2>&1 &
+   # condor_submit /home/shared/nitrates_new/NITRATES/submission_scripts/condor_submit_do_manage.sub
 fi
 
 cd $curdir

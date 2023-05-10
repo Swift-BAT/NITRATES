@@ -1073,7 +1073,7 @@ def find_peaks2scan(res_df, max_dv=10.0, min_sep=8e-3, max_Npeaks=48, min_Npeaks
 
 
 def main(args):
-
+    
     fname = 'manager'
 
     logging.basicConfig(filename=fname+'.log', level=logging.DEBUG,\
@@ -1088,6 +1088,7 @@ def main(args):
     to = ['delauj2@gmail.com', 'aaron.tohu@gmail.com',
             'g3raman@psu.edu', 'jak51@psu.edu']
     subject = 'BATML tito ' + args.GWname
+   # subject = 'BATML tito ' + gwname
     body = "Got data and starting analysis"
     try:
         send_email(subject, body, to)
@@ -1208,6 +1209,7 @@ def main(args):
     if args.do_bkg:
         logging.info("Submitting bkg estimation job now")
         sub_jobs(1, 'BKG_'+args.GWname, args.BKGpyscript, args.condor_fname)
+       # sub_jobs(1, 'BKG_'+gwname, args.BKGpyscript, args.condor_fname)
         logging.info("Job submitted")
 
 
@@ -1266,6 +1268,7 @@ def main(args):
         # try:
         # for condor
         sub_jobs_rates(Nratejobs, 'RATES_'+args.GWname, args.RATEpyscript, args.condor_fname_rates)
+        #sub_jobs_rates(Nratejobs, 'RATES_'+gwname, args.RATEpyscript, args.condor_fname_rates)
         # for pbs
         # sub_jobs(Nratejobs, 'RATES_'+args.GWname, args.RATEpyscript,\
         #                pbs_script, queue=args.queue, qos=args.qos,\
@@ -1445,8 +1448,12 @@ def main(args):
     if args.do_llh:
         logging.info("Submitting %d in FoV Jobs now"%(Njobs_in))
         sub_jobs_llhin(Njobs_in, 'LLHin_'+args.GWname, args.LLHINpyscript, args.condor_fname_llhin)
+        #sub_jobs_llhin(Njobs_in, 'LLHin_'+gwname, args.LLHINpyscript, args.condor_fname_llhin)
+
         logging.info("Submitting %d out of FoV Jobs now"%(Njobs_out))
         sub_jobs_llhout(Njobs_out, 'LLHo_'+args.GWname, args.LLHOUTpyscript, args.condor_fname_llhout)
+        #sub_jobs_llhout(Njobs_out, 'LLHo_'+name, args.LLHOUTpyscript, args.condor_fname_llhout)
+
         logging.info("Jobs submitted, now going to monitor progress")
 
 
