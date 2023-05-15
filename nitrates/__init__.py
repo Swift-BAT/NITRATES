@@ -13,8 +13,7 @@ __all__ = [
     "response",
 ]
 
-__version__ = "0.1a1"  # make sure this matches the setup.py
-
+from ._version import __version__
 
 from . import config
 from . import archive
