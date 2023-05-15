@@ -25,9 +25,15 @@ except FileNotFoundError:
 with open("requirements.txt") as f:
     required = f.read().splitlines()
 
+#get the version number from the _version file
+with open("nitrates/_version.py") as f:
+    file_info = f.read().splitlines()
+version=file_info[-1].split("=")[-1].split('"')[1]
+
+
 setup(
     name="nitrates",
-    version="0.1a1",
+    version=version,
     packages=find_packages(),
     url="https://github.com/Swift-BAT/NITRATES",
     license="BSD-3-Clause",
