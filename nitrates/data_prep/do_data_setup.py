@@ -46,6 +46,8 @@ from ..lib.gti_funcs import (
 )
 from ..data_scraping.db_ql_funcs import get_gainoff_fname
 from ..HeasoftTools.bat_tool_funcs import bateconvert
+from ..lib.search_config import Config
+
 
 
 def query_data_metslice(conn, met0, met1, table_name="SwiftQLevent"):
@@ -635,24 +637,7 @@ def cli():
         type=str,
         help="Time of trigger, in either MET or a datetime string",
     )
-    parser.add_argument(
-        "--search_twind",
-        type=float,
-        help="Time to search +/- around trig_time in secs",
-        default=15,
-    )
-    parser.add_argument(
-        "--min_tbin", type=float, help="Smallest tbin size to use", default=0.256
-    )
-    parser.add_argument(
-        "--min_dt", type=float, help="Min time from trigger to do", default=None
-    )
-    parser.add_argument(
-        "--Ntdbls", type=int, help="Number of times to double tbin size", default=4
-    )
-    parser.add_argument(
-        "--min_pc", type=float, help="Min partical coding fraction to use", default=0.1
-    )
+
     args = parser.parse_args()
     return args
 
@@ -663,6 +648,16 @@ def main(args):
         level=logging.DEBUG,
         format="%(asctime)s-" "%(levelname)s- %(message)s",
     )
+
+    #look for file called 'config.json' in working directory
+    #if not present, use cli args
+    config_filename=os.path.join(args.workdir,'config.json')
+    if os.path.exists(config_filename):
+        search_config = Config(config_filename)
+        args.trig_time = config.trigtime
+    else:
+        search_config = False
+
 
     # Need to find the event, detmask, and att files
     # then prepare them for use if needed and save the new file
@@ -704,14 +699,17 @@ def main(args):
                 ev_data = vstack(tabs)
                 ev_data.sort(keys="TIME")
 
-            MET = False
-            if "T" in args.trig_time:
-                trig_time = Time(args.trig_time, format="isot")
-            elif "-" in args.trig_time:
-                trig_time = Time(args.trig_time, format="iso")
+            if search_config:
+                trig_time=Time(config.trigtime,format="isot")
             else:
-                trig_time = float(args.trig_time)
-                MET = True
+                MET = False
+                if "T" in args.trig_time:
+                    trig_time = Time(args.trig_time, format="isot")
+                elif "-" in args.trig_time:
+                    trig_time = Time(args.trig_time, format="iso")
+                else:
+                    trig_time = float(args.trig_time)
+                    MET = True
 
             if isinstance(trig_time, float):
                 trigtimeMET = trig_time
@@ -804,15 +802,19 @@ def main(args):
 
     conn = get_conn(dbfname)
 
-    trig_time = args.trig_time
-    MET = False
-    if "T" in trig_time:
-        trig_time = Time(args.trig_time, format="isot")
-    elif "-" in args.trig_time:
-        trig_time = Time(args.trig_time, format="iso")
+
+    if search_config:
+        trig_time=Time(config.trigtime,format="isot")
     else:
-        trig_time = float(args.trig_time)
-        MET = True
+        trig_time = args.trig_time
+        MET = False
+        if "T" in trig_time:
+            trig_time = Time(args.trig_time, format="isot")
+        elif "-" in args.trig_time:
+            trig_time = Time(args.trig_time, format="iso")
+        else:
+            trig_time = float(args.trig_time)
+            MET = True
 
     setup_tab_info(conn, ev_fname, trig_time)
 
@@ -838,27 +840,6 @@ def main(args):
 
     tab_info = get_info_tab(conn)
 
-    # logging.info("Writing the TimeWindows Table")
-    # try:
-    #     setup_tab_twinds(conn, tab_info['trigtimeMET'][0],\
-    #                     ntdbls=args.Ntdbls, min_bin_size=args.min_tbin,\
-    #                     t_wind=args.search_twind, tmin=args.min_dt, GTI=GTI_pnt)
-    # except Exception as E:
-    #     logging.error(E)
-    #     logging.error(traceback.format_exc())
-    #
-    #
-    #
-    #
-    # twind_df = get_twinds_tab(conn)
-    # timeIDs = twind_df['timeID'].values
-
-    # try:
-    #     setup_tab_twind_status(conn, timeIDs)
-    # except Exception as E:
-    #     logging.error(E)
-    #     logging.error(traceback.format_exc())
-
     try:
         pc_fname = do_pc(
             "detmask.fits", "attitude.fits", args.work_dir, ovrsmp=2, detapp=True
@@ -872,23 +853,6 @@ def main(args):
         for fname in os.listdir(args.work_dir)
         if "cWB.fits.gz" in fname or "bayestar" in fname or "skymap" in fname
     ]
-    # this good_pix2scan file isnt used anymore, so commenting out this portion of code.
-    # if len(sky_map_fnames) > 0:
-    #
-    #    if check_if_in_GTI(GTI_pnt, tab_info['trigtimeMET'][0]-0.256,\
-    #                    tab_info['trigtimeMET'][0]+0.256):
-    #        t0 = tab_info['trigtimeMET'][0]
-    #    else:
-    #        t0 = np.nanmedian(twind_df['time'])
-    #    logging.debug("Using attitude at time: %.3f"%(t0))
-    #
-    #    pix_arr = pc_gwmap2good_pix(pc_fname, sky_map_fnames[0],\
-    #                                att_tab, t0,\
-    #                                gw_perc_max=0.99,\
-    #                                pc_min=args.min_pc)
-
-    #    pix_fname = os.path.join(args.work_dir, 'good_pix2scan')
-    #    np.save(pix_fname, pix_arr)
 
     logging.info("Done, exiting now")
 
