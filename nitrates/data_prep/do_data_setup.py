@@ -699,17 +699,15 @@ def main(args):
                 ev_data = vstack(tabs)
                 ev_data.sort(keys="TIME")
 
-            if search_config:
-                trig_time=Time(config.trigtime,format="isot")
+
+            MET = False
+            if "T" in args.trig_time:
+                trig_time = Time(args.trig_time, format="isot")
+            elif "-" in args.trig_time:
+                trig_time = Time(args.trig_time, format="iso")
             else:
-                MET = False
-                if "T" in args.trig_time:
-                    trig_time = Time(args.trig_time, format="isot")
-                elif "-" in args.trig_time:
-                    trig_time = Time(args.trig_time, format="iso")
-                else:
-                    trig_time = float(args.trig_time)
-                    MET = True
+                trig_time = float(args.trig_time)
+                MET = True
 
             if isinstance(trig_time, float):
                 trigtimeMET = trig_time
@@ -802,21 +800,7 @@ def main(args):
 
     conn = get_conn(dbfname)
 
-
-    if search_config:
-        trig_time=Time(config.trigtime,format="isot")
-    else:
-        trig_time = args.trig_time
-        MET = False
-        if "T" in trig_time:
-            trig_time = Time(args.trig_time, format="isot")
-        elif "-" in args.trig_time:
-            trig_time = Time(args.trig_time, format="iso")
-        else:
-            trig_time = float(args.trig_time)
-            MET = True
-
-    setup_tab_info(conn, ev_fname, trig_time)
+    setup_tab_info(conn, ev_fname, args.trig_time)
 
     # not needed since this is defined in config.py. Only rt_dir is really needed but keeping it for now.
     # if args.rt_dir is not None:
