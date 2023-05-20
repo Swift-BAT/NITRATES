@@ -15,6 +15,7 @@ __all__ = [
     "time_funcs",
     "trans_func",
     "wcs_funcs",
+    "search_config"
 ]
 
 from .coord_conv_funcs import *
@@ -33,3 +34,4 @@ from .stat_funcs import *
 from .time_funcs import *
 from .trans_func import *
 from .wcs_funcs import *
+from .search_config import *
