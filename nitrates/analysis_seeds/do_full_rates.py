@@ -458,6 +458,21 @@ def main(args):
         format="%(asctime)s-" "%(levelname)s- %(message)s",
     )
 
+
+    #look for file called 'config.json' in working directory
+    #if not present, use cli args
+    config_filename=os.path.join(args.workdir,'config.json')
+    if os.path.exists(config_filename):
+        search_config = Config(config_filename)
+        args.min_tbin = search_config.MinDur
+        args.max_tbin = search_config.MaxDur
+        args.twind = search_config.MaxDT
+        args.min_dt = search_config.MinDT
+        args.snr_min = search_config.minSR
+    else:
+        search_config = False
+
+
     if args.dbfname is None:
         db_fname = guess_dbfname()
         if isinstance(db_fname, list):
