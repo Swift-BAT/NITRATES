@@ -654,7 +654,7 @@ def main(args):
     config_filename=os.path.join(args.workdir,'config.json')
     if os.path.exists(config_filename):
         search_config = Config(config_filename)
-        args.trig_time = config.trigtime
+        args.trig_time = search_config.trigtime
     else:
         search_config = False
 
