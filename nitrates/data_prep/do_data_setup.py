@@ -47,6 +47,7 @@ from ..lib.gti_funcs import (
 from ..data_scraping.db_ql_funcs import get_gainoff_fname
 from ..HeasoftTools.bat_tool_funcs import bateconvert
 from ..lib.search_config import Config
+from EchoAPI import API
 
 
 
@@ -325,6 +326,7 @@ def get_event(args):
         ev_data_table = ev_data_table[idx]
         N_evfiles = len(ev_data_table)
         logging.info(str(N_evfiles) + " event files found")
+
         tstarts = Time(ev_data_table.UTCstart.values.astype(np.str), format="isot")
         tstops = Time(ev_data_table.UTCstop.values.astype(np.str), format="isot")
         logging.info("Tstarts: ")
@@ -638,6 +640,12 @@ def cli():
         help="Time of trigger, in either MET or a datetime string",
     )
 
+    parser.add_argument(
+        "--api_token",
+        type=str,
+        help="EchoAPI key for interactions."
+    )
+
     args = parser.parse_args()
     return args
 
@@ -649,15 +657,17 @@ def main(args):
         format="%(asctime)s-" "%(levelname)s- %(message)s",
     )
 
-    #look for file called 'config.json' in working directory
-    #if not present, use cli args
-    config_filename=os.path.join(args.workdir,'config.json')
-    if os.path.exists(config_filename):
-        search_config = Config(config_filename)
-        args.trig_time = search_config.trigtime
-    else:
-        search_config = False
-
+    if args.api_token:
+        #look for file called 'config.json' in working directory
+        #if not present, use cli args
+        config_filename=os.path.join(args.workdir,'config.json')
+        if os.path.exists(config_filename):
+            search_config = Config(config_filename)
+            args.trig_time = search_config.trigtime
+            api = API(api_token = args.api_token)
+        else:
+            logging.error('Api_token passed but no config.json file found. Exiting.')
+            return False
 
     # Need to find the event, detmask, and att files
     # then prepare them for use if needed and save the new file
@@ -746,6 +756,7 @@ def main(args):
             time.sleep(loop_wait_err)
 
     logging.info("Finally got all the data")
+    api.post_log(trigger=search_config.triggerID, config_id=search_config.id, AllDataFound=datetime.utcnow().isoformat())
 
     ev_fname = evfnames2write(evfname, dmask, args.work_dir, acs_tab)
 
