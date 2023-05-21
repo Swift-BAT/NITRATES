@@ -47,9 +47,6 @@ from ..lib.gti_funcs import (
 from ..data_scraping.db_ql_funcs import get_gainoff_fname
 from ..HeasoftTools.bat_tool_funcs import bateconvert
 from ..lib.search_config import Config
-from EchoAPI import API
-
-
 
 def query_data_metslice(conn, met0, met1, table_name="SwiftQLevent"):
     sql = """SELECT * FROM %s
@@ -658,6 +655,10 @@ def main(args):
     )
 
     if args.api_token is not None:
+        try:
+            from EchoAPI import API
+        except ImportError:
+            return print("swiftools and EchoAPI required, exiting.")
         #look for file called 'config.json' in working directory
         #if not present, use cli args
         config_filename=os.path.join(args.workdir,'config.json')
