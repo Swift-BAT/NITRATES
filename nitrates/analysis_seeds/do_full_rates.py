@@ -469,6 +469,8 @@ def main(args):
         args.twind = search_config.MaxDT
         args.min_dt = search_config.MinDT
         args.snr_min = search_config.minSR
+        args.bkg_nopre = not search_config.BkgPre
+        args.bkg_nopost = not search_config.BkgPost
     else:
         search_config = False
 
