@@ -7,6 +7,7 @@ from astropy.table import Table, vstack
 import os
 import sys
 import time
+from datetime import datetime
 import argparse
 import logging, traceback
 
@@ -658,7 +659,7 @@ def main(args):
         try:
             from EchoAPI import API
         except ImportError:
-            return print("swiftools and EchoAPI required, exiting.")
+            return print("EchoAPI required, exiting.")
         #look for file called 'config.json' in working directory
         #if not present, use cli args
         config_filename=os.path.join(args.workdir,'config.json')
@@ -759,7 +760,11 @@ def main(args):
     logging.info("Finally got all the data")
 
     if args.api_token is not None:
-        api.post_log(trigger=search_config.triggerID, config_id=search_config.id, AllDataFound=datetime.utcnow().isoformat())
+        try:
+            api.post_log(trigger=search_config.triggerID, config_id=search_config.id, AllDataFound=datetime.utcnow().isoformat())
+        except Exception as e:
+            logging.error(e)
+            logging.error('Could not post to log via EchoAPI.')
 
     ev_fname = evfnames2write(evfname, dmask, args.work_dir, acs_tab)
 
