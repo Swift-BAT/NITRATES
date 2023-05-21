@@ -31,6 +31,9 @@ from scipy import optimize
 from ..lib.gti_funcs import check_if_in_GTI, add_bti2gti
 from ..config import EBINS0, EBINS1
 
+from ..lib.search_config import Config
+
+
 
 def cli():
     parser = argparse.ArgumentParser()
