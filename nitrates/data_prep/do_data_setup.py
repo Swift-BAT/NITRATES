@@ -639,11 +639,11 @@ def cli():
         type=str,
         help="Time of trigger, in either MET or a datetime string",
     )
-
     parser.add_argument(
         "--api_token",
         type=str,
-        help="EchoAPI key for interactions."
+        help="EchoAPI key for interactions.",
+        default=None
     )
 
     args = parser.parse_args()
@@ -657,7 +657,7 @@ def main(args):
         format="%(asctime)s-" "%(levelname)s- %(message)s",
     )
 
-    if args.api_token:
+    if args.api_token is not None:
         #look for file called 'config.json' in working directory
         #if not present, use cli args
         config_filename=os.path.join(args.workdir,'config.json')
@@ -756,7 +756,9 @@ def main(args):
             time.sleep(loop_wait_err)
 
     logging.info("Finally got all the data")
-    api.post_log(trigger=search_config.triggerID, config_id=search_config.id, AllDataFound=datetime.utcnow().isoformat())
+
+    if args.api_token is not None:
+        api.post_log(trigger=search_config.triggerID, config_id=search_config.id, AllDataFound=datetime.utcnow().isoformat())
 
     ev_fname = evfnames2write(evfname, dmask, args.work_dir, acs_tab)
 
