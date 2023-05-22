@@ -662,7 +662,7 @@ def main(args):
             return print("EchoAPI required, exiting.")
         #look for file called 'config.json' in working directory
         #if not present, use cli args
-        config_filename=os.path.join(args.workdir,'config.json')
+        config_filename=os.path.join(args.work_dir,'config.json')
         if os.path.exists(config_filename):
             search_config = Config(config_filename)
             args.trig_time = search_config.trigtime
@@ -819,7 +819,17 @@ def main(args):
 
     conn = get_conn(dbfname)
 
-    setup_tab_info(conn, ev_fname, args.trig_time)
+    trig_time = args.trig_time
+    MET = False
+    if "T" in trig_time:
+        trig_time = Time(args.trig_time, format="isot")
+    elif "-" in args.trig_time:
+        trig_time = Time(args.trig_time, format="iso")
+    else:
+        trig_time = float(args.trig_time)
+        MET = True
+
+    setup_tab_info(conn, ev_fname, trig_time)
 
     # not needed since this is defined in config.py. Only rt_dir is really needed but keeping it for now.
     # if args.rt_dir is not None:
