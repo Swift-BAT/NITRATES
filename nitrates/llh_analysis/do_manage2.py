@@ -1,4 +1,5 @@
 import time
+from datetime import datetime
 import numpy as np
 import pandas as pd
 import healpy as hp
@@ -156,7 +157,7 @@ def cli():
         default="/gpfs/group/jak51/default/nitrates_realtime/NITRATES/submission_scripts/pyscript_template_array.pbs",
     )
     parser.add_argument(
-        "--min_pc", type=float, help="Min partical coding fraction to use", default=0.1
+        "--min_pc", type=float, help="Min partial coding fraction to use", default=0.1
     )
     parser.add_argument(
         "--twind",
@@ -167,6 +168,13 @@ def cli():
     parser.add_argument(
         "--rateTScut", type=float, help="Min split det TS for seeding", default=4.5
     )
+    parser.add_argument(
+        "--api_token",
+        type=str,
+        help="EchoAPI key for interactions.",
+        default=None
+    )
+
     args = parser.parse_args()
     return args
 
@@ -1140,11 +1148,40 @@ def main(args):
         format="%(asctime)s-" "%(levelname)s- %(message)s",
     )
 
+    if args.api_token is not None:
+        try:
+            from EchoAPI import API
+        except ImportError:
+            return print("EchoAPI required, exiting.")
+        #look for file called 'config.json' in working directory
+        #if not present, use cli args
+        config_filename=os.path.join(args.workdir,'config.json')
+        if os.path.exists(config_filename):
+            search_config = Config(config_filename)
+            args.min_tbin = search_config.MinDur
+            args.max_tbin = search_config.MaxDur
+            args.twind = search_config.MaxDT
+            args.min_dt = search_config.MinDT
+            args.snr_min = search_config.minSR
+            args.bkg_nopre = not search_config.BkgPre
+            args.bkg_nopost = not search_config.BkgPost
+            api = API(api_token = args.api_token)
+        else:
+            logging.error('Api_token passed but no config.json file found. Exiting.')
+            return False
+
     f = open(fname + ".pid", "w")
     f.write(str(os.getpid()))
     f.close()
 
     logging.info("Wrote pid: %d" % (os.getpid()))
+    if args.api_token is not None:
+        try:
+            api.post_log(trigger=search_config.triggerID, config_id=search_config.id, NITRATESstart=datetime.utcnow().isoformat())
+        except Exception as e:
+            logging.error(e)
+            logging.error('Could not post NITRATESstart to log via EchoAPI.')
+
 
     to = [
         "delauj2@gmail.com",
@@ -1306,6 +1343,13 @@ def main(args):
                 q=args.q,
             )
         logging.info("Job submitted")
+        if args.api_token is not None:
+            try:
+                api.post_log(trigger=search_config.triggerID, config_id=search_config.id, BkgStart=datetime.utcnow().isoformat())
+            except Exception as e:
+                logging.error(e)
+                logging.error('Could not post BkgStart to log via EchoAPI.')
+
         # except Exception as E:
         #     logging.warn(E)
         #     logging.warn("Might have been a problem submitting")
@@ -1354,6 +1398,14 @@ def main(args):
         #     logging.warn(E)
         #     logging.warn("Might have been a problem submitting")
 
+        if args.api_token is not None:
+            try:
+                api.post_log(trigger=search_config.triggerID, config_id=search_config.id, SplitRatesStart=datetime.utcnow().isoformat())
+            except Exception as e:
+                logging.error(e)
+                logging.error('Could not post SplitRatesStart to log via EchoAPI.')
+
+
     dt = 0.0
     t_0 = time.time()
 
@@ -1391,6 +1443,13 @@ def main(args):
         logging.info(body)
         # send_email(subject, body, to)
         send_email_wHTML(subject, body, to)
+
+        if args.api_token is not None:
+            try:
+                api.post_log(trigger=search_config.triggerID, config_id=search_config.id, SplitRatesDone=datetime.utcnow().isoformat())
+            except Exception as e:
+                logging.error(e)
+                logging.error('Could not post SplitRatesDone to log via EchoAPI.')
     except Exception as E:
         logging.error(E)
         logging.error("Trouble sending email")
@@ -1440,12 +1499,35 @@ def main(args):
     Njobs_out = np.max(seed_out_tab["proc_group"]) + 1
 
     Nsquares = len(np.unique(seed_in_tab["squareID"]))
+
+    if args.api_token is not None:
+        try:
+            api.post_log(trigger=search_config.triggerID, config_id=search_config.id, SquareSeeds=Nsquares)
+        except Exception as e:
+            logging.error(e)
+            logging.error('Could not post SquareSeeds to log via EchoAPI.')
+
     Nseeds_in = len(seed_in_tab)
     Nseeds_out = len(seed_out_tab)
     Nseeds = Nseeds_in + Nseeds_out
 
+    if args.api_token is not None:
+        try:
+            api.post_log(trigger=search_config.triggerID, config_id=search_config.id, TotalSeeds=Nseeds)
+        except Exception as e:
+            logging.error(e)
+            logging.error('Could not post TotalSeeds to log via EchoAPI.')
+
     Ntot_in_fnames = len(seed_in_tab.groupby(["squareID", "proc_group"]))
     Ntot_out_fnames = len(np.unique(seed_out_tab["hp_ind"]))
+
+    if args.api_token is not None:
+        try:
+            api.post_log(trigger=search_config.triggerID, config_id=search_config.id, IFOVfilesTot=Ntot_in_fnames, OFOVfilesTot=Ntot_out_fnames)
+        except Exception as e:
+            logging.error(e)
+            logging.error('Could not post IFOVfilesTot to log via EchoAPI.')
+    
 
     if Nseeds < 1:
         body = "No seeds. Exiting analysis."
@@ -1508,6 +1590,14 @@ def main(args):
             rhel7=args.rhel7,
             q=args.q,
         )
+
+        if args.api_token is not None:
+            try:
+                api.post_log(trigger=search_config.triggerID, config_id=search_config.id, IFOVjobs=Njobs_in, IFOVStart=datetime.utcnow().isoformat())
+            except Exception as e:
+                logging.error(e)
+                logging.error('Could not post IFOVStart to log via EchoAPI.')
+
         logging.info("Submitting %d out of FoV Jobs now" % (Njobs_out))
         sub_jobs(
             Njobs_out,
@@ -1520,6 +1610,13 @@ def main(args):
             q=args.q,
         )
         logging.info("Jobs submitted, now going to monitor progress")
+
+        if args.api_token is not None:
+            try:
+                api.post_log(trigger=search_config.triggerID, config_id=search_config.id, OFOVjobs=Njobs_out, OFOVStart=datetime.utcnow().isoformat())
+            except Exception as e:
+                logging.error(e)
+                logging.error('Could not post OFOVStart to log via EchoAPI.')
 
     t_0 = time.time()
     dt = 0.0
@@ -1553,10 +1650,26 @@ def main(args):
         if len(res_in_fnames) != Ndone_in:
             Ndone_in = len(res_in_fnames)
             logging.info("%d of %d in files done" % (Ndone_in, Ntot_in_fnames))
+
+            if args.api_token is not None:
+                try:
+                    api.post_log(trigger=search_config.triggerID, config_id=search_config.id, IFOVfilesDone=Ndone_in)
+                except Exception as e:
+                    logging.error(e)
+                    logging.error('Could not post IFOVfilesDone to log via EchoAPI.')
+
             if Ndone_in < Ntot_in_fnames:
                 res_in_tab = get_merged_csv_df(res_in_fnames)
             else:
                 logging.info("Got all of the in results now")
+
+                if args.api_token is not None:
+                    try:
+                        api.post_log(trigger=search_config.triggerID, config_id=search_config.id, IFOVDone=datetime.utcnow().isoformat())
+                    except Exception as e:
+                        logging.error(e)
+                        logging.error('Could not post IFOVDone to log via EchoAPI.')
+
                 res_peak_fnames = get_peak_res_fnames()
                 try:
                     if has_sky_map:
@@ -1634,10 +1747,26 @@ def main(args):
         if len(res_out_fnames) != Ndone_out:
             Ndone_out = len(res_out_fnames)
             logging.info("%d of %d out files done" % (Ndone_out, Ntot_out_fnames))
+
+            if args.api_token is not None:
+                try:
+                    api.post_log(trigger=search_config.triggerID, config_id=search_config.id, OFOVfilesDone=Ndone_out)
+                except Exception as e:
+                    logging.error(e)
+                    logging.error('Could not post OFOVfilesDone to log via EchoAPI.')
+
             if Ndone_out < Ntot_out_fnames:
                 res_out_tab = get_merged_csv_df(res_out_fnames)
             else:
                 logging.info("Got all of the out results now")
+
+                if args.api_token is not None:
+                    try:
+                        api.post_log(trigger=search_config.triggerID, config_id=search_config.id, OFOVDone=datetime.utcnow().isoformat())
+                    except Exception as e:
+                        logging.error(e)
+                        logging.error('Could not post OFOVDone to log via EchoAPI.')
+
                 try:
                     if has_sky_map:
                         res_out_tab = get_merged_csv_df_wpos(
