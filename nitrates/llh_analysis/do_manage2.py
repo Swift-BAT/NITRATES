@@ -1796,6 +1796,11 @@ def main(args):
                     logging.error(E)
                     logging.error("Trouble sending email")
         if DoneIn and DoneOut:
+            try:
+                api.report(search_config.queueID,complete=True)
+            except Exception as e:
+                logging.error(e)
+                logging.error('Could not report done to Queue via EchoAPI.')           
             break
         time.sleep(30.0)
         dt = time.time() - t_0
