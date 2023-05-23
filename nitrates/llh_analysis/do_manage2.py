@@ -1826,7 +1826,7 @@ def main(args):
                     logging.error(e)
                     logging.error('Could not report done to Queue via EchoAPI.')   
 
-            from nitrates_reader import get_dlogls_inout    
+            from ..post_process.nitrates_reader import get_dlogls_inout    
 
             infov = grab_in_fov_results(os.getcwd(),search_config.triggerID, attq, trigtime, config_id=search_config.id)
             outfov = grab_out_fov_results(os.getcwd(),search_config.triggerID, attq, trigtime, config_id=search_config.id)
