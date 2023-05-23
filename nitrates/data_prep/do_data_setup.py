@@ -597,7 +597,7 @@ def cli():
         "--data_dbfname",
         type=str,
         help="DB file name with information on the BAT data already downloaded from the QL site",
-        default="/gpfs/group/jak51/default/nitrates_realtime/NITRATES/data_scraping/BATQL.db",
+        default="/gpfs/group/jak51/default/realtime_workdir/BATQL.db",
     )
     parser.add_argument(
         "--att_dname",
