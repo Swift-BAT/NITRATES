@@ -1746,6 +1746,15 @@ def main(args):
                         logging.error(E)
                         logging.error("Trouble sending email")
 
+                if args.api_token is not None:
+                    from ..post_process.nitrates_reader import grab_in_fov_results
+                    infov = grab_in_fov_results(os.getcwd(),search_config.triggerID, attq, trigtime, top_n=64, config_id=search_config.id)
+                    try:
+                        api.post_nitrates_results(trigger=search_config.triggerID,config_id=search_config.id,result_type='n_INFOV',result_data=infov)
+                    except Exception as e:
+                        logging.error(e)
+                        logging.error('Could not post to IN FOV results via EchoAPI.')
+                        
                 DoneIn = True
 
         if len(res_out_fnames) != Ndone_out:
@@ -1799,13 +1808,38 @@ def main(args):
                 except Exception as E:
                     logging.error(E)
                     logging.error("Trouble sending email")
+
+                if args.api_token is not None:
+                    from ..post_process.nitrates_reader import grab_out_fov_results
+                    outfov = grab_out_fov_results(os.getcwd(),search_config.triggerID, attq, trigtime, top_n=64, config_id=search_config.id)
+                    try:
+                        api.post_nitrates_results(trigger=search_config.triggerID,config_id=search_config.id,result_type='n_OUTFOV',result_data=outfov)
+                    except Exception as e:
+                        logging.error(e)
+                        logging.error('Could not post to OUT FOV results via EchoAPI.')]
+
         if DoneIn and DoneOut:
+            if args.api_token is not None:
+                try:
+                    api.report(search_config.queueID,complete=True)
+                except Exception as e:
+                    logging.error(e)
+                    logging.error('Could not report done to Queue via EchoAPI.')   
+
+            from nitrates_reader import get_dlogls_inout    
+
+            infov = grab_in_fov_results(os.getcwd(),search_config.triggerID, attq, trigtime, config_id=search_config.id)
+            outfov = grab_out_fov_results(os.getcwd(),search_config.triggerID, attq, trigtime, config_id=search_config.id)
+
+            topres=get_dlogls_inout(infov, outfov, search_config.triggerID, config_id=search_config.id)
             try:
-                api.report(search_config.queueID,complete=True)
+                api.post_nitrates_results(trigger=search_config.triggerID,config_id=search_config.id,result_type='n_TOP',result_data=topres)
             except Exception as e:
                 logging.error(e)
-                logging.error('Could not report done to Queue via EchoAPI.')          
+                logging.error('Could not report TOP results via EchoAPI.')   
+
             break
+        
         time.sleep(30.0)
         dt = time.time() - t_0
 
