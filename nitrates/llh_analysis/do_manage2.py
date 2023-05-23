@@ -1512,7 +1512,7 @@ def main(args):
 
     if args.api_token is not None:
         try:
-            api.post_log(trigger=search_config.triggerID, config_id=search_config.id, TotalSeeds=Nseeds,SquareSeeds=Nsquares,TimeBins=len(np.unique(seed_tab["timeID"])))
+            api.post_log(trigger=search_config.triggerID, config_id=search_config.id, TotalSeeds=Nseeds,SquareSeeds=Nsquares,TimeBins=len(np.unique(seed_in_tab["timeID"])))
         except Exception as e:
             logging.error(e)
             logging.error('Could not post TotalSeeds,SquareSeeds,TimeBins to log via EchoAPI.')
