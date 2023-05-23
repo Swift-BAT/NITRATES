@@ -31,6 +31,7 @@ from scipy import optimize
 from ..lib.gti_funcs import check_if_in_GTI, add_bti2gti
 from ..config import EBINS0, EBINS1
 
+from ..lib.search_config import Config
 
 def cli():
     parser = argparse.ArgumentParser()
@@ -75,6 +76,12 @@ def cli():
     )
     parser.add_argument(
         "--snr_min", type=float, help="Min snr cut for time seeds", default=2.5
+    )
+    parser.add_argument(
+        "--api_token",
+        type=str,
+        help="EchoAPI key for interactions.",
+        default=None
     )
 
     args = parser.parse_args()
@@ -458,6 +465,29 @@ def main(args):
         format="%(asctime)s-" "%(levelname)s- %(message)s",
     )
 
+
+    if args.api_token is not None:
+        try:
+            from EchoAPI import API
+        except ImportError:
+            return print("EchoAPI required, exiting.")
+        #look for file called 'config.json' in working directory
+        #if not present, use cli args
+        config_filename= 'config.json'
+        if os.path.exists(config_filename):
+            search_config = Config(config_filename)
+            args.min_tbin = search_config.MinDur
+            args.max_tbin = search_config.MaxDur
+            args.twind = search_config.MaxDT
+            args.min_dt = search_config.MinDT
+            args.snr_min = search_config.minSNR
+            args.bkg_nopre = not search_config.BkgPre
+            args.bkg_nopost = not search_config.BkgPost
+            api = API(api_token = args.api_token)
+        else:
+            logging.error('Api_token passed but no config.json file found. Exiting.')
+            return False
+
     if args.dbfname is None:
         db_fname = guess_dbfname()
         if isinstance(db_fname, list):
@@ -555,6 +585,16 @@ def main(args):
         logging.info("Saving results in a DataFrame to file: ")
         logging.info(save_fname)
         df2keep.to_csv(save_fname, index=False)
+
+        if args.api_token is not None:
+            from ..post_process.nitrates_reader import grab_full_rate_results
+            #for now reading this file back in again. Really should just use the DataFrame defined above and add the 2 necessary columns...
+            fullrate = grab_full_rate_results(os.getcwd(),search_config.triggerID, config_id=search_config.id)
+            try:
+                api.post_nitrates_results(trigger=search_config.triggerID,config_id=search_config.id,result_type='n_FULLRATE',result_data=fullrate)
+            except Exception as e:
+                logging.error(e)
+                logging.error('Could not post to rates results via EchoAPI.')
 
     else:
         logging.info("0 time seeds")

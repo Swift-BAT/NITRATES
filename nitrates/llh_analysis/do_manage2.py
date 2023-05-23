@@ -1,4 +1,5 @@
 import time
+from datetime import datetime
 import numpy as np
 import pandas as pd
 import healpy as hp
@@ -6,7 +7,7 @@ from astropy.table import Table
 from astropy.io import fits
 from astropy.wcs import WCS
 from scipy import interpolate
-import os, socket, subprocess, shlex
+import os, socket, subprocess
 import argparse
 import logging, traceback
 
@@ -19,20 +20,18 @@ except:
 
 from ..lib.helper_funcs import (
     send_email,
-    send_error_email,
-    send_email_attach,
     send_email_wHTML,
 )
 
 from ..lib.sqlite_funcs import get_conn
 from ..lib.dbread_funcs import get_files_tab, get_info_tab, guess_dbfname
 from ..lib.coord_conv_funcs import (
-    convert_radec2imxy,
     convert_imxy2radec,
     convert_radec2thetaphi,
     convert_theta_phi2radec,
 )
 from ..lib.hp_funcs import pc_probmap2good_outFoVmap_inds
+from ..lib.search_config import Config
 
 
 def cli():
@@ -156,7 +155,7 @@ def cli():
         default="/gpfs/group/jak51/default/nitrates_realtime/NITRATES/submission_scripts/pyscript_template_array.pbs",
     )
     parser.add_argument(
-        "--min_pc", type=float, help="Min partical coding fraction to use", default=0.1
+        "--min_pc", type=float, help="Min partial coding fraction to use", default=0.1
     )
     parser.add_argument(
         "--twind",
@@ -167,6 +166,13 @@ def cli():
     parser.add_argument(
         "--rateTScut", type=float, help="Min split det TS for seeding", default=4.5
     )
+    parser.add_argument(
+        "--api_token",
+        type=str,
+        help="EchoAPI key for interactions.",
+        default=None
+    )
+
     args = parser.parse_args()
     return args
 
@@ -325,7 +331,6 @@ def mk_seed_tab4scans(
 
     imxax = np.linspace(-2, 2, im_steps * 4 + 1)
     imyax = np.linspace(-1, 1, im_steps * 2 + 1)
-    im_step = imxax[1] - imxax[0]
     bins = [imxax, imyax]
 
     h = np.histogram2d(pc_imxs, pc_imys, bins=bins)[0]
@@ -373,7 +378,6 @@ def mk_seed_tab(rates_res, TS_min=3.75, im_steps=20):
     imxax = np.linspace(-2, 2, im_steps * 4 + 1)
     imyax = np.linspace(-1, 1, im_steps * 2 + 1)
     # imyg, imxg = np.meshgrid((imyax[1:]+imyax[:-1])/2., (imxax[1:]+imxax[:-1])/2.)
-    im_step = imxax[1] - imxax[0]
     bins = [imxax, imyax]
 
     df_twinds = rates_res.groupby("timeID")
@@ -453,7 +457,6 @@ def mk_in_seed_tab(
     imxax = np.linspace(-2, 2, im_steps * 4 + 1)
     imyax = np.linspace(-1, 1, im_steps * 2 + 1)
     # imyg, imxg = np.meshgrid((imyax[1:]+imyax[:-1])/2., (imxax[1:]+imxax[:-1])/2.)
-    im_step = imxax[1] - imxax[0]
     bins = [imxax, imyax]
 
     df_twinds = rates_res.groupby("timeID")
@@ -822,7 +825,6 @@ def mk_out_seed_tab(in_seed_tab, hp_inds, att_q, Nside=2**4, Nmax_jobs=24):
 def mk_job_tab(seed_tab, Njobs, im_steps=20):
     imxax = np.linspace(-2, 2, im_steps * 4 + 1)
     imyax = np.linspace(-1, 1, im_steps * 2 + 1)
-    im_step = imxax[1] - imxax[0]
     bins = [imxax, imyax]
     squareIDs = np.unique(seed_tab["squareID"])
     shp = (len(imxax) - 1, len(imyax) - 1)
@@ -1089,7 +1091,7 @@ def find_peaks2scan(
             continue
 
         df = df_.sort_values("sig_nllh")
-        vals = df["sig_nllh"]
+        #vals = df["sig_nllh"]
         #         ind_sort = np.argsort(vals)
         min_val = np.nanmin(df["sig_nllh"])
 
@@ -1140,11 +1142,40 @@ def main(args):
         format="%(asctime)s-" "%(levelname)s- %(message)s",
     )
 
+    if args.api_token is not None:
+        try:
+            from EchoAPI import API
+        except ImportError:
+            return print("EchoAPI required, exiting.")
+        #look for file called 'config.json' in working directory
+        #if not present, use cli args
+        config_filename= 'config.json'
+        if os.path.exists(config_filename):
+            search_config = Config(config_filename)
+            args.min_tbin = search_config.MinDur
+            args.max_tbin = search_config.MaxDur
+            args.twind = search_config.MaxDT
+            args.min_dt = search_config.MinDT
+            args.snr_min = search_config.minSNR
+            args.bkg_nopre = not search_config.BkgPre
+            args.bkg_nopost = not search_config.BkgPost
+            api = API(api_token = args.api_token)
+        else:
+            logging.error('Api_token passed but no config.json file found. Exiting.')
+            return False
+
     f = open(fname + ".pid", "w")
     f.write(str(os.getpid()))
     f.close()
 
     logging.info("Wrote pid: %d" % (os.getpid()))
+    if args.api_token is not None:
+        try:
+            api.post_log(trigger=search_config.triggerID, config_id=search_config.id, NITRATESstart=datetime.utcnow().isoformat())
+        except Exception as e:
+            logging.error(e)
+            logging.error('Could not post NITRATESstart to log via EchoAPI.')
+
 
     to = [
         "delauj2@gmail.com",
@@ -1306,6 +1337,13 @@ def main(args):
                 q=args.q,
             )
         logging.info("Job submitted")
+        if args.api_token is not None:
+            try:
+                api.post_log(trigger=search_config.triggerID, config_id=search_config.id, BkgStart=datetime.utcnow().isoformat())
+            except Exception as e:
+                logging.error(e)
+                logging.error('Could not post BkgStart to log via EchoAPI.')
+
         # except Exception as E:
         #     logging.warn(E)
         #     logging.warn("Might have been a problem submitting")
@@ -1354,6 +1392,14 @@ def main(args):
         #     logging.warn(E)
         #     logging.warn("Might have been a problem submitting")
 
+        if args.api_token is not None:
+            try:
+                api.post_log(trigger=search_config.triggerID, config_id=search_config.id, SplitRatesStart=datetime.utcnow().isoformat())
+            except Exception as e:
+                logging.error(e)
+                logging.error('Could not post SplitRatesStart to log via EchoAPI.')
+
+
     dt = 0.0
     t_0 = time.time()
 
@@ -1391,9 +1437,28 @@ def main(args):
         logging.info(body)
         # send_email(subject, body, to)
         send_email_wHTML(subject, body, to)
+
     except Exception as E:
         logging.error(E)
         logging.error("Trouble sending email")
+
+
+    attq = attfile["QPARAM"][np.argmin(np.abs(attfile["TIME"] - trigtime))]
+
+    if args.api_token is not None:
+        try:
+            api.post_log(trigger=search_config.triggerID, config_id=search_config.id, SplitRatesDone=datetime.utcnow().isoformat())
+        except Exception as e:
+            logging.error(e)
+            logging.error('Could not post SplitRatesDone to log via EchoAPI.')
+        try:
+            from ..post_process.nitrates_reader import grab_split_rate_results
+            splitrate=grab_split_rate_results(os.getcwd(),search_config.triggerID, attq, trigtime, config_id=search_config.id)
+            api.post_nitrates_results(trigger=search_config.triggerID,config_id=search_config.id,result_type='n_SPLITRATE',result_data=splitrate)
+        except Exception as e:
+            logging.error(e)
+            logging.error('Could not post to split-rates results via EchoAPI.')
+
 
     if args.archive:
         seed_in_tab = mk_in_seed_tab_archive(
@@ -1406,6 +1471,7 @@ def main(args):
     if args.queue == "open":
         Nmax_jobs = 64
     seed_in_tab = assign_in_seeds2jobs(seed_in_tab, Nmax_jobs=Nmax_jobs)
+
     # sky_map_fnames = [fname for fname in os.listdir() if\
     #                 'cWB.fits.gz' in fname or 'bayestar' in fname\
     #                 or 'skymap' in fname]
@@ -1422,7 +1488,6 @@ def main(args):
         args.pcfname, None, attfile, trigtime
     )
 
-    attq = attfile["QPARAM"][np.argmin(np.abs(attfile["TIME"] - trigtime))]
     Nmax_jobs = 24
     Nmax_jobs = args.N_outfov_jobs
     if args.queue == "open":
@@ -1440,12 +1505,28 @@ def main(args):
     Njobs_out = np.max(seed_out_tab["proc_group"]) + 1
 
     Nsquares = len(np.unique(seed_in_tab["squareID"]))
+
     Nseeds_in = len(seed_in_tab)
     Nseeds_out = len(seed_out_tab)
     Nseeds = Nseeds_in + Nseeds_out
 
+    if args.api_token is not None:
+        try:
+            api.post_log(trigger=search_config.triggerID, config_id=search_config.id, TotalSeeds=Nseeds,SquareSeeds=Nsquares,TimeBins=len(np.unique(seed_in_tab["timeID"])))
+        except Exception as e:
+            logging.error(e)
+            logging.error('Could not post TotalSeeds,SquareSeeds,TimeBins to log via EchoAPI.')
+
     Ntot_in_fnames = len(seed_in_tab.groupby(["squareID", "proc_group"]))
     Ntot_out_fnames = len(np.unique(seed_out_tab["hp_ind"]))
+
+    if args.api_token is not None:
+        try:
+            api.post_log(trigger=search_config.triggerID, config_id=search_config.id, IFOVfilesTot=Ntot_in_fnames, OFOVfilesTot=Ntot_out_fnames)
+        except Exception as e:
+            logging.error(e)
+            logging.error('Could not post IFOVfilesTot to log via EchoAPI.')
+    
 
     if Nseeds < 1:
         body = "No seeds. Exiting analysis."
@@ -1508,6 +1589,14 @@ def main(args):
             rhel7=args.rhel7,
             q=args.q,
         )
+
+        if args.api_token is not None:
+            try:
+                api.post_log(trigger=search_config.triggerID, config_id=search_config.id, IFOVjobs=Njobs_in, IFOVStart=datetime.utcnow().isoformat())
+            except Exception as e:
+                logging.error(e)
+                logging.error('Could not post IFOVStart to log via EchoAPI.')
+
         logging.info("Submitting %d out of FoV Jobs now" % (Njobs_out))
         sub_jobs(
             Njobs_out,
@@ -1520,6 +1609,13 @@ def main(args):
             q=args.q,
         )
         logging.info("Jobs submitted, now going to monitor progress")
+
+        if args.api_token is not None:
+            try:
+                api.post_log(trigger=search_config.triggerID, config_id=search_config.id, OFOVjobs=Njobs_out, OFOVStart=datetime.utcnow().isoformat())
+            except Exception as e:
+                logging.error(e)
+                logging.error('Could not post OFOVStart to log via EchoAPI.')
 
     t_0 = time.time()
     dt = 0.0
@@ -1553,10 +1649,26 @@ def main(args):
         if len(res_in_fnames) != Ndone_in:
             Ndone_in = len(res_in_fnames)
             logging.info("%d of %d in files done" % (Ndone_in, Ntot_in_fnames))
+
+            if args.api_token is not None:
+                try:
+                    api.post_log(trigger=search_config.triggerID, config_id=search_config.id, IFOVfilesDone=Ndone_in)
+                except Exception as e:
+                    logging.error(e)
+                    logging.error('Could not post IFOVfilesDone to log via EchoAPI.')
+
             if Ndone_in < Ntot_in_fnames:
                 res_in_tab = get_merged_csv_df(res_in_fnames)
             else:
                 logging.info("Got all of the in results now")
+
+                if args.api_token is not None:
+                    try:
+                        api.post_log(trigger=search_config.triggerID, config_id=search_config.id, IFOVDone=datetime.utcnow().isoformat())
+                    except Exception as e:
+                        logging.error(e)
+                        logging.error('Could not post IFOVDone to log via EchoAPI.')
+
                 res_peak_fnames = get_peak_res_fnames()
                 try:
                     if has_sky_map:
@@ -1629,15 +1741,40 @@ def main(args):
                         logging.error(E)
                         logging.error("Trouble sending email")
 
+                if args.api_token is not None:
+                    from ..post_process.nitrates_reader import grab_in_fov_results
+                    infov = grab_in_fov_results(os.getcwd(),search_config.triggerID, attq, trigtime, top_n=64, config_id=search_config.id)
+                    try:
+                        api.post_nitrates_results(trigger=search_config.triggerID,config_id=search_config.id,result_type='n_INFOV',result_data=infov)
+                    except Exception as e:
+                        logging.error(e)
+                        logging.error('Could not post to IN FOV results via EchoAPI.')
+                        
                 DoneIn = True
 
         if len(res_out_fnames) != Ndone_out:
             Ndone_out = len(res_out_fnames)
             logging.info("%d of %d out files done" % (Ndone_out, Ntot_out_fnames))
+
+            if args.api_token is not None:
+                try:
+                    api.post_log(trigger=search_config.triggerID, config_id=search_config.id, OFOVfilesDone=Ndone_out)
+                except Exception as e:
+                    logging.error(e)
+                    logging.error('Could not post OFOVfilesDone to log via EchoAPI.')
+
             if Ndone_out < Ntot_out_fnames:
                 res_out_tab = get_merged_csv_df(res_out_fnames)
             else:
                 logging.info("Got all of the out results now")
+
+                if args.api_token is not None:
+                    try:
+                        api.post_log(trigger=search_config.triggerID, config_id=search_config.id, OFOVDone=datetime.utcnow().isoformat())
+                    except Exception as e:
+                        logging.error(e)
+                        logging.error('Could not post OFOVDone to log via EchoAPI.')
+
                 try:
                     if has_sky_map:
                         res_out_tab = get_merged_csv_df_wpos(
@@ -1666,8 +1803,38 @@ def main(args):
                 except Exception as E:
                     logging.error(E)
                     logging.error("Trouble sending email")
+
+                if args.api_token is not None:
+                    from ..post_process.nitrates_reader import grab_out_fov_results
+                    outfov = grab_out_fov_results(os.getcwd(),search_config.triggerID, attq, trigtime, top_n=64, config_id=search_config.id)
+                    try:
+                        api.post_nitrates_results(trigger=search_config.triggerID,config_id=search_config.id,result_type='n_OUTFOV',result_data=outfov)
+                    except Exception as e:
+                        logging.error(e)
+                        logging.error('Could not post to OUT FOV results via EchoAPI.')
+
         if DoneIn and DoneOut:
+            if args.api_token is not None:
+                try:
+                    api.report(search_config.queueID,complete=True)
+                except Exception as e:
+                    logging.error(e)
+                    logging.error('Could not report done to Queue via EchoAPI.')   
+
+            from ..post_process.nitrates_reader import get_dlogls_inout    
+
+            infov = grab_in_fov_results(os.getcwd(),search_config.triggerID, attq, trigtime, config_id=search_config.id)
+            outfov = grab_out_fov_results(os.getcwd(),search_config.triggerID, attq, trigtime, config_id=search_config.id)
+
+            topres=get_dlogls_inout(infov, outfov, search_config.triggerID, config_id=search_config.id)
+            try:
+                api.post_nitrates_results(trigger=search_config.triggerID,config_id=search_config.id,result_type='n_TOP',result_data=topres)
+            except Exception as e:
+                logging.error(e)
+                logging.error('Could not report TOP results via EchoAPI.')   
+
             break
+
         time.sleep(30.0)
         dt = time.time() - t_0
 

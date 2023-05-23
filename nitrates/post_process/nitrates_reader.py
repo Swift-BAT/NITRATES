@@ -146,10 +146,11 @@ def grab_full_rate_results(path, trig_id, config_id=0):
 
 
 def grab_split_rate_results(
-    path, files, trig_id, att_q, trigtime, top_n=64, notDB=False, config_id=0
+    path, trig_id, att_q, trigtime, top_n=64, notDB=False, config_id=0
 ):
     # Read in all csvs in the form rates_llh_res_*_.csv where * is replaced with an integer
     split_rate_regex = re.compile(r"rates_llh_(out_)?res_\d+_.csv")
+    files=os.listdir(path)
     dfs = [
         pd.read_csv(os.path.join(path, file))
         for file in filter(split_rate_regex.fullmatch, files)
@@ -210,7 +211,6 @@ def grab_split_rate_results(
 
 def grab_out_fov_results(
     path,
-    files,
     trig_id,
     att_q,
     trigtime,
@@ -221,7 +221,7 @@ def grab_out_fov_results(
 ):
     # Read in all csvs in the form res_hpind_*_.csv where * is replaced with an integer
     out_fov_regex = re.compile(r"res_hpind_\d+_.csv")
-
+    files=os.listdir(path)
     if cluster:
         dfs = [
             pd.read_csv(os.path.join(path, file), index_col=0)
@@ -263,7 +263,6 @@ def grab_out_fov_results(
 
 def grab_in_fov_results(
     path,
-    files,
     trig_id,
     att_q,
     trigtime,
@@ -275,7 +274,8 @@ def grab_in_fov_results(
     # Read in all csvs in the form peak_res_*_*_.csv (if TS > 6) where * is replaced with an integer, optionally
     # omitting peak_ for the files in which TS <= 6
     in_fov_regex = re.compile(r"(peak_)?res_\d+_\d+_.csv")
-
+    files=os.listdir(path)
+    
     if cluster:
         dfs = [
             pd.read_csv(os.path.join(path, file), index_col=0)
@@ -656,8 +656,6 @@ def read_results_dirs(paths, api_token, figures=True, config_id=0):
                 print("Failed to post log")
                 print(e)
 
-            files[i] = os.listdir(path)
-
             # Grab attitude quaternion at trigtime for later use to convert imx and imy to ra dec
             try:
                 attfile = fits.open(os.path.join(path, "attitude.fits"))[1].data
@@ -700,7 +698,6 @@ def read_results_dirs(paths, api_token, figures=True, config_id=0):
                 dfs = [
                     grab_split_rate_results(
                         paths[i],
-                        files[i],
                         trig_ids[i],
                         att_qs[i],
                         sctimes[i],
@@ -719,7 +716,6 @@ def read_results_dirs(paths, api_token, figures=True, config_id=0):
                 if figures:
                     splitrates = grab_split_rate_results(
                         paths[i],
-                        files[i],
                         trig_ids[i],
                         att_qs[i],
                         sctimes[i],
@@ -740,7 +736,6 @@ def read_results_dirs(paths, api_token, figures=True, config_id=0):
             try:
                 res_out_tab = grab_out_fov_results(
                     paths[i],
-                    files[i],
                     trig_ids[i],
                     att_qs[i],
                     sctimes[i],
@@ -773,7 +768,6 @@ def read_results_dirs(paths, api_token, figures=True, config_id=0):
             try:
                 res_in_tab = grab_in_fov_results(
                     paths[i],
-                    files[i],
                     trig_ids[i],
                     att_qs[i],
                     sctimes[i],
