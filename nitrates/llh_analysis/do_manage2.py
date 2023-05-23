@@ -1445,15 +1445,24 @@ def main(args):
         # send_email(subject, body, to)
         send_email_wHTML(subject, body, to)
 
-        if args.api_token is not None:
-            try:
-                api.post_log(trigger=search_config.triggerID, config_id=search_config.id, SplitRatesDone=datetime.utcnow().isoformat())
-            except Exception as e:
-                logging.error(e)
-                logging.error('Could not post SplitRatesDone to log via EchoAPI.')
     except Exception as E:
         logging.error(E)
         logging.error("Trouble sending email")
+
+    if args.api_token is not None:
+        try:
+            api.post_log(trigger=search_config.triggerID, config_id=search_config.id, SplitRatesDone=datetime.utcnow().isoformat())
+        except Exception as e:
+            logging.error(e)
+            logging.error('Could not post SplitRatesDone to log via EchoAPI.')
+        try:
+            from ..post_process.nitrates_reader import grab_split_rate_results
+            splitrate=grab_split_rate_results(os.getcwd(),search_config.triggerID, attq, trigtime, config_id=search_config.id)
+            api.post_nitrates_results(trigger=search_config.triggerID,config_id=search_config.id,result_type='n_SPLITRATE',result_data=splitrate)
+        except Exception as e:
+            logging.error(e)
+            logging.error('Could not post to split-rates results via EchoAPI.')
+
 
     if args.archive:
         seed_in_tab = mk_in_seed_tab_archive(
@@ -1466,6 +1475,7 @@ def main(args):
     if args.queue == "open":
         Nmax_jobs = 64
     seed_in_tab = assign_in_seeds2jobs(seed_in_tab, Nmax_jobs=Nmax_jobs)
+
     # sky_map_fnames = [fname for fname in os.listdir() if\
     #                 'cWB.fits.gz' in fname or 'bayestar' in fname\
     #                 or 'skymap' in fname]
@@ -1501,23 +1511,16 @@ def main(args):
 
     Nsquares = len(np.unique(seed_in_tab["squareID"]))
 
-    if args.api_token is not None:
-        try:
-            api.post_log(trigger=search_config.triggerID, config_id=search_config.id, SquareSeeds=Nsquares)
-        except Exception as e:
-            logging.error(e)
-            logging.error('Could not post SquareSeeds to log via EchoAPI.')
-
     Nseeds_in = len(seed_in_tab)
     Nseeds_out = len(seed_out_tab)
     Nseeds = Nseeds_in + Nseeds_out
 
     if args.api_token is not None:
         try:
-            api.post_log(trigger=search_config.triggerID, config_id=search_config.id, TotalSeeds=Nseeds)
+            api.post_log(trigger=search_config.triggerID, config_id=search_config.id, TotalSeeds=Nseeds,SquareSeeds=Nsquares,TimeBins=len(np.unique(seed_tab["timeID"])))
         except Exception as e:
             logging.error(e)
-            logging.error('Could not post TotalSeeds to log via EchoAPI.')
+            logging.error('Could not post TotalSeeds,SquareSeeds,TimeBins to log via EchoAPI.')
 
     Ntot_in_fnames = len(seed_in_tab.groupby(["squareID", "proc_group"]))
     Ntot_out_fnames = len(np.unique(seed_out_tab["hp_ind"]))
@@ -1801,7 +1804,7 @@ def main(args):
                 api.report(search_config.queueID,complete=True)
             except Exception as e:
                 logging.error(e)
-                logging.error('Could not report done to Queue via EchoAPI.')           
+                logging.error('Could not report done to Queue via EchoAPI.')          
             break
         time.sleep(30.0)
         dt = time.time() - t_0
