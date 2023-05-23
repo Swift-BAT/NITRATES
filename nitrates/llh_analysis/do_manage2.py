@@ -331,7 +331,6 @@ def mk_seed_tab4scans(
 
     imxax = np.linspace(-2, 2, im_steps * 4 + 1)
     imyax = np.linspace(-1, 1, im_steps * 2 + 1)
-    im_step = imxax[1] - imxax[0]
     bins = [imxax, imyax]
 
     h = np.histogram2d(pc_imxs, pc_imys, bins=bins)[0]
@@ -379,7 +378,6 @@ def mk_seed_tab(rates_res, TS_min=3.75, im_steps=20):
     imxax = np.linspace(-2, 2, im_steps * 4 + 1)
     imyax = np.linspace(-1, 1, im_steps * 2 + 1)
     # imyg, imxg = np.meshgrid((imyax[1:]+imyax[:-1])/2., (imxax[1:]+imxax[:-1])/2.)
-    im_step = imxax[1] - imxax[0]
     bins = [imxax, imyax]
 
     df_twinds = rates_res.groupby("timeID")
@@ -459,7 +457,6 @@ def mk_in_seed_tab(
     imxax = np.linspace(-2, 2, im_steps * 4 + 1)
     imyax = np.linspace(-1, 1, im_steps * 2 + 1)
     # imyg, imxg = np.meshgrid((imyax[1:]+imyax[:-1])/2., (imxax[1:]+imxax[:-1])/2.)
-    im_step = imxax[1] - imxax[0]
     bins = [imxax, imyax]
 
     df_twinds = rates_res.groupby("timeID")
@@ -828,7 +825,6 @@ def mk_out_seed_tab(in_seed_tab, hp_inds, att_q, Nside=2**4, Nmax_jobs=24):
 def mk_job_tab(seed_tab, Njobs, im_steps=20):
     imxax = np.linspace(-2, 2, im_steps * 4 + 1)
     imyax = np.linspace(-1, 1, im_steps * 2 + 1)
-    im_step = imxax[1] - imxax[0]
     bins = [imxax, imyax]
     squareIDs = np.unique(seed_tab["squareID"])
     shp = (len(imxax) - 1, len(imyax) - 1)
@@ -1095,7 +1091,7 @@ def find_peaks2scan(
             continue
 
         df = df_.sort_values("sig_nllh")
-        vals = df["sig_nllh"]
+        #vals = df["sig_nllh"]
         #         ind_sort = np.argsort(vals)
         min_val = np.nanmin(df["sig_nllh"])
 
@@ -1446,6 +1442,9 @@ def main(args):
         logging.error(E)
         logging.error("Trouble sending email")
 
+
+    attq = attfile["QPARAM"][np.argmin(np.abs(attfile["TIME"] - trigtime))]
+
     if args.api_token is not None:
         try:
             api.post_log(trigger=search_config.triggerID, config_id=search_config.id, SplitRatesDone=datetime.utcnow().isoformat())
@@ -1489,7 +1488,6 @@ def main(args):
         args.pcfname, None, attfile, trigtime
     )
 
-    attq = attfile["QPARAM"][np.argmin(np.abs(attfile["TIME"] - trigtime))]
     Nmax_jobs = 24
     Nmax_jobs = args.N_outfov_jobs
     if args.queue == "open":
