@@ -7,7 +7,7 @@ from astropy.table import Table
 from astropy.io import fits
 from astropy.wcs import WCS
 from scipy import interpolate
-import os, socket, subprocess, shlex
+import os, socket, subprocess
 import argparse
 import logging, traceback
 
@@ -20,15 +20,12 @@ except:
 
 from ..lib.helper_funcs import (
     send_email,
-    send_error_email,
-    send_email_attach,
     send_email_wHTML,
 )
 
 from ..lib.sqlite_funcs import get_conn
 from ..lib.dbread_funcs import get_files_tab, get_info_tab, guess_dbfname
 from ..lib.coord_conv_funcs import (
-    convert_radec2imxy,
     convert_imxy2radec,
     convert_radec2thetaphi,
     convert_theta_phi2radec,
