@@ -1816,7 +1816,7 @@ def main(args):
                         api.post_nitrates_results(trigger=search_config.triggerID,config_id=search_config.id,result_type='n_OUTFOV',result_data=outfov)
                     except Exception as e:
                         logging.error(e)
-                        logging.error('Could not post to OUT FOV results via EchoAPI.')]
+                        logging.error('Could not post to OUT FOV results via EchoAPI.')
 
         if DoneIn and DoneOut:
             if args.api_token is not None:
@@ -1839,7 +1839,7 @@ def main(args):
                 logging.error('Could not report TOP results via EchoAPI.')   
 
             break
-        
+
         time.sleep(30.0)
         dt = time.time() - t_0
 
