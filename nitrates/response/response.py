@@ -2060,3 +2060,35 @@ class ResponseInFoV2(object):
                 wts.append(th_wts[i] * ph_wts[j])
 
         return ths_, phs_, wts
+
+    
+def get_pc(bl_dmask, theta, phi):
+    '''
+    Returns fraction of detectors that have los go through mask
+    doesn't exactly match partial coding from bat tools but close
+    
+    bl_dmask: boolean array of which dets are active
+    theta, phi: instrument coordinates, can be scalars or arrays
+    
+    returns partial coding fraction (array if theta, phi are arrays)
+    '''
+    
+    mask_obj = Swift_Mask_Interactions(None, bl_dmask)
+    batxs, batys = bldmask2batxys(bl_dmask)
+    batzs = 3.187 + np.zeros(ndets)
+    mask_obj.set_batxyzs(batxs, batys, batzs)
+    mask_obj.set_energy_arr(np.array([15.0]))
+    
+    if np.isscalar(theta):
+        mask_obj.set_theta_phi(theta, phi)
+        pc = float(mask_obj.Ndets_int_mask) / mask_obj.ndets
+    else:            
+        pc = np.zeros_like(theta)
+
+        for i in range(len(pc)):
+            mask_obj.set_theta_phi(theta[i], phi[i])
+            pc[i] = float(mask_obj.Ndets_int_mask) / mask_obj.ndets
+        
+    return pc
+        
+    
