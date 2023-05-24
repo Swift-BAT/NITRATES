@@ -29,9 +29,12 @@ from ..lib.coord_conv_funcs import (
     convert_imxy2radec,
     convert_radec2thetaphi,
     convert_theta_phi2radec,
+    imxy2theta_phi,
+    convert_radec2imxy,
 )
 from ..lib.hp_funcs import pc_probmap2good_outFoVmap_inds
 from ..lib.search_config import Config
+from ..response.response import get_pc
 
 
 def cli():
@@ -1132,6 +1135,58 @@ def find_peaks2scan(
 
     return peaks_df
 
+def get_pcvals_hpmap(Nside, att_row, bl_dmask, nest=True):
+    '''
+    Use get_pc to get an approximate partial coding
+    healpix map
+    '''
+    
+    Npix = hp.nside2npix(Nside)
+    pc_map = np.zeros(Npix)
+
+    att_q = att_row['QPARAM']
+    pnt_ra, pnt_dec = att_row['POINTING'][:2]
+    vec = hp.ang2vec(pnt_ra, pnt_dec, lonlat=True)
+    hp_inds = hp.query_disc(Nside, vec, np.radians(70.0), nest=nest)
+    hp_ras, hp_decs = hp.pix2ang(Nside, hp_inds, nest=nest, lonlat=True)
+    hp_imxs, hp_imys = convert_radec2imxy(hp_ras, hp_decs, att_q)
+
+    bl = (np.abs(hp_imys)<1.01)&(np.abs(hp_imxs)<2.0)
+
+    hp_thetas, hp_phis = imxy2theta_phi(hp_imxs[bl], hp_imys[bl])
+    
+    pc_vals = get_pc(bl_dmask, hp_thetas, hp_phis)
+    
+    pc_map[hp_inds[bl]] = pc_vals
+    
+    return pc_map
+
+def get_outFoVmap_inds(
+    att_tab,
+    trig_time,
+    bl_dmask,
+    pc_max=0.05,
+    Nside_out=2**4,
+):
+    '''
+    Gets the hp inds that are OFOV
+    '''
+    att_ind = np.argmin(np.abs(att_tab["TIME"] - trig_time))
+    att_row = att_tab[att_ind]
+
+    try:
+        pc_map = get_pcvals_hpmap(Nside_out, att_row, bl_dmask)
+    except Exception as E:
+        logging.error(E)
+        logging.warn("Couldn't make PC map")
+        pc_map = np.zeros(hp.nside2npix(Nside_out))
+
+    good_map = (pc_map <= pc_max)
+
+    good_hp_inds = np.where(good_map)[0]
+
+    return good_map, good_hp_inds
+
 
 def main(args):
     fname = "manager"
@@ -1229,7 +1284,7 @@ def main(args):
         logging.info("Got files table")
         attfname = files_tab["attfname"][0]
         evfname = files_tab["evfname"][0]
-
+        dmask_fname = files_tab["detmask"][0]
     except Exception as E:
         logging.warning("problem getting files tab from DB")
         logging.error(E)
@@ -1245,6 +1300,15 @@ def main(args):
         logging.error(E)
         logging.error(traceback.format_exc())
 
+    try:
+        dmask = fits.open(dmask_fname)[0].data
+        bl_dmask = dmask == 0.0
+    except Exception as E:
+        logging.warning("Trouble openning detmask file")
+        logging.error(E)
+        logging.error(traceback.format_exc())
+
+        
     try:
         GTI_pnt = Table.read(evfname, hdu="GTI_POINTING")
         logging.info("Opened GTI_pnt")
@@ -1484,9 +1548,7 @@ def main(args):
     # good_map, good_hp_inds = pc_probmap2good_outFoVmap_inds(args.pcfname,\
     #                                     skfname, attfile, trigtime)
     # For now just do full sky
-    good_map, good_hp_inds = pc_probmap2good_outFoVmap_inds(
-        args.pcfname, None, attfile, trigtime
-    )
+    good_map, good_hp_inds = get_outFoVmap_inds(attfile, trigtime, bl_dmask)
 
     Nmax_jobs = 24
     Nmax_jobs = args.N_outfov_jobs

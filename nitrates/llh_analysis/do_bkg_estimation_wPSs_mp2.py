@@ -28,7 +28,8 @@ from ..models.models import (
 from ..llh_analysis.LLH import LLH_webins
 from ..llh_analysis.minimizers import NLLH_ScipyMinimize, NLLH_ScipyMinimize_Wjacob
 from ..response.ray_trace_funcs import RayTraces
-from ..lib.coord_conv_funcs import convert_radec2imxy
+from ..response.response import get_pc
+from ..lib.coord_conv_funcs import convert_radec2imxy, imxy2theta_phi
 from ..lib.gti_funcs import add_bti2gti, bti2gti, gti2bti, union_gtis
 from ..lib.wcs_funcs import world2val
 
@@ -69,7 +70,7 @@ def cli():
         action="store_true",
     )
     parser.add_argument(
-        "--pcfname", type=str, help="partial coding file name", default="pc_2.img"
+        "--pcfname", type=str, help="partial coding file name", default=None
     )
     parser.add_argument(
         "--preset_bkg_log_file",
@@ -113,7 +114,7 @@ def add_imxy2src_tab(src_tab, attfile, t0):
     return src_tab
 
 
-def get_srcs_infov(attfile, t0, pcfname=None, pcmin=1e-3):
+def get_srcs_infov(attfile, t0, pcfname=None, bl_dmask=None, pcmin=1e-3):
     brt_src_tab = Table.read(bright_source_table_fname)
     add_imxy2src_tab(brt_src_tab, attfile, t0)
     bl_infov = (np.abs(brt_src_tab["imy"]) < 0.95) & (np.abs(brt_src_tab["imx"]) < 1.75)
@@ -127,6 +128,15 @@ def get_srcs_infov(attfile, t0, pcfname=None, pcmin=1e-3):
         except Exception as E:
             logging.warn("Trouble Using PC file")
             logging.error(E)
+    elif bl_dmask is not None:
+        try:
+            theta, phi = imxy2theta_phi(brt_src_tab["imx"], brt_src_tab["imy"])
+            pcvals = get_pc(bl_dmask, theta, phi)
+            bl_infov = bl_infov & (pcvals >= pcmin)
+        except Exception as E:
+            logging.warn("Trouble Getting PC vals")
+            logging.error(E)
+            
     N_infov = np.sum(bl_infov)
     return brt_src_tab[bl_infov]
 
@@ -636,7 +646,7 @@ def main(args):
 
     solid_angle_dpi = np.load(solid_angle_dpi_fname)
 
-    src_tab = get_srcs_infov(attfile, tmid, pcfname=args.pcfname)
+    src_tab = get_srcs_infov(attfile, tmid, pcfname=args.pcfname, bl_dmask=bl_dmask)
     Nsrcs = len(src_tab)
     logging.info("src_tab: ")
     logging.info(src_tab)
