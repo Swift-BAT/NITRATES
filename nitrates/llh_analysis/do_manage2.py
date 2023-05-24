@@ -29,6 +29,7 @@ from ..lib.coord_conv_funcs import (
     convert_imxy2radec,
     convert_radec2thetaphi,
     convert_theta_phi2radec,
+    imxy2theta_phi,
 )
 from ..lib.hp_funcs import pc_probmap2good_outFoVmap_inds
 from ..lib.search_config import Config
