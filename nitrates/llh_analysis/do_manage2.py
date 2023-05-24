@@ -1135,7 +1135,7 @@ def find_peaks2scan(
 
     return peaks_df
 
-def get_pcvals_hpmap(Nside, att_row, nest=True):
+def get_pcvals_hpmap(Nside, att_row, bl_dmask, nest=True):
     '''
     Use get_pc to get an approximate partial coding
     healpix map
@@ -1164,6 +1164,7 @@ def get_pcvals_hpmap(Nside, att_row, nest=True):
 def get_outFoVmap_inds(
     att_tab,
     trig_time,
+    bl_dmask,
     pc_max=0.05,
     Nside_out=2**4,
 ):
@@ -1174,7 +1175,7 @@ def get_outFoVmap_inds(
     att_row = att_tab[att_ind]
 
     try:
-        pc_map = get_pcvals_hpmap(Nside_out, att_row)
+        pc_map = get_pcvals_hpmap(Nside_out, att_row, bl_dmask)
     except Exception as E:
         logging.error(E)
         logging.warn("Couldn't make PC map")
@@ -1283,7 +1284,7 @@ def main(args):
         logging.info("Got files table")
         attfname = files_tab["attfname"][0]
         evfname = files_tab["evfname"][0]
-
+        dmask_fname = files_tab["detmask"][0]
     except Exception as E:
         logging.warning("problem getting files tab from DB")
         logging.error(E)
@@ -1299,6 +1300,15 @@ def main(args):
         logging.error(E)
         logging.error(traceback.format_exc())
 
+    try:
+        dmask = fits.open(dmask_fname)[0].data
+        bl_dmask = dmask == 0.0
+    except Exception as E:
+        logging.warning("Trouble openning detmask file")
+        logging.error(E)
+        logging.error(traceback.format_exc())
+
+        
     try:
         GTI_pnt = Table.read(evfname, hdu="GTI_POINTING")
         logging.info("Opened GTI_pnt")
