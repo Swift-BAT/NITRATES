@@ -29,7 +29,7 @@ from ..llh_analysis.LLH import LLH_webins
 from ..llh_analysis.minimizers import NLLH_ScipyMinimize, NLLH_ScipyMinimize_Wjacob
 from ..response.ray_trace_funcs import RayTraces
 from ..response.response import get_pc
-from ..lib.coord_conv_funcs import convert_radec2imxy
+from ..lib.coord_conv_funcs import convert_radec2imxy, imxy2theta_phi
 from ..lib.gti_funcs import add_bti2gti, bti2gti, gti2bti, union_gtis
 from ..lib.wcs_funcs import world2val
 
