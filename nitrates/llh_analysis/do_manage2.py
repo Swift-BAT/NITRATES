@@ -1172,7 +1172,7 @@ def get_outFoVmap_inds(
     att_row = att_tab[att_ind]
 
     try:
-        pc_map = pcfile2hpmap(pc_fname, att_row, Nside_out)
+        pc_map = get_pcvals_hpmap(Nside_out, att_row)
     except Exception as E:
         logging.error(E)
         logging.warn("Couldn't make PC map")
