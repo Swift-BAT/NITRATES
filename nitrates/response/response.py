@@ -2075,7 +2075,7 @@ def get_pc(bl_dmask, theta, phi):
     
     mask_obj = Swift_Mask_Interactions(None, bl_dmask)
     batxs, batys = bldmask2batxys(bl_dmask)
-    batzs = 3.187 + np.zeros(ndets)
+    batzs = 3.187 + np.zeros(np.sum(bl_dmask))
     mask_obj.set_batxyzs(batxs, batys, batzs)
     mask_obj.set_energy_arr(np.array([15.0]))
     
