@@ -1548,7 +1548,7 @@ def main(args):
     # good_map, good_hp_inds = pc_probmap2good_outFoVmap_inds(args.pcfname,\
     #                                     skfname, attfile, trigtime)
     # For now just do full sky
-    good_map, good_hp_inds = get_outFoVmap_inds(attfile, trigtime)
+    good_map, good_hp_inds = get_outFoVmap_inds(attfile, trigtime, bl_dmask)
 
     Nmax_jobs = 24
     Nmax_jobs = args.N_outfov_jobs
