@@ -1331,11 +1331,11 @@ def main(args):
                 logging.error("Trouble sending email")
 
             if args.api_token is not None:
-                    try:
-                        api.report(search_config.queueID,complete=True)
-                    except Exception as e:
-                        logging.error(e)
-                        logging.error('Could not report done to Queue via EchoAPI.')   
+                try:
+                    api.report(search_config.queueID,complete=True)
+                except Exception as e:
+                    logging.error(e)
+                    logging.error('Could not report done to Queue via EchoAPI.')   
 
             return
 
