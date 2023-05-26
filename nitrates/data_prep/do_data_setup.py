@@ -762,7 +762,12 @@ def main(args):
         ev_fname = evfnames2write(evfname, dmask, args.work_dir, acs_tab)
     except Exception as E:
         logging.error(E)
-        api.report(search_config.queueID,complete=False)
+        if args.api_token is not None:
+            try:
+                api.report(search_config.queueID,complete=False)
+            except Exception as e:
+                logging.error(e)
+                logging.error('Could not report ERROR to Queue via EchoAPI.')   
 
     logging.info("Finally got all the data")
 
