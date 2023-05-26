@@ -1439,6 +1439,13 @@ def main(args):
         except Exception as E:
             logging.error(E)
             logging.error("Trouble sending email")
+
+        if args.api_token is not None:
+            try:
+                api.report(search_config.queueID,complete=False)
+            except Exception as e:
+                logging.error(e)
+                logging.error('Could not report ERROR to Queue via EchoAPI.')   
         return
 
     extra_args = "--min_pc %.4f" % (args.min_pc)
