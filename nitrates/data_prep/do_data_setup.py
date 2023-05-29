@@ -757,6 +757,18 @@ def main(args):
             logging.error(traceback.format_exc())
             time.sleep(loop_wait_err)
 
+
+    try:
+        ev_fname = evfnames2write(evfname, dmask, args.work_dir, acs_tab)
+    except Exception as E:
+        logging.error(E)
+        if args.api_token is not None:
+            try:
+                api.report(search_config.queueID,complete=True)
+            except Exception as e:
+                logging.error(e)
+                logging.error('Could not report complete to Queue via EchoAPI.')   
+
     logging.info("Finally got all the data")
 
     if args.api_token is not None:
@@ -765,8 +777,6 @@ def main(args):
         except Exception as e:
             logging.error(e)
             logging.error('Could not post to log via EchoAPI.')
-
-    ev_fname = evfnames2write(evfname, dmask, args.work_dir, acs_tab)
 
     try:
         mask_vals = mask_detxy(dmask, ev_data0)
