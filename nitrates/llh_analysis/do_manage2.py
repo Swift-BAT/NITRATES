@@ -1668,7 +1668,7 @@ def main(args):
 
         if args.api_token is not None:
             try:
-                api.post_log(trigger=search_config.triggerID, config_id=search_config.id, IFOVjobs=Njobs_in, IFOVStart=datetime.utcnow().isoformat())
+                api.post_log(trigger=search_config.triggerID, config_id=search_config.id, IFOVjobs=int(Njobs_in), IFOVStart=datetime.utcnow().isoformat())
             except Exception as e:
                 logging.error(e)
                 logging.error('Could not post IFOVStart to log via EchoAPI.')
@@ -1688,7 +1688,7 @@ def main(args):
 
         if args.api_token is not None:
             try:
-                api.post_log(trigger=search_config.triggerID, config_id=search_config.id, OFOVjobs=Njobs_out, OFOVStart=datetime.utcnow().isoformat())
+                api.post_log(trigger=search_config.triggerID, config_id=search_config.id, OFOVjobs=int(Njobs_out), OFOVStart=datetime.utcnow().isoformat())
             except Exception as e:
                 logging.error(e)
                 logging.error('Could not post OFOVStart to log via EchoAPI.')
