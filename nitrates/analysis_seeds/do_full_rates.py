@@ -547,7 +547,18 @@ def main(args):
     )
 
     logging.info("Inited bkg_obj, now starting fits")
-    bkg_obj.do_fits()
+
+    try:
+        bkg_obj.do_fits()
+    except Exception as e:
+        logging.error(e)
+        if args.api_token is not None:
+            try:
+                api.report(search_config.queueID,complete=False)
+            except Exception as e:
+                logging.error(e)
+                logging.error('Could not report error to Queue via EchoAPI.')   
+
     logging.info("Done doing bkg linear fits")
 
     dur = args.min_tbin
