@@ -850,7 +850,7 @@ def sub_jobs_rates(njobs, name, pyscript, condor_fname_rates):
 
 
 def sub_jobs_llhin(njobs, name, pyscript, condor_fname_llhin):
-    base_sub_cmd = 'condor_submit %s' %(condor_fname_llhin)
+    base_sub_cmd = 'condor_submit %s Njobs=%d' %(condor_fname_llhin, njobs)
     logging.info("Trying to submit")
     logging.info(base_sub_cmd)
     try:
@@ -861,7 +861,7 @@ def sub_jobs_llhin(njobs, name, pyscript, condor_fname_llhin):
         logging.error(base_sub_cmd)
 
 def sub_jobs_llhout(njobs, name, pyscript, condor_fname_llhout):
-    base_sub_cmd = 'condor_submit %s' %(condor_fname_llhout)
+    base_sub_cmd = 'condor_submit %s Njobs=%d' %(condor_fname_llhout, njobs)
     logging.info("Trying to submit")
     logging.info(base_sub_cmd)
     try:
@@ -1442,8 +1442,8 @@ def main(args):
 
 
 # For condor
-    os.environ['Njobs_in'] = str(Njobs_in)
-    os.environ['Njobs_out'] = str(Njobs_out)
+#    os.environ['Njobs_in'] = str(Njobs_in)
+#    os.environ['Njobs_out'] = str(Njobs_out)
 
     if args.do_llh:
         logging.info("Submitting %d in FoV Jobs now"%(Njobs_in))

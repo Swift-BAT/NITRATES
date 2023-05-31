@@ -9,6 +9,7 @@ import logging, traceback
 import time
 import pandas as pd
 import gc
+import sys
 
 from bkg_rate_estimation import rate_obj_from_sqltab
 from sqlite_funcs import get_conn, write_result, write_results,\
@@ -79,6 +80,7 @@ def cli():
     args = parser.parse_args()
     return args
 
+job_id=sys.argv[1]
 
 
 

@@ -1,12 +1,12 @@
 #!/bin/bash
 
 #batml_path='/storage/home/jjd330/work/local/NITRATES/'
-batmal_path='/home/shared/nitratesnew/NITRATES/'
+batml_path='/home/shared/nitrates_new/NITRATES/'
 ht_path=$batml_path'HeasoftTools/'
 sub_path=$batml_path'submission_scripts/'
 
 #workdir='/gpfs/scratch/jjd330/bat_data/'
-workdir='/home/shared/nitrates_new/NITRATES/'
+workdir='/home/shared/realtime_workdir/'
 #workdir='/storage/home/j/jjd330/work/local/bat_data/realtime_workdir/'
 
 #drmdir='/storage/home/j/jjd330/work/local/bat_data/drms/'

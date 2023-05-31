@@ -10,6 +10,7 @@ import time
 import pandas as pd
 #from memory_profiler import profile
 import gc
+import sys
 from copy import copy, deepcopy
 
 from bkg_rate_estimation import rate_obj_from_sqltab
@@ -98,6 +99,8 @@ def cli():
             default=6.0)
     args = parser.parse_args()
     return args
+
+job_id=sys.argv[1]
 
 def im_dist(imx0, imy0, imx1, imy1):
 

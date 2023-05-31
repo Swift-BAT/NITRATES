@@ -1,12 +1,11 @@
 universe   = vanilla
 executable = /home/shared/nitrates_new/NITRATES/do_llh_outFoV4realtime2.py 
-error      = /home/shared/realtime_workdir/condor_test_outfovlog.err
-output     = /home/shared/realtime_workdir/condor_test_outfovlog.out
-log        = /home/shared/realtime_workdir/condor_test_outfovlog.log
+arguments = --job_id $(Process)
+error      = /home/shared/realtime_workdir/condor_log_error_files/condor_test_outfovlog.err
+output     = /home/shared/realtime_workdir/condor_log_error_files/condor_test_outfovlog.out
+log        = /home/shared/realtime_workdir/condor_log_error_files/condor_test_outfovlog.log
 getenv     = true
 request_memory = 8000
 request_cpus = 1
-arguments = --job_id $(Process)
 notification = never
-environment = Njobs_out=$(Njobs_out)
-queue $(Njobs_out)
+queue $(njobs)

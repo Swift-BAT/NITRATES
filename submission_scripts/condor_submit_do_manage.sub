@@ -1,0 +1,12 @@
+universe = vanilla
+executable = /home/shared/nitrates_new/NITRATES/do_manage2.py
+arguments = --GWname '$(gwname)'  --do_bkg --do_rates --do_llh --N_infov_jobs 160 --N_outfov_jobs 40
+environment = gwname=$(gwname)
+error = /home/shared/realtime_workdir/condor_do_manage.err
+output = /home/shared/realtime_workdir/condor_do_manage.out
+log = /home/shared/realtime_workdir/condor_do_manage.log
+getenv = true
+request_memory = 8000
+request_cpus = 1
+notification = never
+queue 1

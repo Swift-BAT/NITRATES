@@ -49,7 +49,7 @@ tmin=-20.0
 Ntdbls=6
 
 #queue='jak51_b_g_bc_default'
-NinFOVjobs=260
+NinFOVjobs=120
 NoutFOVjobs=40
 
 workdir=$workdir$gwname
@@ -80,13 +80,14 @@ echo $$ > $workdir'/run_stuff.pid'
 
 python mkdb.py --trig_time $trigtime --work_dir $workdir --drm_dir $drmdir
 
+echo 'finished mkdb.py' 
 cd $workdir
 #cd $obsid
 
 python $batml_path'do_data_setup.py' --work_dir $workdir --trig_time $trigtime --search_twind $twind --min_dt $tmin --Ntdbls $Ntdbls --min_tbin $mintbin --evfname $evfname --dmask $dmask --att_fname $attfname --acs_fname $attfname
 if [ -f "filter_evdata.fits" ]; then
     python $batml_path'do_full_rates.py' --min_tbin $mintbin > full_rates.out 2>&1 &
-    python $batml_path'do_manage2.py' --GWname $gwname --rhel7 --do_bkg --do_rates --do_llh > manager.out 2>&1 &
+    python $batml_path'do_manage2.py' --GWname $gwname --rhel7 --do_bkg --do_rates --do_llh --N_infov_jobs $NinFOVjobs --N_outfov_jobs $NoutFOVjobs> manager.out 2>&1 &
    # condor_submit /home/shared/nitrates_new/NITRATES/submission_scripts/condor_submit_do_manage.sub
 fi
 
