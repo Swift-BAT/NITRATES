@@ -758,16 +758,11 @@ def main(args):
             time.sleep(loop_wait_err)
 
 
-    try:
-        ev_fname = evfnames2write(evfname, dmask, args.work_dir, acs_tab)
-    except Exception as E:
-        logging.error(E)
-        if args.api_token is not None:
-            try:
-                api.report(search_config.queueID,complete=True)
-            except Exception as e:
-                logging.error(e)
-                logging.error('Could not report complete to Queue via EchoAPI.')   
+    if evfname is None or dmask is None or acs_tab is None:
+        logging.error("No data found, exiting now.")
+        return -1
+
+    ev_fname = evfnames2write(evfname, dmask, args.work_dir, acs_tab)
 
     logging.info("Finally got all the data")
 
