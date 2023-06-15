@@ -16,6 +16,7 @@ __all__ = [
     "trans_func",
     "wcs_funcs",
     "search_config"
+    "calc_BAT_ul"
 ]
 
 from .coord_conv_funcs import *
@@ -35,3 +36,4 @@ from .time_funcs import *
 from .trans_func import *
 from .wcs_funcs import *
 from .search_config import *
+from .calc_BAT_ul import *
