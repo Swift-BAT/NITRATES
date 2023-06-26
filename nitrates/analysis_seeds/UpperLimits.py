@@ -185,13 +185,20 @@ def main(args):
 #
     ntbins = len(tbins0)
     snrs = np.zeros(ntbins)
+    sig2_bkg_values =[]
     for i in range(ntbins):
         dur = tbins1[i] - tbins0[i]
         tmid = (tbins1[i] + tbins0[i]) / 2.0
         bkg_rate, bkg_rate_err = bkg_obj.get_rate(tmid)
         sig2_bkg = (bkg_rate_err * dur) ** 2 + (bkg_rate * dur)
+        sig2_bkg_values.append(sig2_bkg)
         snrs[i] = (tcnts[i] - bkg_rate * dur) / np.sqrt(sig2_bkg)
-    
+   
+    max_sig2_bkg = np.max(sig2_bkg_values)
+    print('max of sig2_bkg=',max_sig2_bkg)
+    print('sig2_bkg=',sig2_bkg)
+    logging.debug('max sig2_bkg:')
+    logging.debug(max_sig2_bkg) 
     logging.debug('bkg rate:')
     logging.debug(bkg_rate)
     logging.debug('bkg rate error:')
@@ -206,41 +213,82 @@ def main(args):
     #print('No. of avtive detectors =',ndets)
 
     Ndet_ratio = Ndets_active / Ndets_tot
+    
+# new using new responses ----
+    theta_phi_file_path = '/gpfs/group/jak51/default/gzr5209/development/NITRATES/nitrates/analysis_seeds/theta_phi.txt'
+    with open(theta_phi_file_path, 'r') as file:
+        lines = file.readlines()
+    theta_values = []
+    phi_values = []
+    
 
-    IDs = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 29, 30, 31, 32, 33]
-    rate_std = np.sqrt(sig2_bkg) # the std of rates from the LC
+    for line in lines:
+        theta, phi = line.split()
+        theta_values.append(theta)  
+        phi_values.append(phi)  
+    
+
+    rate_std = np.sqrt(max_sig2_bkg)
     rate_upper_limit = 5*rate_std
-#    # print("5sigma rate upper limit: ", rate_upper_limit)
-    
-    ul_5sigma = [] 
-    
-    for i in IDs:
-        grid_id = i 
-#    # print("grid_id: ", grid_id)
-#
-#    # using energy bin 15-350 and ignoring 350-500
-        chan_low = 0 
+    ul_5sigma_new = []
+
+    for i in range(len(theta_values)):
+        drm_tab_new = get_resp4ul_tab(theta_values[i],phi_values[i])
+
+# using energy bin 15-350 and ignoring 350-500
+        chan_low = 0
         chan_hi = 3
-#
-#    # getting the NITRATES DRM table
-        drm_tab = get_drm_tab(grid_id)
-#
-#    # response matrix using selected energy bins and corrected for number of active dets
-        drm_matrix = drm_tab['MATRIX'][:,chan_low:(chan_hi+1)] * Ndet_ratio 
-#
-#    # find the flux that gives an expected rate equal to the rate upper limit
-        flux_upper_limit = rate2band_eflux(rate_upper_limit, drm_matrix,\
-                                                   drm_tab['ENERG_LO'], drm_tab['ENERG_HI'],\
+# response matrix using selected energy bins and corrected for number of active dets
+        drm_matrix_new = drm_tab_new['MATRIX'][:,chan_low:(chan_hi+1)] * Ndet_ratio
+
+# find the flux that gives an expected rate equal to the rate upper limit
+        flux_upper_limit_new = rate2band_eflux(rate_upper_limit, drm_matrix_new,\
+                                                   drm_tab_new['ENERG_LO'], drm_tab_new['ENERG_HI'],\
                                                    alpha, beta, Epeak, flux_elo, flux_ehi)
-#    #print("5-sigma flux upper limit [erg/cm2/s]: ", flux_upper_limit)
-        ul_5sigma.append(flux_upper_limit)
-##     np.save(os.path.join('test-GW200112_155838', name + "_BAT_gridID_ul.npy"), ul_5sigma)
-#
-#
-    logging.debug('5 sigma UL=')
-    logging.debug(ul_5sigma)
+        ul_5sigma_new.append(flux_upper_limit_new)
+    
+    logging.debug('5 sigma UL new values=')
+    logging.debug(ul_5sigma_new)
 
 
+
+# ------------------------------------
+# Old using grid_ids for infov----
+
+#    IDs = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 29, 30, 31, 32, 33]
+#    rate_std = np.sqrt(sig2_bkg) # the std of rates from the LC
+#    rate_upper_limit = 5*rate_std
+##    # print("5sigma rate upper limit: ", rate_upper_limit)
+#    
+#    ul_5sigma = [] 
+#    
+#    for i in IDs:
+#        grid_id = i 
+##    # print("grid_id: ", grid_id)
+##
+##    # using energy bin 15-350 and ignoring 350-500
+#        chan_low = 0 
+#        chan_hi = 3
+##
+##    # getting the NITRATES DRM table
+#        drm_tab = get_drm_tab(grid_id)
+##
+##    # response matrix using selected energy bins and corrected for number of active dets
+#        drm_matrix = drm_tab['MATRIX'][:,chan_low:(chan_hi+1)] * Ndet_ratio 
+##
+##    # find the flux that gives an expected rate equal to the rate upper limit
+#        flux_upper_limit = rate2band_eflux(rate_upper_limit, drm_matrix,\
+#                                                   drm_tab['ENERG_LO'], drm_tab['ENERG_HI'],\
+#                                                   alpha, beta, Epeak, flux_elo, flux_ehi)
+##    #print("5-sigma flux upper limit [erg/cm2/s]: ", flux_upper_limit)
+#        ul_5sigma.append(flux_upper_limit)
+###     np.save(os.path.join('test-GW200112_155838', name + "_BAT_gridID_ul.npy"), ul_5sigma)
+##
+##
+#    logging.debug('5 sigma UL=')
+#    logging.debug(ul_5sigma)
+#    #print("5 sigma UL old values=",ul_5sigma)
+#
 
 if __name__ == "__main__":
     args = cli()
