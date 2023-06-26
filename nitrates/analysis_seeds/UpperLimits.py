@@ -11,6 +11,7 @@ from copy import copy, deepcopy
 import logging, traceback
 import sys
 import argparse
+import time
 
 from ..lib.event2dpi_funcs import det2dpis, mask_detxy
 from ..lib.sqlite_funcs import get_conn
@@ -21,6 +22,7 @@ from ..analysis_seeds.do_full_rates import *
 
 from ..lib.calc_BAT_ul import *
 
+start_time = time.time()
 
 def cli():
     parser = argparse.ArgumentParser()
@@ -168,89 +170,123 @@ def main(args):
 #print(bkg_obj)
     bkg_obj.do_fits()
 
-# calculate bkg rate and rate error
-    twind = 20
-    dur = 1.024 #  1.024 s
-# min_dt = -twind
-    dtmin = -20
-    dtmax = twind
 
-    tstep = dur / 4.0
-    tbins0 = np.arange(dtmin, dtmax, tstep) + trigger_time
-    tbins1 = tbins0 + dur
-    tcnts = get_cnts_tbins_fast(tbins0, tbins1, ev_data)
+
+# Getting rate errors and std deviations for all durations:
+
+   # dur_values=[0.128, 0.256, 0.512, 1.024, 2.048, 4.096, 8.192, 16.384]
+    dur_values=[1.024]
+    for k in range(len(dur_values)):
+        #print('k=',k,'duration:',dur_values[k])
+# calculate bkg rate and rate error
+        twind = 20
+        #dur = 1.024 #  1.024 s
+# min_dt = -twind
+        dtmin = -20
+        dtmax = twind
+
+        tstep = dur_values[k] / 4.0
+        tbins0 = np.arange(dtmin, dtmax, tstep) + trigger_time
+        tbins1 = tbins0 + dur_values[k]
+        tcnts = get_cnts_tbins_fast(tbins0, tbins1, ev_data)
 
 # snrs = calc_rate_snrs(tbins0, tbins1, tcnts, bkg_obj)
 # print(snrs)
 #
-    ntbins = len(tbins0)
-    snrs = np.zeros(ntbins)
-    sig2_bkg_values =[]
-    for i in range(ntbins):
-        dur = tbins1[i] - tbins0[i]
-        tmid = (tbins1[i] + tbins0[i]) / 2.0
-        bkg_rate, bkg_rate_err = bkg_obj.get_rate(tmid)
-        sig2_bkg = (bkg_rate_err * dur) ** 2 + (bkg_rate * dur)
-        sig2_bkg_values.append(sig2_bkg)
-        snrs[i] = (tcnts[i] - bkg_rate * dur) / np.sqrt(sig2_bkg)
+        ntbins = len(tbins0)
+        snrs = np.zeros(ntbins)
+        sig2_bkg_values =[]
+        
+        for i in range(ntbins):
+            dur = tbins1[i] - tbins0[i]
+            tmid = (tbins1[i] + tbins0[i]) / 2.0
+            bkg_rate, bkg_rate_err = bkg_obj.get_rate(tmid)
+            sig2_bkg = (bkg_rate_err * dur) ** 2 + (bkg_rate * dur)
+            sig2_bkg_values.append(sig2_bkg)
+            snrs[i] = (tcnts[i] - bkg_rate * dur) / np.sqrt(sig2_bkg)
    
-    max_sig2_bkg = np.max(sig2_bkg_values)
-    print('max of sig2_bkg=',max_sig2_bkg)
-    print('sig2_bkg=',sig2_bkg)
-    logging.debug('max sig2_bkg:')
-    logging.debug(max_sig2_bkg) 
-    logging.debug('bkg rate:')
-    logging.debug(bkg_rate)
-    logging.debug('bkg rate error:')
-    logging.debug(bkg_rate_err)
+        max_sig2_bkg = np.max(sig2_bkg_values)
+        #print('max of sig2_bkg=',max_sig2_bkg)
+        #print('sig2_bkg=',sig2_bkg)
+        logging.debug('max sig2_bkg:')
+        logging.debug(max_sig2_bkg) 
+        logging.debug('bkg rate:')
+        logging.debug(bkg_rate)
+        logging.debug('bkg rate error:')
+        logging.debug(bkg_rate_err)
 
 
 # UL
 
 
-    Ndets_tot = 32768.0 # total dets 
-    Ndets_active = ndets   # number of active detectors
-    #print('No. of avtive detectors =',ndets)
+        Ndets_tot = 32768.0 # total dets 
+        Ndets_active = ndets   # number of active detectors
+        #print('No. of avtive detectors =',ndets)
 
-    Ndet_ratio = Ndets_active / Ndets_tot
+        Ndet_ratio = Ndets_active / Ndets_tot
     
 # new using new responses ----
-    theta_phi_file_path = '/gpfs/group/jak51/default/gzr5209/development/NITRATES/nitrates/analysis_seeds/theta_phi.txt'
-    with open(theta_phi_file_path, 'r') as file:
-        lines = file.readlines()
-    theta_values = []
-    phi_values = []
-    
 
-    for line in lines:
-        theta, phi = line.split()
-        theta_values.append(theta)  
-        phi_values.append(phi)  
-    
+        theta_values=["0.000","109.471","109.471","109.471","109.471","109.471","109.471","109.471","109.471","109.471","109.471","109.471","109.471","109.471","109.471","109.471","109.471","120.000","120.000","120.000","120.000","120.000","120.000","120.000","120.000","120.000","120.000","120.000","120.000","120.000","120.000","120.000","120.000","131.810","131.810","131.810","131.810","131.810","131.810","131.810","131.810","131.810","131.810","131.810","131.810","131.810","131.810","131.810","131.810","144.341","144.341","144.341","144.341","144.341","144.341","144.341","144.341","144.341","144.341","144.341","144.341","156.444","156.444","156.444","156.444","156.444","156.444","156.444","156.444","16.699","16.699","168.284","168.284","168.284","168.284","180.000","21.801","21.801","26.565","26.565","26.565","26.565","30.964","30.964","35.796","35.796","35.796","35.796","38.660","38.660","40.511","40.511","40.511","40.511","41.987","41.987","44.564","44.564","44.564","44.564","45.000","45.000","45.000","45.000","50.194","50.194","50.194","50.194","50.292","50.292","50.292","50.292","51.046","51.046","51.046","51.046","51.671","51.671","51.671","51.671","53.301","53.301","53.301","53.301","55.264","55.264","55.264","55.264","56.310","56.310","56.310","56.310","56.310","56.310","57.212","57.212","57.212","57.212","57.995","57.995","58.438","58.438","58.438","58.438","59.491","59.491","59.491","59.491","59.534","59.534","59.534","59.534","59.664","59.664","59.664","59.664","60.000","60.000","60.000","60.000","60.000","60.000","60.000","60.000","60.000","60.000","60.000","60.000","60.000","60.000","60.000","60.000","61.421","61.421","61.421","61.421","62.499","62.499","62.499","62.499","63.435","63.435","63.435","63.435","65.489","65.489","65.489","65.489","70.529","70.529","70.529","70.529","70.529","70.529","70.529","70.529","70.529","70.529","70.529","70.529","70.529","70.529","70.529","70.529","80.406","80.406","80.406","80.406","80.406","80.406","80.406","80.406","80.406","80.406","80.406","80.406","80.406","80.406","80.406","80.406","90.000","90.000","90.000","90.000","90.000","90.000","90.000","90.000","90.000","90.000","90.000","90.000","90.000","90.000","90.000","90.000","99.594","99.594","99.594","99.594","99.594","99.594","99.594","99.594","99.594","99.594","99.594","99.594","99.594","99.594","99.594","99.594"]    
 
-    rate_std = np.sqrt(max_sig2_bkg)
-    rate_upper_limit = 5*rate_std
-    ul_5sigma_new = []
+        phi_values=["-0.000","101.250","11.250","123.750","146.250","168.750","191.250","213.750","236.250","258.750","281.250","303.750","326.250","33.750","348.750","56.250","78.750","0.000","112.500","135.000","157.500","180.000","202.500","225.000","22.500","247.500","270.000","292.500","315.000","337.500","45.000","67.500","90.000","101.250","11.250","123.750","146.250","168.750","191.250","213.750","236.250","258.750","281.250","303.750","326.250","33.750","348.750","56.250","78.750","105.000","135.000","15.000","165.000","195.000","225.000","255.000","285.000","315.000","345.000","45.000","75.000","112.500","157.500","202.500","22.500","247.500","292.500","337.500","67.500","270.000","90.000","135.000","225.000","315.000","45.000","0.000","-0.000","180.000","143.130","216.870","323.130","36.870","270.000","90.000","123.690","236.310","303.690","56.310","-0.000","180.000","159.444","200.556","20.556","339.444","270.000","90.000","113.962","246.038","293.962","66.038","143.130","216.870","323.130","36.870","-0.000","180.000","270.000","90.000","131.634","228.366","311.634","48.366","14.036","165.964","194.036","345.964","108.435","251.565","288.435","71.565","153.435","206.565","26.565","333.435","123.690","236.310","303.690","56.310","143.130","216.870","270.000","323.130","36.870","90.000","104.931","255.069","284.931","75.069","-0.000","180.000","10.620","169.380","190.620","349.380","135.000","225.000","315.000","45.000","118.072","241.928","298.072","61.928","159.444","200.556","20.556","339.444","0.000","112.500","135.000","157.500","180.000","202.500","225.000","22.500","247.500","270.000","292.500","315.000","337.500","45.000","67.500","90.000","150.642","209.358","29.358","330.642","128.660","231.340","308.660","51.340","143.130","216.870","323.130","36.870","136.848","223.152","316.848","43.152","101.250","11.250","123.750","146.250","168.750","191.250","213.750","236.250","258.750","281.250","303.750","326.250","33.750","348.750","56.250","78.750","0.000","112.500","135.000","157.500","180.000","202.500","225.000","22.500","247.500","270.000","292.500","315.000","337.500","45.000","67.500","90.000","101.250","11.250","123.750","146.250","168.750","191.250","213.750","236.250","258.750","281.250","303.750","326.250","33.750","348.750","56.250","78.750","0.000","112.500","135.000","157.500","180.000","202.500","225.000","22.500","247.500","270.000","292.500","315.000","337.500","45.000","67.500","90.000"]
 
-    for i in range(len(theta_values)):
-        drm_tab_new = get_resp4ul_tab(theta_values[i],phi_values[i])
+        rate_std = np.sqrt(max_sig2_bkg)
+        rate_upper_limit = 5*rate_std
+        ul_5sigma_new = []
+
+   # Using 4 spectral templates
+        alpha_values = [-1.0,-1.9,-0.62,-1.5]
+        beta_values = [-2.3,-3.7,0.0,0.0]
+        Epeak_values = [230.0,70.0,185.0,1500.0]
+
+        for index,j in enumerate(alpha_values):
+        #for j in range(1):
+                      
+            if index == 0:
+                spec_temp = "Band: Normal template (Ep=230 keV, alpha=-1.0,beta=-2.3)"
+            elif index == 1:
+                spec_temp = "Band: Soft template (Ep=70.0 keV, alpha=-1.9, beta=-3.7)"
+            elif index == 2:
+                spec_temp = "Cutoff PL: GW170817-like (Ep=185 keV, alpha=-0.62)"
+            elif index == 3:
+                spec_temp = "Cutoff PL hard (Ep=1500 keV,alpha=-1.5)"
+
+            for i in range(len(theta_values)):
+           # for i in range(3):
+                drm_tab_new = get_resp4ul_tab(theta_values[i],phi_values[i])
 
 # using energy bin 15-350 and ignoring 350-500
-        chan_low = 0
-        chan_hi = 3
+                chan_low = 0
+                chan_hi = 3
 # response matrix using selected energy bins and corrected for number of active dets
-        drm_matrix_new = drm_tab_new['MATRIX'][:,chan_low:(chan_hi+1)] * Ndet_ratio
+                drm_matrix_new = drm_tab_new['MATRIX'][:,chan_low:(chan_hi+1)] * Ndet_ratio
 
 # find the flux that gives an expected rate equal to the rate upper limit
-        flux_upper_limit_new = rate2band_eflux(rate_upper_limit, drm_matrix_new,\
+                if j>=2:
+                    flux_upper_limit_new = rate2comp_eflux(rate_upper_limit,drm_matrix_new,\
+                                               drm_tab_new['ENERG_LO'], drm_tab_new['ENERG_HI'],\
+                                               alpha_values[index],Epeak_values[index], flux_elo, flux_ehi)
+                else:
+                    flux_upper_limit_new = rate2band_eflux(rate_upper_limit, drm_matrix_new,\
                                                    drm_tab_new['ENERG_LO'], drm_tab_new['ENERG_HI'],\
-                                                   alpha, beta, Epeak, flux_elo, flux_ehi)
-        ul_5sigma_new.append(flux_upper_limit_new)
-    
-    logging.debug('5 sigma UL new values=')
-    logging.debug(ul_5sigma_new)
+                                                   alpha_values[index], beta_values[index], Epeak_values[index], flux_elo, flux_ehi)
+                
+                ul_5sigma_new.append(flux_upper_limit_new)
+                
+            logging.debug('5 sigma UL values for:')
+            logging.debug(spec_temp)
+            logging.debug('and time bin')
+            logging.debug(dur_values[k])
+            logging.debug('-----')
+            logging.debug(ul_5sigma_new)
+            logging.debug('------')
 
 
+    elapsed_time = time.time() - start_time
+
+# Print the elapsed time
+    print(f"Time taken: {elapsed_time} seconds")
 
 # ------------------------------------
 # Old using grid_ids for infov----
