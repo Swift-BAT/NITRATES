@@ -16,7 +16,7 @@ import time
 from ..lib.event2dpi_funcs import det2dpis, mask_detxy
 from ..lib.sqlite_funcs import get_conn
 from ..lib.dbread_funcs import get_info_tab
-
+from ..lib.coord_conv_funcs import  convert_theta_phi2radec
 
 from ..analysis_seeds.do_full_rates import *
 
@@ -91,7 +91,8 @@ def main(args):
     )
 
 
-    work_dir='/gpfs/group/jak51/default/F702399789'
+   # work_dir='/gpfs/group/jak51/default/F702399789'
+    work_dir='/storage/home/gzr5209/Desktop/709523649_c0/'
 
     conn = get_conn(os.path.join(work_dir,'results.db'))
     logging.info("Connecting to DB") 
@@ -110,6 +111,9 @@ def main(args):
     # the final set of detectors to mask (disabled dets, hot/cold dets, and dets with glitches)  
     dmask = fits.open(os.path.join(work_dir,'detmask.fits'))[0].data
     attfile = fits.open(os.path.join(work_dir,'attitude.fits'))[1].data
+    att_q = attfile["QPARAM"][np.argmin(np.abs(attfile["TIME"] - trigger_time))]
+    ra1, dec1 = convert_theta_phi2radec(100,100,att_q)
+    print('test ra, dec=',ra1,dec1)
 
     ebins0 = np.array([15.0, 24.0, 35.0, 48.0, 64.0])
     ebins0 = np.append(ebins0, np.logspace(np.log10(84.0), np.log10(500.0), 5+1))[:-1]
@@ -172,7 +176,7 @@ def main(args):
 
 
 
-# Getting rate errors and std deviations for all durations:
+# Getting rate and std deviations for all durations:
 
    # dur_values=[0.128, 0.256, 0.512, 1.024, 2.048, 4.096, 8.192, 16.384]
     dur_values=[1.024]
@@ -231,12 +235,30 @@ def main(args):
 
         phi_values=["-0.000","101.250","11.250","123.750","146.250","168.750","191.250","213.750","236.250","258.750","281.250","303.750","326.250","33.750","348.750","56.250","78.750","0.000","112.500","135.000","157.500","180.000","202.500","225.000","22.500","247.500","270.000","292.500","315.000","337.500","45.000","67.500","90.000","101.250","11.250","123.750","146.250","168.750","191.250","213.750","236.250","258.750","281.250","303.750","326.250","33.750","348.750","56.250","78.750","105.000","135.000","15.000","165.000","195.000","225.000","255.000","285.000","315.000","345.000","45.000","75.000","112.500","157.500","202.500","22.500","247.500","292.500","337.500","67.500","270.000","90.000","135.000","225.000","315.000","45.000","0.000","-0.000","180.000","143.130","216.870","323.130","36.870","270.000","90.000","123.690","236.310","303.690","56.310","-0.000","180.000","159.444","200.556","20.556","339.444","270.000","90.000","113.962","246.038","293.962","66.038","143.130","216.870","323.130","36.870","-0.000","180.000","270.000","90.000","131.634","228.366","311.634","48.366","14.036","165.964","194.036","345.964","108.435","251.565","288.435","71.565","153.435","206.565","26.565","333.435","123.690","236.310","303.690","56.310","143.130","216.870","270.000","323.130","36.870","90.000","104.931","255.069","284.931","75.069","-0.000","180.000","10.620","169.380","190.620","349.380","135.000","225.000","315.000","45.000","118.072","241.928","298.072","61.928","159.444","200.556","20.556","339.444","0.000","112.500","135.000","157.500","180.000","202.500","225.000","22.500","247.500","270.000","292.500","315.000","337.500","45.000","67.500","90.000","150.642","209.358","29.358","330.642","128.660","231.340","308.660","51.340","143.130","216.870","323.130","36.870","136.848","223.152","316.848","43.152","101.250","11.250","123.750","146.250","168.750","191.250","213.750","236.250","258.750","281.250","303.750","326.250","33.750","348.750","56.250","78.750","0.000","112.500","135.000","157.500","180.000","202.500","225.000","22.500","247.500","270.000","292.500","315.000","337.500","45.000","67.500","90.000","101.250","11.250","123.750","146.250","168.750","191.250","213.750","236.250","258.750","281.250","303.750","326.250","33.750","348.750","56.250","78.750","0.000","112.500","135.000","157.500","180.000","202.500","225.000","22.500","247.500","270.000","292.500","315.000","337.500","45.000","67.500","90.000"]
 
+        float_theta = []
+        float_phi = []
+
+        for element in theta_values:
+            float_theta_value = float(element)
+            float_theta.append(float_theta_value)
+        for element2 in phi_values:
+            float_phi_value = float(element2)
+            float_phi.append(float_phi_value)
+       
+        float_theta = np.array(float_theta)
+        float_phi = np.array(float_phi) 
+        #print('float_theta=',float_theta)
+        #print('float_phi=',float_phi)
+        ras, decs = convert_theta_phi2radec(float_theta, float_phi, att_q)
+        #print('ras=',ras)
+        #print('decs=',decs)            
+
         rate_std = np.sqrt(max_sig2_bkg)
         rate_upper_limit = 5*rate_std
-        ul_5sigma_new = []
+       # ul_5sigma_new = []
 
    # Using 4 spectral templates
-        alpha_values = [-1.0,-1.9,-0.62,-1.5]
+        alpha_values = [-1.0,-1.9,0.62,-1.5]
         beta_values = [-2.3,-3.7,0.0,0.0]
         Epeak_values = [230.0,70.0,185.0,1500.0]
 
@@ -244,13 +266,15 @@ def main(args):
         #for j in range(1):
                       
             if index == 0:
-                spec_temp = "Band: Normal template (Ep=230 keV, alpha=-1.0,beta=-2.3)"
+                spec_temp = "Band_Normal_template_Ep230keV_alpha-1.0_beta-2.3"
             elif index == 1:
-                spec_temp = "Band: Soft template (Ep=70.0 keV, alpha=-1.9, beta=-3.7)"
+                spec_temp = "Band_Soft_template_Ep70keV_alpha-1.9_beta_-3.7"
             elif index == 2:
-                spec_temp = "Cutoff PL: GW170817-like (Ep=185 keV, alpha=-0.62)"
+                spec_temp = "Cutoff_PL_GW170817-like_Ep185keV_alpha0.62"
             elif index == 3:
-                spec_temp = "Cutoff PL hard (Ep=1500 keV,alpha=-1.5)"
+                spec_temp = "Cutoff_PL_hard_Ep1500_keV_alpha-1.5"
+            
+            ul_5sigma_new = []
 
             for i in range(len(theta_values)):
            # for i in range(3):
@@ -273,7 +297,13 @@ def main(args):
                                                    alpha_values[index], beta_values[index], Epeak_values[index], flux_elo, flux_ehi)
                 
                 ul_5sigma_new.append(flux_upper_limit_new)
-                
+            
+            filename = f"ul_5sigma_{spec_temp}_{dur_values[k]}.txt"
+            with open(filename, "w") as file:
+                #for item in ul_5sigma_new:
+                    #file.write(str(item) + "\n")
+                for i in range(len(ul_5sigma_new)):
+                    file.write(f"{ul_5sigma_new[i]}\t{theta_values[i]}\t{phi_values[i]}\t{ras[i]}\t{decs[i]}\n")    
             logging.debug('5 sigma UL values for:')
             logging.debug(spec_temp)
             logging.debug('and time bin')
