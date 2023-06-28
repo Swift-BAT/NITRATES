@@ -287,7 +287,7 @@ def main(args):
                 drm_matrix_new = drm_tab_new['MATRIX'][:,chan_low:(chan_hi+1)] * Ndet_ratio
 
 # find the flux that gives an expected rate equal to the rate upper limit
-                if j>=2:
+                if index>=2:
                     flux_upper_limit_new = rate2comp_eflux(rate_upper_limit,drm_matrix_new,\
                                                drm_tab_new['ENERG_LO'], drm_tab_new['ENERG_HI'],\
                                                alpha_values[index],Epeak_values[index], flux_elo, flux_ehi)
