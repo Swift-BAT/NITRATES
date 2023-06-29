@@ -22,6 +22,9 @@ if NITRATES_RESP_DIR is None:
     # it's assumed to be in the current working direc
     NITRATES_RESP_DIR = "."
 
+# responses for upper limits directory
+resp_dname = '/gpfs/group/jak51/default/rsps4limits2/'
+
     # ray traces directory
 rt_dir = os.path.join(NITRATES_RESP_DIR, "ray_traces_detapp_npy")
 # Resp Table with direct response directory

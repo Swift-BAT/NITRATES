@@ -3,13 +3,10 @@ from astropy.table import Table, vstack
 import matplotlib.pyplot as plt
 import os
 
+from ..config import resp_dname
+
 #cwd = os.getcwd()
 
-#drm_dir_old = cwd+'/rsp_maskweight/'
-#drm_dir_nitrates = cwd+'/rsp_NITRATES/'
-drm_dir_old = '/gpfs/group/jak51/default/responses/rsp_maskweight/'
-drm_dir_nitrates = '/gpfs/group/jak51/default/responses/rsp_NITRATES/'
-rsps4limits ='/gpfs/group/jak51/default/rsps4limits/'
 
 # comptomized and band spectra functions
 # E is photon energy, A is normalization, E0 is pivot energy
@@ -270,17 +267,9 @@ def get_drm_tab(grid_id, old=False, get_ebounds=False):
 
 
 def get_resp4ul_tab(theta,phi):
-    drm_fname = os.path.join(rsps4limits, 'NITRATES_alldet_theta_%s_phi_%s_.rsp'%(theta,phi))
+    drm_fname = resp_dname + 'NITRATES_alldet_theta_%s_phi_%s_.rsp'%(theta,phi)
     drm_tab = Table.read(drm_fname)
     
     return drm_tab
 
 
-    # band spec shape params
-alpha = -1.0
-beta = -2.3
-Epeak = 230.0
-
-# flux integration bounds
-flux_elo = 15.0
-flux_ehi = 350.0
