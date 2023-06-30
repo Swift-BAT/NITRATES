@@ -23,7 +23,7 @@ if NITRATES_RESP_DIR is None:
     NITRATES_RESP_DIR = "."
 
 # responses for upper limits directory
-resp_dname = '/gpfs/group/jak51/default/rsps4limits2/'
+resp_dname = os.path.join(NITRATES_RESP_DIR,"rsps4limits2/")
 
     # ray traces directory
 rt_dir = os.path.join(NITRATES_RESP_DIR, "ray_traces_detapp_npy")

@@ -21,70 +21,23 @@ from ..lib.coord_conv_funcs import  convert_theta_phi2radec
 from ..analysis_seeds.do_full_rates import *
 
 from ..lib.calc_BAT_ul import *
+from ..config import resp_dname
 
 start_time = time.time()
 
 def cli():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--work_dir", type=str, help="Results directory", default="/gpfs/group/jak51/default/F702399789/")
+    parser.add_argument("--work_dir", type=str, help="Results directory", default='.')
     parser.add_argument("--evfname", type=str, help="Event data file", default=None)
     parser.add_argument("--dmask", type=str, help="Detmask fname", default=None)
-    parser.add_argument(
-        "--att_fname", type=str, help="Fname for that att file", default=None
-    )
-    parser.add_argument(
-        "--trig_time",
-        type=str,
-        help="Time of trigger, in either MET or a datetime string",
-    )
-    parser.add_argument(
-        "--dbfname", type=str, help="Name to save the database to", default=None
-    )
-    parser.add_argument(
-        "--bkg_fname",
-        type=str,
-        help="Name of the file with the bkg fits",
-        default="bkg_estimation.csv",
-    )
-    parser.add_argument(
-        "--twind",
-        type=float,
-        help="Number of seconds to go +/- from the trigtime",
-        default=20 * 1.024,
-    )
-    parser.add_argument(
-        "--min_dt", type=float, help="Min time from trigger to do", default=None
-    )
-    parser.add_argument(
-        "--drm_dir_old",
-        type=str,
-        help="drm_directory",
-        default="/gpfs/group/jak51/default/responses/rsp_maskweight/",
-    )
-    parser.add_argument(
-        "--drm_dir",
-        type=str,
-        help="drm_directory",
-        default="/gpfs/group/jak51/default/responses/rsp_NITRATES/",
-    )
-    parser.add_argument(
-        "--resp_dname",
-        type=str,
-        help="new responses directory",
-        default="/gpfs/group/jak51/default/rsps4limits2/"
-    )
-    parser.add_argument(
-        "--api_token",
-        type=str,
-        help="EchoAPI key for interactions.",
-        default=None
-    )
+    parser.add_argument("--att_fname", type=str, help="Fname for that att file", default=None)
+    parser.add_argument("--trig_time",type=str, help="Time of trigger, in either MET or a datetime string", default=None)
+    parser.add_argument("--dbfname", type=str, help="Name to save the database to", default=None)
+    parser.add_argument("--resp_dname",type=str,help="new responses directory",default=None)
+    parser.add_argument("--api_token",type=str,help="EchoAPI key for interactions.",default=None)
 
     args = parser.parse_args()
     return args
-
-
-
 
 
 
@@ -97,8 +50,7 @@ def main(args):
     )
 
     work_dir=args.work_dir
-    resp_dname=args.resp_dname
-   # work_dir='/storage/home/gzr5209/Desktop/709523649_c0/'
+    #resp_dname=args.resp_dname
 
     conn = get_conn(os.path.join(work_dir,'results.db'))
     logging.info("Connecting to DB") 
@@ -118,16 +70,7 @@ def main(args):
     dmask = fits.open(os.path.join(work_dir,'detmask.fits'))[0].data
     attfile = fits.open(os.path.join(work_dir,'attitude.fits'))[1].data
     att_q = attfile["QPARAM"][np.argmin(np.abs(attfile["TIME"] - trigger_time))]
-    ra1, dec1 = convert_theta_phi2radec(100,100,att_q)
-    print('test ra, dec=',ra1,dec1)
 
-    ebins0 = np.array([15.0, 24.0, 35.0, 48.0, 64.0])
-    ebins0 = np.append(ebins0, np.logspace(np.log10(84.0), np.log10(500.0), 5+1))[:-1]
-    ebins0 = np.round(ebins0, decimals=1)[:-1]
-    ebins1 = np.append(ebins0[1:], [350.0])
-    nebins = len(ebins0)
-    logging.debug("Number of ebins: ")
-    logging.debug(nebins)
 
     # number of detectors being used
     ndets = np.sum(dmask==0)
@@ -146,7 +89,7 @@ def main(args):
     # from bad dets
     # with bad event flags
     bl_ev = (ev_data['EVENT_FLAGS']<1)&\
-        (ev_data['ENERGY']<=500.)&(ev_data['ENERGY']>=14.)&\
+        (ev_data['ENERGY']<=350.)&(ev_data['ENERGY']>=15.)&\
         (mask_vals==0.)&(ev_data['TIME']<=t_end)&\
         (ev_data['TIME']>=t_start)
 
@@ -155,8 +98,6 @@ def main(args):
 
    # logging.info(GTI_PNT)
 
-   # for row in GTI_PNT:
-   #     print(row['START'] - trigger_time, row['STOP'] - trigger_time)
 
         
     bkg_fname = os.path.join(work_dir,'bkg_estimation.csv')
@@ -165,19 +106,13 @@ def main(args):
 
 # create bkg object
 
-    try:
-        GTI = Table.read(evfname, hdu="GTI_POINTING")
-    except:
-        GTI = Table.read(evfname, hdu="GTI")
     tmin = GTI_PNT["START"][0]
     tmax = GTI_PNT["STOP"][-1]
     twind = 20
-# print(GTI,tmin,tmax,twind)
 
     poly_trng = np.int(twind)
 
     bkg_obj = Linear_Rates(ev_data, tmin, tmax, trigger_time, GTI_PNT, sig_clip=4.0, poly_trng=poly_trng)
-#print(bkg_obj)
     bkg_obj.do_fits()
 
 
@@ -185,7 +120,6 @@ def main(args):
 # Getting rate and std deviations for all durations:
 
     dur_values=[0.128, 0.256, 0.512, 1.024, 2.048, 4.096, 8.192, 16.384]
-    #dur_values=[0.128] 
     for k in range(len(dur_values)):
 
 # calculate bkg rate and rate error
@@ -196,7 +130,7 @@ def main(args):
         tstep = dur_values[k] / 4.0
         tbins0 = np.arange(dtmin, dtmax, tstep) + trigger_time
         tbins1 = tbins0 + dur_values[k]
-        tcnts = get_cnts_tbins_fast(tbins0, tbins1, ev_data)
+        tcnts = get_cnts_tbins_fast(tbins0, tbins1, ev_data0)
 
         ntbins = len(tbins0)
         snrs = np.zeros(ntbins)
@@ -211,10 +145,11 @@ def main(args):
             snrs[i] = (tcnts[i] - bkg_rate * dur) / np.sqrt(sig2_bkg)
    
         max_sig2_bkg = np.max(sig2_bkg_values)
-        #print('max of sig2_bkg=',max_sig2_bkg)
-        #print('sig2_bkg=',sig2_bkg)
+        min_sig2_bkg = np.min(sig2_bkg_values)
         logging.debug('max sig2_bkg:')
         logging.debug(max_sig2_bkg) 
+        logging.debug('min sig2_bkg')
+        logging.debug(min_sig2_bkg)
         logging.debug('bkg rate:')
         logging.debug(bkg_rate)
         logging.debug('bkg rate error:')
@@ -236,7 +171,7 @@ def main(args):
 
         ras, decs = convert_theta_phi2radec(theta_values, phi_values, att_q)
 
-        rate_std = np.sqrt(max_sig2_bkg)
+        rate_std = (np.sqrt(max_sig2_bkg))/dur_values[k]
         rate_upper_limit = 5*rate_std
 
    # Using 4 spectral templates
@@ -246,7 +181,6 @@ def main(args):
         flux_elo=15.0
         flux_ehi=350.0
         for index,j in enumerate(alpha_values):
-        #for j in range(1):
                       
             if index == 0:
                 spec_temp = "Band_Normal_template_Ep230keV_alpha-1.0_beta-2.3"
@@ -260,7 +194,6 @@ def main(args):
             ul_5sigma_new = []
 
             for i in range(len(theta_values)):
-           # for i in range(3):
                 drm_tab_new = get_resp4ul_tab(thetas_string[i],phis_string[i])
 
 # using energy bin 15-350 and ignoring 350-500
@@ -282,11 +215,23 @@ def main(args):
                 ul_5sigma_new.append(flux_upper_limit_new)
             
             filename = f"ul_5sigma_{spec_temp}_{dur_values[k]}.txt"
-            with open(filename, "w") as file:
-                #for item in ul_5sigma_new:
-                    #file.write(str(item) + "\n")
-                for i in range(len(ul_5sigma_new)):
-                    file.write(f"{ul_5sigma_new[i]}\t{theta_values[i]}\t{phi_values[i]}\t{ras[i]}\t{decs[i]}\n")    
+            #with open(filename, "w") as file:
+            #    for i in range(len(ul_5sigma_new)):
+            #        file.write(f"{ul_5sigma_new[i]}\t{theta_values[i]}\t{phi_values[i]}\t{ras[i]}\t{decs[i]}\n")    
+            data = {
+                "ul_5sigma": ul_5sigma_new,
+                "theta": theta_values,
+                "phi": phi_values,
+                "ra": ras,
+                "dec": decs
+            }
+
+            df = pd.DataFrame(data)
+
+            df.to_csv(filename, index=False)
+
+
+
             logging.debug('5 sigma UL values for:')
             logging.debug(spec_temp)
             logging.debug('and time bin')
@@ -298,8 +243,8 @@ def main(args):
 
     elapsed_time = time.time() - start_time
 
-# Print the elapsed time
-    print(f"Time taken: {elapsed_time} seconds")
+    logging.debug("Time taken in seconds:")
+    logging.debug(elapsed_time)
 
 
 if __name__ == "__main__":
