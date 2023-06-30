@@ -112,7 +112,7 @@ def main(args):
 
     poly_trng = np.int(twind)
 
-    bkg_obj = Linear_Rates(ev_data, tmin, tmax, trigger_time, GTI_PNT, sig_clip=4.0, poly_trng=poly_trng)
+    bkg_obj = Linear_Rates(ev_data0, tmin, tmax, trigger_time, GTI_PNT, sig_clip=4.0, poly_trng=poly_trng)
     bkg_obj.do_fits()
 
 
@@ -214,7 +214,7 @@ def main(args):
                 
                 ul_5sigma_new.append(flux_upper_limit_new)
             
-            filename = f"ul_5sigma_{spec_temp}_{dur_values[k]}.txt"
+            filename = f"ul_5sigma_{spec_temp}_{dur_values[k]}.csv"
             #with open(filename, "w") as file:
             #    for i in range(len(ul_5sigma_new)):
             #        file.write(f"{ul_5sigma_new[i]}\t{theta_values[i]}\t{phi_values[i]}\t{ras[i]}\t{decs[i]}\n")    
