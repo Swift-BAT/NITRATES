@@ -760,6 +760,13 @@ def main(args):
 
     if evfname is None or dmask is None or acs_tab is None:
         logging.error("No data found, exiting now.")
+        if args.api_token is not None:
+            try:
+                api.report(search_config.queueID,complete=True)
+            except Exception as e:
+                logging.error(e)
+                logging.error('Could not report done to Queue via EchoAPI.')
+                
         return -1
 
     ev_fname = evfnames2write(evfname, dmask, args.work_dir, acs_tab)
