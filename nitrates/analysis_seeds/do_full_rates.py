@@ -554,6 +554,8 @@ def main(args):
             except Exception as e:
                 logging.error(e)
                 logging.error('Could not report complete to Queue via EchoAPI.')
+        
+        return -1
 
     logging.info("Inited bkg_obj, now starting fits")
 
