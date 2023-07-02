@@ -542,9 +542,20 @@ def main(args):
     tmax = GTI["STOP"][-1]
 
     poly_trng = int(args.twind)
-    bkg_obj = Linear_Rates(
-        ev_data, tmin, tmax, trigtime, GTI, sig_clip=4.0, poly_trng=poly_trng
-    )
+    try:
+        bkg_obj = Linear_Rates(
+            ev_data, tmin, tmax, trigtime, GTI, sig_clip=4.0, poly_trng=poly_trng
+        )
+    except Exception as e:
+        logging.error(e)
+        if args.api_token is not None:
+            try:
+                api.report(search_config.queueID,complete=True)
+            except Exception as e:
+                logging.error(e)
+                logging.error('Could not report complete to Queue via EchoAPI.')
+        
+        return -1
 
     logging.info("Inited bkg_obj, now starting fits")
 
