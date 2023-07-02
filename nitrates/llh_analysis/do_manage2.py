@@ -1544,6 +1544,19 @@ def main(args):
         )
     else:
         seed_in_tab = mk_in_seed_tab(rate_res, TS_min=args.rateTScut)
+
+    if len(seed_in_tab) == 0:
+        if args.api_token is not None:
+            try:
+                api.report(search_config.queueID,complete=True)
+            except Exception as e:
+                logging.error(e)
+                logging.error('Could not report done to Queue via EchoAPI.') 
+        
+        logging.info('No seeds from split rates, exiting.')
+        return
+
+    
     Nmax_jobs = 96
     Nmax_jobs = args.N_infov_jobs
     if args.queue == "open":
