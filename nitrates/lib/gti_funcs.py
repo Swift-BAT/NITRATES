@@ -164,7 +164,7 @@ def get_btis_for_glitches(evdata, tstart, tstop, tbin_size=16e-3):
     return bad_twinds
 
 
-def find_cr_glitch_times(ev_data, tmin, tmax, tbin_size=5e-5, emin=50, max_cnts=40):
+def find_cr_glitch_times(ev_data, tmin, tmax, tbin_size=5e-5, emin=50, max_cnts=20):
     bad_times = []
 
     t0 = tmin
