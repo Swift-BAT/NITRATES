@@ -13,6 +13,7 @@ from astropy.io import fits
 from ..lib.coord_conv_funcs import imxy2theta_phi, convert_theta_phi2radec
 from ..lib.sqlite_funcs import get_conn
 from ..lib.dbread_funcs import get_info_tab
+from UtilityBelt.llhplot import *
 
 # Assume all nitrates archival jobs are running on computers with US/Eastern timestamps
 tzlocal = pytz.timezone("US/Eastern")
@@ -682,7 +683,7 @@ def read_results_dirs(paths, api_token, figures=True, config_id=0):
                 print(result)
                 if figures:
                     rates = grab_full_rate_results(paths[i], trig_ids[i])
-                    plot = plotly_waterfall_seeds(rates, trig_ids[i])
+                    plot = plotly_waterfall_seeds(rates, trig_ids[i], config_id=config_id)
                     print(f"Made {plot}")
                     with open(plot) as f:
                         api.post_nitrates_plot(trig_ids[i], config_id, 'n_FULLRATE', json.load(f))
@@ -723,7 +724,7 @@ def read_results_dirs(paths, api_token, figures=True, config_id=0):
                         top_n=1000000,
                         notDB=True,
                     )
-                    plot = plotly_splitrates(trig_ids[i], splitrates)
+                    plot = plotly_splitrates(trig_ids[i], splitrates, config_id=config_id)
                     print(f"Made {plot}")
                     with open(plot) as f:
                         api.post_nitrates_plot(trig_ids[i], config_id, 'n_SPLITRATE', json.load(f))
@@ -756,7 +757,7 @@ def read_results_dirs(paths, api_token, figures=True, config_id=0):
                 print(result)
                 if figures:
                     # make the plot, and upload it!
-                    plot = plotly_dlogl_sky(trig_ids[i], res_out_tab)
+                    plot = plotly_dlogl_sky(trig_ids[i], res_out_tab, config_id=config_id)
                     print(f"Made {plot}")
                     with open(plot) as f:
                         api.post_nitrates_plot(trig_ids[i], config_id, 'n_OUTFOV', json.load(f))
