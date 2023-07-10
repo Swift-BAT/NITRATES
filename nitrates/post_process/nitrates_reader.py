@@ -441,7 +441,7 @@ def read_results_dirs(paths, api_token, figures=True, config_id=0):
     try:
         from swifttools.swift_too import Clock
         from EchoAPI import API
-        from UtilityBelt.llhplot import *
+        from UtilityBelt.llhplot import plotly_waterfall_seeds, plotly_splitrates, plotly_dlogl_sky
     except ImportError:
         return print("swiftools, EchoAPI, and UtilityBelt required, exiting.")
 
