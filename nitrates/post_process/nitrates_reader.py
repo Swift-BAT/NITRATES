@@ -684,7 +684,8 @@ def read_results_dirs(paths, api_token, figures=True, config_id=0):
                     rates = grab_full_rate_results(paths[i], trig_ids[i])
                     plot = plotly_waterfall_seeds(rates, trig_ids[i])
                     print(f"Made {plot}")
-                    upload_file(BUCKET, plot)
+                    with open(plot) as f:
+                        api.post_nitrates_plot(trig_ids[i], config_id, 'n_FULLRATE', json.load(f))
                     os.remove(plot)
                     print("Uploaded rates seeds plot :)")
 
@@ -724,7 +725,8 @@ def read_results_dirs(paths, api_token, figures=True, config_id=0):
                     )
                     plot = plotly_splitrates(trig_ids[i], splitrates)
                     print(f"Made {plot}")
-                    upload_file(BUCKET, plot)
+                    with open(plot) as f:
+                        api.post_nitrates_plot(trig_ids[i], config_id, 'n_SPLITRATE', json.load(f))
                     os.remove(plot)
                     print("Uploaded split rates plot :)")
             except Exception as e:
@@ -756,7 +758,8 @@ def read_results_dirs(paths, api_token, figures=True, config_id=0):
                     # make the plot, and upload it!
                     plot = plotly_dlogl_sky(trig_ids[i], res_out_tab)
                     print(f"Made {plot}")
-                    upload_file(BUCKET, plot)
+                    with open(plot) as f:
+                        api.post_nitrates_plot(trig_ids[i], config_id, 'n_OUTFOV', json.load(f))
                     os.remove(plot)
                     print("Uploaded OFOV plot :)")
             except Exception as e:
