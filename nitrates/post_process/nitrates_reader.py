@@ -13,7 +13,6 @@ from astropy.io import fits
 from ..lib.coord_conv_funcs import imxy2theta_phi, convert_theta_phi2radec
 from ..lib.sqlite_funcs import get_conn
 from ..lib.dbread_funcs import get_info_tab
-from UtilityBelt.llhplot import *
 
 # Assume all nitrates archival jobs are running on computers with US/Eastern timestamps
 tzlocal = pytz.timezone("US/Eastern")
@@ -442,8 +441,9 @@ def read_results_dirs(paths, api_token, figures=True, config_id=0):
     try:
         from swifttools.swift_too import Clock
         from EchoAPI import API
+        from UtilityBelt.llhplot import *
     except ImportError:
-        return print("swiftools and EchoAPI required, exiting.")
+        return print("swiftools, EchoAPI, and UtilityBelt required, exiting.")
 
     config_values = [0, 1, 2, 99]  # see https://guano.swift.psu.edu/configs
 
