@@ -441,8 +441,9 @@ def read_results_dirs(paths, api_token, figures=True, config_id=0):
     try:
         from swifttools.swift_too import Clock
         from EchoAPI import API
+        from UtilityBelt.llhplot import plotly_waterfall_seeds, plotly_splitrates, plotly_dlogl_sky
     except ImportError:
-        return print("swiftools and EchoAPI required, exiting.")
+        return print("swiftools, EchoAPI, and UtilityBelt required, exiting.")
 
     config_values = [0, 1, 2, 99]  # see https://guano.swift.psu.edu/configs
 
@@ -682,9 +683,10 @@ def read_results_dirs(paths, api_token, figures=True, config_id=0):
                 print(result)
                 if figures:
                     rates = grab_full_rate_results(paths[i], trig_ids[i])
-                    plot = plotly_waterfall_seeds(rates, trig_ids[i])
+                    plot = plotly_waterfall_seeds(rates, trig_ids[i], config_id=config_id)
                     print(f"Made {plot}")
-                    upload_file(BUCKET, plot)
+                    with open(plot) as f:
+                        api.post_nitrates_plot(trig_ids[i], config_id, 'n_FULLRATE', json.load(f))
                     os.remove(plot)
                     print("Uploaded rates seeds plot :)")
 
@@ -722,9 +724,10 @@ def read_results_dirs(paths, api_token, figures=True, config_id=0):
                         top_n=1000000,
                         notDB=True,
                     )
-                    plot = plotly_splitrates(trig_ids[i], splitrates)
+                    plot = plotly_splitrates(trig_ids[i], splitrates, config_id=config_id)
                     print(f"Made {plot}")
-                    upload_file(BUCKET, plot)
+                    with open(plot) as f:
+                        api.post_nitrates_plot(trig_ids[i], config_id, 'n_SPLITRATE', json.load(f))
                     os.remove(plot)
                     print("Uploaded split rates plot :)")
             except Exception as e:
@@ -754,9 +757,10 @@ def read_results_dirs(paths, api_token, figures=True, config_id=0):
                 print(result)
                 if figures:
                     # make the plot, and upload it!
-                    plot = plotly_dlogl_sky(trig_ids[i], res_out_tab)
+                    plot = plotly_dlogl_sky(trig_ids[i], res_out_tab, config_id=config_id)
                     print(f"Made {plot}")
-                    upload_file(BUCKET, plot)
+                    with open(plot) as f:
+                        api.post_nitrates_plot(trig_ids[i], config_id, 'n_OUTFOV', json.load(f))
                     os.remove(plot)
                     print("Uploaded OFOV plot :)")
             except Exception as e:
