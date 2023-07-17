@@ -681,7 +681,6 @@ def main(args):
             
         if args.disable_bkg_sourcefit:
             logging.info("Disabling the background source location fitting.")
-            stop
         
         init_bf_params, src_tab = do_init_bkg_wPSs(
             bkg_mod,
@@ -693,6 +692,7 @@ def main(args):
             Nprocs=Nprocs,
             tmin=tmin_,
             tmax=tmax_,
+            disable_bkg_sourcefit=args.disable_bkg_sourcefit
         )
 
         Nsrcs = len(src_tab)
