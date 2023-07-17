@@ -79,7 +79,7 @@ def cli():
     )
     parser.add_argument("--disable_bkg_sourceloc_fit",
         help="Flag to tell the nitrates background estimation to not attempt to fit background sources",
-        action="store_true",
+        action="store_true"
     )
 
     args = parser.parse_args()
