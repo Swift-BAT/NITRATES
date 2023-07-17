@@ -457,88 +457,89 @@ def ul_nogw(t0,ul_5sigma_new,head,ras,decs,wdir):
             df.at[time_bin,spec] = "{:.2e}".format(ul)
 
 
-        df.to_csv(os.path.join(wdir,'ul.txt'), sep='\t', index=True)           
-
-    #print('check post earth')
-
-    nside = 32  # Resolution parameter, determines the number of pixels (higher resolution = more pixels)
-    npix = hp.nside2npix(nside)  # Total number of pixels in the map
-
-    map_values = np.zeros(npix)  # Initialize the array with zeros
-
-    tot=0
-    cumul=0
-
-    for n in range(npix):
-
-        theta, phi = hp.pix2ang(nside, n)  # Retrieve theta and phi angles
-        dec = np.degrees(np.pi / 2 - theta)  # Convert theta to Dec
-        ra = np.degrees(phi)  # Convert phi to RA
-
-
-        tot+=weight(ra,dec)
-
-        if ang_sep(ra_ea, red_ea, ra, dec)< radius_ear:
-            map_values[n]=0.0
-            cumul+=weight(ra,dec)
-
-        else:
-            map_values[n]=1.0 * weight(ra,dec)
-
-    # this line prints the fraction of the gw posterior occulted by earth
-    sentence = 'The fraction of the sky posterior occulted by Earth is %%%% %'
-    # Format the sentence with the number
-    formatted_sentence = sentence.replace('%%%%', "%.2f" %(cumul/tot))
-
-    # Save the sentence to a text file
-    filename = os.path.join(wdir,'earth_occultation.txt')  # Specify the desired filename
-    with open(filename, 'w') as file:
-        file.write(formatted_sentence)
-
-    if max(map_values)==0.0:
-        print('region occulted by earth, no upper limits available')
-    
-    else:
-
-        #print('check pre ul')
-
-        df = pd.DataFrame(columns=['soft', 'normal', 'hard', '170817'], index=['0.128', '0.256', '0.512', '1.024', '2.048', '4.096','8.192', '16.384'])
-
-        for n in range(len(ul_5sigma_new)):
-
-        
-            spec = head[n][0]
-            time_bin = head[n][1]
-
-
-            def f_ul_n(x,y):
-                return f_ul(x,y,ras,decs,ul_5sigma_new[n])
-
-            dp=0
-            norm=0
-
-            for i in range(npix):
-
-                theta, phi = hp.pix2ang(nside, i)  # Retrieve theta and phi angles
-                dec = np.degrees(np.pi / 2 - theta)  # Convert theta to Dec
-                ra = np.degrees(phi)   # Convert phi to RA
-
-
-                if map_values[i]>0:
-
-                    ul=f_ul_n(ra,dec)
-                    dp+=ul*map_values[i] 
-                    norm+=map_values[i]
-
-
-            if spec=='normal' and time_bin=='1.024':
-                plot_ul_map(ras,decs,ul_5sigma_new[n],'None', ra_ea, red_ea, radius_ear, wdir, None)
-
-            df.at[time_bin,spec] = "{:.2e}".format(dp/norm)
-
-        #print('check post ul')
-
         df.to_csv(os.path.join(wdir,'ul.txt'), sep='\t', index=True)
+        
+    else:
+        #print('check post earth')
+    
+        nside = 32  # Resolution parameter, determines the number of pixels (higher resolution = more pixels)
+        npix = hp.nside2npix(nside)  # Total number of pixels in the map
+    
+        map_values = np.zeros(npix)  # Initialize the array with zeros
+    
+        tot=0
+        cumul=0
+    
+        for n in range(npix):
+    
+            theta, phi = hp.pix2ang(nside, n)  # Retrieve theta and phi angles
+            dec = np.degrees(np.pi / 2 - theta)  # Convert theta to Dec
+            ra = np.degrees(phi)  # Convert phi to RA
+    
+    
+            tot+=weight(ra,dec)
+    
+            if ang_sep(ra_ea, red_ea, ra, dec)< radius_ear:
+                map_values[n]=0.0
+                cumul+=weight(ra,dec)
+    
+            else:
+                map_values[n]=1.0 * weight(ra,dec)
+    
+        # this line prints the fraction of the gw posterior occulted by earth
+        sentence = 'The fraction of the sky posterior occulted by Earth is %%%% %'
+        # Format the sentence with the number
+        formatted_sentence = sentence.replace('%%%%', "%.2f" %(cumul/tot))
+    
+        # Save the sentence to a text file
+        filename = os.path.join(wdir,'earth_occultation.txt')  # Specify the desired filename
+        with open(filename, 'w') as file:
+            file.write(formatted_sentence)
+    
+        if max(map_values)==0.0:
+            print('region occulted by earth, no upper limits available')
+        
+        else:
+    
+            #print('check pre ul')
+    
+            df = pd.DataFrame(columns=['soft', 'normal', 'hard', '170817'], index=['0.128', '0.256', '0.512', '1.024', '2.048', '4.096','8.192', '16.384'])
+    
+            for n in range(len(ul_5sigma_new)):
+    
+            
+                spec = head[n][0]
+                time_bin = head[n][1]
+    
+    
+                def f_ul_n(x,y):
+                    return f_ul(x,y,ras,decs,ul_5sigma_new[n])
+    
+                dp=0
+                norm=0
+    
+                for i in range(npix):
+    
+                    theta, phi = hp.pix2ang(nside, i)  # Retrieve theta and phi angles
+                    dec = np.degrees(np.pi / 2 - theta)  # Convert theta to Dec
+                    ra = np.degrees(phi)   # Convert phi to RA
+    
+    
+                    if map_values[i]>0:
+    
+                        ul=f_ul_n(ra,dec)
+                        dp+=ul*map_values[i] 
+                        norm+=map_values[i]
+    
+    
+                if spec=='normal' and time_bin=='1.024':
+                    plot_ul_map(ras,decs,ul_5sigma_new[n],'None', ra_ea, red_ea, radius_ear, wdir, None)
+    
+                df.at[time_bin,spec] = "{:.2e}".format(dp/norm)
+    
+            #print('check post ul')
+    
+            df.to_csv(os.path.join(wdir,'ul.txt'), sep='\t', index=True)
 
 
 
