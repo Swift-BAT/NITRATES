@@ -452,7 +452,7 @@ def ul_nogw(t0,ul_5sigma_new,head,ras,decs,wdir):
             def f_ul_n(x,y):
                 return f_ul(x,y,ras,decs,ul_5sigma_new[n])
 
-            ul=f_ul_n(ra,dec)
+            ul=f_ul_n(ra_point,dec_point)
 
             df.at[time_bin,spec] = "{:.2e}".format(ul)
 
