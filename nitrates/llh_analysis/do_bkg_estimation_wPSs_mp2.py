@@ -397,6 +397,7 @@ def do_init_bkg_wPSs(
 
         ######Added here to test if we need to even do this type of operation. It doesnt seem to change the results that much. so keep this as an option for the mpi4py code
         if disable_bkg_sourcefit:
+            logging.info("Disabling the background source fitting. ")
             im_steps=1
             Nprocs=1
         ###################
