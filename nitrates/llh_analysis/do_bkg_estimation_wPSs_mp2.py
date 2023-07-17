@@ -77,6 +77,10 @@ def cli():
         help="Flag to tell the nitrates background estimation to print logging information into a log file that may have been created prior to calling the main function",
         action="store_true",
     )
+    parser.add_argument("--disable_bkg_sourcefit",
+        help="Flag to tell the nitrates background estimation to not attempt to fit background sources",
+        action="store_true",
+    )
 
     args = parser.parse_args()
     return args
@@ -323,7 +327,7 @@ def do_init_bkg_wPSs(
     TSmin=7.0,
     Nprocs=1,
     tmin=None,
-    tmax=None,
+    tmax=None, disable_bkg_sourcefit=False
 ):
     if not tmin is None:
         bti = (-np.inf, tmin)
@@ -391,9 +395,10 @@ def do_init_bkg_wPSs(
 
         llh_obj.set_model(comp_mod)
 
-        ######Added here to test if we need to even do this type of operation:
-        # im_steps=1
-        # Nprocs=1
+        ######Added here to test if we need to even do this type of operation. It doesnt seem to change the results that much. so keep this as an option for the mpi4py code
+        if disable_bkg_sourcefit:
+            im_steps=1
+            Nprocs=1
         ###################
 
         bf_nllh, bf_params, TS_nulls = bkg_withPS_fit(
