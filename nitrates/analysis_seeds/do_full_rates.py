@@ -1,19 +1,15 @@
 import numpy as np
-import sqlite3
 import pandas as pd
 from astropy.io import fits
-from astropy.time import Time, TimeDelta
-from astropy.table import Table, vstack
+from astropy.table import Table
 import os
-import sys
-import time
 import argparse
-import logging, traceback
+import logging
+import json
 
 
 from ..lib.sqlite_funcs import (
     get_conn,
-    setup_tab_info,
     setup_tab_twinds,
     setup_files_tab,
     setup_tab_twind_status,
@@ -610,10 +606,22 @@ def main(args):
 
         if args.api_token is not None:
             from ..post_process.nitrates_reader import grab_full_rate_results
+            from UtilityBelt.llhplot import plotly_waterfall_seeds
+
             #for now reading this file back in again. Really should just use the DataFrame defined above and add the 2 necessary columns...
             fullrate = grab_full_rate_results(os.getcwd(),search_config.triggerID, config_id=search_config.id)
+
+            try:
+                plot = plotly_waterfall_seeds(fullrate, search_config.triggerID, config_id = search_config.id)
+            except Exception as e:
+                logging.error(e)
+                logging.error('Could not make rates waterfall plot.')
+
             try:
                 api.post_nitrates_results(trigger=search_config.triggerID,config_id=search_config.id,result_type='n_FULLRATE',result_data=fullrate)
+                with open(plot) as f:
+                    api.post_nitrates_plot(trigger=search_config.triggerID,config_id=search_config.id,result_type='n_FULLRATE',result_data=json.load(f))
+                os.remove(plot)
             except Exception as e:
                 logging.error(e)
                 logging.error('Could not post to rates results via EchoAPI.')

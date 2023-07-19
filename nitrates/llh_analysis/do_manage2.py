@@ -1200,6 +1200,7 @@ def main(args):
     if args.api_token is not None:
         try:
             from EchoAPI import API
+            import json
         except ImportError:
             return print("EchoAPI required, exiting.")
         #look for file called 'config.json' in working directory
@@ -1529,10 +1530,25 @@ def main(args):
         except Exception as e:
             logging.error(e)
             logging.error('Could not post SplitRatesDone to log via EchoAPI.')
+
+        from ..post_process.nitrates_reader import grab_split_rate_results
+
+        splitrate64=grab_split_rate_results(os.getcwd(),search_config.triggerID, attq, trigtime, config_id=search_config.id)
+        splitrate=grab_split_rate_results(os.getcwd(),search_config.triggerID, attq, trigtime, top_n=1000000, config_id=search_config.id)
+
         try:
-            from ..post_process.nitrates_reader import grab_split_rate_results
-            splitrate=grab_split_rate_results(os.getcwd(),search_config.triggerID, attq, trigtime, config_id=search_config.id)
-            api.post_nitrates_results(trigger=search_config.triggerID,config_id=search_config.id,result_type='n_SPLITRATE',result_data=splitrate)
+            from UtilityBelt.llhplot import plotly_splitrates
+            plot = plotly_splitrates(search_config.triggerID, splitrate, config_id=search_config.id)
+        except Exception as e:
+            logging.error(e)
+            logging.error('Failed to make split rates plot.')
+
+        try:
+            api.post_nitrates_results(trigger=search_config.triggerID,config_id=search_config.id,result_type='n_SPLITRATE',result_data=splitrate64)
+            with open(plot) as f:
+                api.post_nitrates_plot(trigger=search_config.triggerID, config_id= search_config.id,result_type='n_SPLITRATE', result_data=json.load(f))
+            os.remove(plot)
+
         except Exception as e:
             logging.error(e)
             logging.error('Could not post to split-rates results via EchoAPI.')
@@ -1895,12 +1911,26 @@ def main(args):
 
                 if args.api_token is not None:
                     from ..post_process.nitrates_reader import grab_out_fov_results
-                    outfov = grab_out_fov_results(os.getcwd(),search_config.triggerID, attq, trigtime, top_n=64, config_id=search_config.id)
+                    outfov = grab_out_fov_results(os.getcwd(),search_config.triggerID, attq, trigtime, config_id=search_config.id)
+                    table64 = outfov.loc[outfov["TS"].nlargest(64).index]
+
                     try:
-                        api.post_nitrates_results(trigger=search_config.triggerID,config_id=search_config.id,result_type='n_OUTFOV',result_data=outfov)
+                        from UtilityBelt.llhplot import plotly_dlogl_sky
+                        plot = plotly_dlogl_sky(search_config.triggerID, outfov, config_id=search_config.id)
+                    except Exception as e:
+                        logging.error(e)
+                        logging.error('Could not make OFOV plot.')
+
+                    try:
+                        api.post_nitrates_results(trigger=search_config.triggerID,config_id=search_config.id,result_type='n_OUTFOV',result_data=table64)
+                        with open(plot) as f:
+                            api.post_nitrates_plot(trigger=search_config.triggerID,config_id=search_config.id,result_type='n_OUTFOV',result_data=json.load(f))
+                        os.remove(plot)
                     except Exception as e:
                         logging.error(e)
                         logging.error('Could not post to OUT FOV results via EchoAPI.')
+
+
 
         if DoneIn and DoneOut:
             if args.api_token is not None:
