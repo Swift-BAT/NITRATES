@@ -36,13 +36,11 @@ from astropy.table import Table
 import astropy_healpix as ah
 import astropy.units as u
 import healpy as hp
-import sys
 from ligo.gracedb.rest import GraceDb
 sys.path.append('/gpfs/group/jak51/default/UtilityBelt/UtilityBelt')
 from skyplot import get_earth_sat_pos
 import scipy.interpolate
 from scipy.spatial import Delaunay
-import pandas as pd
 from gbm.finder import TriggerCatalog
 
 
