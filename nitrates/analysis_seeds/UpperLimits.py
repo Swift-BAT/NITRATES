@@ -9,8 +9,6 @@ import logging
 import sys
 import argparse
 import time
-from datetime import datetime
-from astropy.time import Time
 import json
 
 
@@ -24,17 +22,13 @@ from .do_full_rates import *
 from ..lib.calc_BAT_ul import *
 from ..config import resp_dname
 
-
 from astropy.table import Table
-
-from ligo.gracedb.rest import GraceDb
 
 import cProfile as profile
 import pstats
 
 sys.path.append('/gpfs/group/jak51/default/UtilityBelt/UtilityBelt')
-from ul_skyaverage import  ul_gw
-from ul_skyaverage import  ul_nogw
+from ul_skyaverage import  compute_ul
 
 
 
@@ -312,41 +306,15 @@ def main(args):
 
 
     # print(ul_arr)
+    coord_file = args.coord_file
 
-    utc_time = Time(trig_time, scale='utc')
-    t1=utc_time.gps-1
-    t2=utc_time.gps+1
+    compute_ul(trig_time,head,ras,decs,work_dir, path_results, ratio, ul_arr, coord_file)
 
-    client = GraceDb()
-
-    ev=client.superevents(query='gpstime: %s .. %s' %(str(t1),str(t2)))
-
-    ev_list=[]
-    for event in ev:
-        ev_list.append(event['superevent_id'])
-
-    #logging.info('ev list', ev_list)
-
-
-    try:
-        trig_time = datetime.strptime(trig_time, '%Y-%m-%dT%H:%M:%S.%f').strftime('%Y-%m-%d %H:%M:%S.%f')
-    except ValueError:
-        trig_time = datetime.strptime(trig_time, '%Y-%m-%dT%H:%M:%S').strftime('%Y-%m-%d %H:%M:%S')
-
-    
-
-
-    if len(ev_list)>0:
-        ul_gw(ev_list[0],trig_time,head,ras,decs,work_dir, path_results, ratio, ul_arr)
-    else:
-        coord_file = args.coord_file
-        ul_nogw(trig_time,head,ras,decs,work_dir, path_results, ratio, ul_arr, coord_file)
 
     elapsed_time = time.time() - start_time
 
     logging.debug("Time taken in seconds:")
     logging.debug(elapsed_time)
-
 
 if __name__ == "__main__":
     args = cli()
