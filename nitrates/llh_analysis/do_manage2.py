@@ -1082,59 +1082,6 @@ def sub_jobs(
     return jobids
 
 
-def find_peaks2scan(
-    res_df, max_dv=10.0, min_sep=8e-3, max_Npeaks=48, min_Npeaks=2, minTS=6.0
-):
-    tgrps = res_df.groupby("timeID")
-
-    peak_dfs = []
-
-    for timeID, df_ in tgrps:
-        if np.nanmax(df_["TS"]) < minTS:
-            continue
-
-        df = df_.sort_values("sig_nllh")
-        #vals = df["sig_nllh"]
-        #         ind_sort = np.argsort(vals)
-        min_val = np.nanmin(df["sig_nllh"])
-
-        peak_dict = {
-            "timeID": int(timeID),
-            "time": np.nanmean(df["time"]),
-            "duration": np.nanmean(df["duration"]),
-        }
-
-        imxs_ = np.empty(0)
-        imys_ = np.empty_like(imxs_)
-        As_ = np.empty_like(imxs_)
-        Gs_ = np.empty_like(imxs_)
-
-        for row_ind, row in df.iterrows():
-            if row["sig_nllh"] > (min_val + max_dv) and len(imxs_) >= min_Npeaks:
-                break
-            if len(imxs_) >= max_Npeaks:
-                break
-
-            if len(imxs_) > 0:
-                imdist = np.min(im_dist(row["imx"], row["imy"], imxs_, imys_))
-                if imdist <= min_sep:
-                    continue
-
-            imxs_ = np.append(imxs_, [row["imx"]])
-            imys_ = np.append(imys_, [row["imy"]])
-            As_ = np.append(As_, [row["A"]])
-            Gs_ = np.append(Gs_, [row["ind"]])
-
-        peak_dict["imx"] = imxs_
-        peak_dict["imy"] = imys_
-        peak_dict["Signal_A"] = As_
-        peak_dict["Signal_gamma"] = Gs_
-        peak_dfs.append(pd.DataFrame(peak_dict))
-
-    peaks_df = pd.concat(peak_dfs, ignore_index=True)
-
-    return peaks_df
-
 def get_pcvals_hpmap(Nside, att_row, bl_dmask, nest=True):
     '''
     Use get_pc to get an approximate partial coding
