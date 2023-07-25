@@ -1546,7 +1546,7 @@ def main(args):
         try:
             api.post_nitrates_results(trigger=search_config.triggerID,config_id=search_config.id,result_type='n_SPLITRATE',result_data=splitrate64)
             with open(plot) as f:
-                api.post_nitrates_plot(trigger=search_config.triggerID, config_id= search_config.id,result_type='n_SPLITRATE', result_data=json.load(f))
+                api.post_nitrates_plot(trigger=search_config.triggerID, config_id= search_config.id,result_type='n_SPLITRATE', plot_data=json.load(f))
             os.remove(plot)
 
         except Exception as e:
@@ -1924,7 +1924,7 @@ def main(args):
                     try:
                         api.post_nitrates_results(trigger=search_config.triggerID,config_id=search_config.id,result_type='n_OUTFOV',result_data=table64)
                         with open(plot) as f:
-                            api.post_nitrates_plot(trigger=search_config.triggerID,config_id=search_config.id,result_type='n_OUTFOV',result_data=json.load(f))
+                            api.post_nitrates_plot(trigger=search_config.triggerID,config_id=search_config.id,result_type='n_OUTFOV',plot_data=json.load(f))
                         os.remove(plot)
                     except Exception as e:
                         logging.error(e)

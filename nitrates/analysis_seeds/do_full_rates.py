@@ -620,7 +620,7 @@ def main(args):
             try:
                 api.post_nitrates_results(trigger=search_config.triggerID,config_id=search_config.id,result_type='n_FULLRATE',result_data=fullrate)
                 with open(plot) as f:
-                    api.post_nitrates_plot(trigger=search_config.triggerID,config_id=search_config.id,result_type='n_FULLRATE',result_data=json.load(f))
+                    api.post_nitrates_plot(trigger=search_config.triggerID,config_id=search_config.id,result_type='n_FULLRATE',plot_data=json.load(f))
                 os.remove(plot)
             except Exception as e:
                 logging.error(e)
