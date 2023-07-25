@@ -25,7 +25,6 @@ from ..lib.calc_BAT_ul import *
 from ..config import resp_dname
 
 
-import ligo.skymap.io
 from astropy.table import Table
 
 from ligo.gracedb.rest import GraceDb
