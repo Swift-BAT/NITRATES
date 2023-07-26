@@ -27,9 +27,7 @@ from astropy.table import Table
 import cProfile as profile
 import pstats
 
-sys.path.append('/gpfs/group/jak51/default/UtilityBelt/UtilityBelt')
-from ul_skyaverage import  compute_ul
-
+from UtilityBelt.ul_skyaverage import compute_ul
 
 
 start_time = time.time()
