@@ -839,10 +839,11 @@ def read_results_dirs(paths, api_token, figures=True, config_id=0):
         json.dump(failed, fob)
 
 
-
-parser = argparse.ArgumentParser()
-parser.add_argument("--work_dir", type=str, help="Results directory", default= None)
-args = parser.parse_args()
-
-if args.work_dir is not None:
-    read_results_dirs('%s' %args.work_dir)
+if __name__ == "__main__":
+    
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--work_dir", type=str, help="Results directory", default= None)
+    args = parser.parse_args()
+    
+    if args.work_dir is not None:
+        read_results_dirs('%s' %args.work_dir)
