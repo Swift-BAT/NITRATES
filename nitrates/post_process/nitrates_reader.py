@@ -839,6 +839,7 @@ def read_results_dirs(paths, api_token, figures=True, config_id=0):
         json.dump(failed, fob)
 
 
+
 parser = argparse.ArgumentParser()
 parser.add_argument("--work_dir", type=str, help="Results directory", default= None)
 args = parser.parse_args()
