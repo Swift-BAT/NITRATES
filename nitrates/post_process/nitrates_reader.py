@@ -14,6 +14,8 @@ from ..lib.coord_conv_funcs import imxy2theta_phi, convert_theta_phi2radec
 from ..lib.sqlite_funcs import get_conn
 from ..lib.dbread_funcs import get_info_tab
 
+import argparse
+
 # Assume all nitrates archival jobs are running on computers with US/Eastern timestamps
 tzlocal = pytz.timezone("US/Eastern")
 utc = pytz.timezone("UTC")
