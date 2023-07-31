@@ -20,11 +20,6 @@ import argparse
 tzlocal = pytz.timezone("US/Eastern")
 utc = pytz.timezone("UTC")
 
-def cli():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--work_dir", type=str, help="Results directory", default= None)
-    args = parser.parse_args()
-    return args
 
 
 def read_manager_log(path):
@@ -842,6 +837,11 @@ def read_results_dirs(paths, api_token, figures=True, config_id=0):
 
     with open("failures.json", "a") as fob:
         json.dump(failed, fob)
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--work_dir", type=str, help="Results directory", default= None)
+args = parser.parse_args()
 
 if args.work_dir is not None:
     read_results_dirs('%s' %args.work_dir)
