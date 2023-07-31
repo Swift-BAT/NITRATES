@@ -843,7 +843,9 @@ if __name__ == "__main__":
     
     parser = argparse.ArgumentParser()
     parser.add_argument("--work_dir", type=str, help="Results directory", default= None)
+    parser.add_argument("--api_token", type=str, help="api token", default= None)
+
     args = parser.parse_args()
     
     if args.work_dir is not None:
-        read_results_dirs('%s' %args.work_dir)
+        read_results_dirs('%s' %args.work_dir, api_token='%s' %args.api_token)
