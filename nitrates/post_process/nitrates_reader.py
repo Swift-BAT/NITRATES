@@ -14,9 +14,12 @@ from ..lib.coord_conv_funcs import imxy2theta_phi, convert_theta_phi2radec
 from ..lib.sqlite_funcs import get_conn
 from ..lib.dbread_funcs import get_info_tab
 
+import argparse
+
 # Assume all nitrates archival jobs are running on computers with US/Eastern timestamps
 tzlocal = pytz.timezone("US/Eastern")
 utc = pytz.timezone("UTC")
+
 
 
 def read_manager_log(path):
@@ -834,3 +837,15 @@ def read_results_dirs(paths, api_token, figures=True, config_id=0):
 
     with open("failures.json", "a") as fob:
         json.dump(failed, fob)
+
+
+if __name__ == "__main__":
+    
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--work_dir", type=str, help="Results directory", default= None)
+    parser.add_argument("--api_token", type=str, help="api token", default= None)
+
+    args = parser.parse_args()
+    
+    if args.work_dir is not None:
+        read_results_dirs('%s' %args.work_dir, api_token='%s' %args.api_token)
