@@ -841,5 +841,5 @@ def read_results_dirs(paths, api_token, figures=True, config_id=0):
     with open("failures.json", "a") as fob:
         json.dump(failed, fob)
 
-if args.work_dir not None:
+if args.work_dir is not None:
     read_results_dirs('%s' %args.work_dir)
