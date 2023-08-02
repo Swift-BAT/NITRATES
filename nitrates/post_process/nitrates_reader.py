@@ -13,10 +13,14 @@ from astropy.io import fits
 from ..lib.coord_conv_funcs import imxy2theta_phi, convert_theta_phi2radec
 from ..lib.sqlite_funcs import get_conn
 from ..lib.dbread_funcs import get_info_tab
+from ..lib.search_config import Config
+
+import argparse
 
 # Assume all nitrates archival jobs are running on computers with US/Eastern timestamps
 tzlocal = pytz.timezone("US/Eastern")
 utc = pytz.timezone("UTC")
+
 
 
 def read_manager_log(path):
@@ -437,7 +441,7 @@ def get_dlogls_inout(res_tab, res_out_tab, trigger_id, config_id=0, imdistthresh
     return df
 
 
-def read_results_dirs(paths, api_token, figures=True, config_id=0):
+def read_results_dirs(paths, api_token, figures=True):
     try:
         from swifttools.swift_too import Clock
         from EchoAPI import API
@@ -446,13 +450,6 @@ def read_results_dirs(paths, api_token, figures=True, config_id=0):
         return print("swiftools, EchoAPI, and UtilityBelt required, exiting.")
 
     config_values = [0, 1, 2, 99]  # see https://guano.swift.psu.edu/configs
-
-    if config_id in config_values:
-        print(f"Config: {config_id}")
-    else:
-        raise ValueError(
-            f"The value {config_id} is not a valid configuration id value. See https://guano.swift.psu.edu/configs for more information."
-        )
 
     api = API(api_token=api_token)
 
@@ -473,6 +470,24 @@ def read_results_dirs(paths, api_token, figures=True, config_id=0):
         try:
             print("***********************************************")
             print(f"Starting {path}")
+
+
+            #look for file called 'config.json' in working directory
+            #if not present, use default
+            config_filename= os.path.join(path, 'config.json')
+            if os.path.exists(config_filename):
+                search_config = Config(config_filename)
+                config_id = search_config.id
+            else:
+                logging.error('Api_token passed but no config.json file found. Assuming config_id=0')
+                config_id=0
+
+            if config_id in config_values:
+                print(f"Config: {config_id}")
+            else:
+                raise ValueError(
+                    f"The value {config_id} is not a valid configuration id value. See https://guano.swift.psu.edu/configs for more information."
+                )
 
             # Grabbing trigger time from results.db
             try:
@@ -834,3 +849,15 @@ def read_results_dirs(paths, api_token, figures=True, config_id=0):
 
     with open("failures.json", "a") as fob:
         json.dump(failed, fob)
+
+
+if __name__ == "__main__":
+    
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--work_dir", type=str, help="Results directory", default= None)
+    parser.add_argument("--api_token", type=str, help="api token", default= None)
+
+    args = parser.parse_args()
+    
+    if args.work_dir is not None:
+        read_results_dirs('%s' %args.work_dir, api_token='%s' %args.api_token)
