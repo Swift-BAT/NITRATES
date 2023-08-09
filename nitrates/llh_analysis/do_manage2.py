@@ -154,8 +154,8 @@ def cli():
     parser.add_argument(
         "--pbs_arr_fname",
         type=str,
-        help="Name of pbs script",
-        default="/gpfs/group/jak51/default/nitrates_realtime/NITRATES/submission_scripts/pyscript_template_array.pbs",
+        help="Name of submit script",
+        default="/storage/group/jak51/Alfred/sub_scripts/slurm/pyscript_template_array_sub.sh",
     )
     parser.add_argument(
         "--min_pc", type=float, help="Min partial coding fraction to use", default=0.1
@@ -174,6 +174,12 @@ def cli():
         type=str,
         help="EchoAPI key for interactions.",
         default=None
+    )
+    parser.add_argument(
+        "--sub_type",
+        type=str,
+        help="cluster submission type, (slurm, pbs)",
+        default='slurm'
     )
 
     args = parser.parse_args()
@@ -904,6 +910,7 @@ def sub_jobs(
     ppn=1,
     rhel7=False,
     array=True,
+    sub_type='slurm'
 ):
     hostname = socket.gethostname()
 
@@ -912,145 +919,133 @@ def sub_jobs(
 
     if "aci.ics" in hostname and "amon" not in hostname:
         ssh = False
-
-    if ssh:
-        ssh_cmd = 'ssh aci-b.aci.ics.psu.edu "'
-        server = "aci-b.aci.ics.psu.edu"
-        server = "submit.aci.ics.psu.edu"
-        server = "submit-001.aci.ics.psu.edu"
-        server = "submit-010.aci.ics.psu.edu"
-        # client = paramiko.SSHClient()
-        # client.load_system_host_keys()
-        # client.connect(server)
-        client = get_ssh_client(server)
-        # base_sub_cmd = 'qsub %s -A %s -N %s -v '\
-        #             %(args.pbs_fname, args.queue, args.name)
-    if qos is not None:
-        if rhel7:
-            if q is None:
-                base_sub_cmd = (
-                    "qsub %s -A %s -N %s -l nodes=1:ppn=%d -l qos=%s -l feature=rhel7 -v "
-                    % (pbs_fname, queue, name, ppn, qos)
-                )
-            else:
-                base_sub_cmd = (
-                    "qsub %s -A %s -q %s -N %s -l nodes=1:ppn=%d -l qos=%s -l feature=rhel7 -v "
-                    % (pbs_fname, queue, q, name, ppn, qos)
-                )
-        else:
-            if q is None:
-                base_sub_cmd = "qsub %s -A %s -N %s -l nodes=1:ppn=%d -l qos=%s -v " % (
-                    pbs_fname,
-                    queue,
-                    name,
-                    ppn,
-                    qos,
-                )
-            else:
-                base_sub_cmd = (
-                    "qsub %s -A %s -q %s -N %s -l nodes=1:ppn=%d -l qos=%s -v "
-                    % (pbs_fname, queue, q, name, ppn, qos)
-                )
-    else:
-        if rhel7:
-            if q is None:
-                base_sub_cmd = (
-                    "qsub %s -A %s -N %s -l nodes=1:ppn=%d -l feature=rhel7 -v "
-                    % (pbs_fname, queue, name, ppn)
-                )
-            else:
-                base_sub_cmd = (
-                    "qsub %s -A %s -q %s -N %s -l nodes=1:ppn=%d -l feature=rhel7 -v "
-                    % (pbs_fname, queue, q, name, ppn)
-                )
-        else:
-            if q is None:
-                base_sub_cmd = "qsub %s -A %s -N %s -l nodes=1:ppn=%d -v " % (
-                    pbs_fname,
-                    queue,
-                    name,
-                    ppn,
-                )
-            else:
-                base_sub_cmd = "qsub %s -A %s -q %s -N %s -l nodes=1:ppn=%d -v " % (
-                    pbs_fname,
-                    queue,
-                    q,
-                    name,
-                    ppn,
-                )
-
-    if workdir is None:
-        workdir = os.getcwd()
-    if extra_args is None:
-        extra_args = ""
-
-    cmd = ""
-    cmds = []
-    jobids = []
-
-    if array and not ssh:
-        if njobs > 1:
-            cmd_ = 'workdir=%s,njobs=%d,pyscript=%s,extra_args="%s" -t 0-%d' % (
-                workdir,
-                njobs,
-                pyscript,
-                extra_args,
-                njobs - 1,
-            )
-        else:
-            cmd_ = 'workdir=%s,njobs=%d,pyscript=%s,extra_args="%s"' % (
-                workdir,
-                njobs,
-                pyscript,
-                extra_args,
-            )
-        cmd = base_sub_cmd + cmd_
-        logging.info("Trying to submit: ")
-        logging.info(cmd)
-
-        try:
-            os.system(cmd)
-            # subprocess.check_call(cmd, shell=True)
-        except Exception as E:
-            logging.error(E)
-            logging.error("Messed up with ")
-            logging.error(cmd)
-        return
-    for i in range(njobs):
-        # cmd_ = 'jobid=%d,workdir=%s,njobs=%d,pyscript=%s' %(i,workdir,njobs,pyscript)
-        cmd_ = 'jobid=%d,workdir=%s,njobs=%d,pyscript=%s,extra_args="%s"' % (
-            i,
-            workdir,
-            njobs,
-            pyscript,
-            extra_args,
+    if sub_type == 'slurm':
+        base_sub_cmd = (
+            "sbatch -J %s --export="
+            % (name)
         )
+        if array and not ssh:
+            if njobs > 1:
+                cmd_ = 'workdir=%s,njobs=%d,pyscript=%s,extra_args="%s" --array 0-%d' % (
+                    workdir,
+                    njobs,
+                    pyscript,
+                    extra_args,
+                    njobs - 1,
+                )
+            else:
+                cmd_ = 'workdir=%s,njobs=%d,pyscript=%s,extra_args="%s"' % (
+                    workdir,
+                    njobs,
+                    pyscript,
+                    extra_args,
+                )
+            cmd = base_sub_cmd + cmd_ + ' ' + pbs_fname
+            logging.info("Trying to submit: ")
+            logging.info(cmd)
+
+            try:
+                os.system(cmd)
+                # subprocess.check_call(cmd, shell=True)
+            except Exception as E:
+                logging.error(E)
+                logging.error("Messed up with ")
+                logging.error(cmd)
+            return
+
+    elif sub_type == 'pbs':
         if ssh:
-            cmd += base_sub_cmd + cmd_
-            # split up command if it's too long
-            # max packet size is 32768 bytes
-            if len(cmd) > 2e4:
-                cmds.append(cmd)
-                cmd = ""
-                continue
-            if i < (njobs - 1):
-                cmd += " | "
-            # cmd = base_sub_cmd + cmd_
-            # jbid = execute_ssh_cmd(client, cmd, server)
-            # jobids.append(jbid)
-            # try:
-            #     stdin, stdout, stderr = client.exec_command(cmd)
-            #     logging.info("stdout: ")
-            #     sto = stdout.read()
-            #     logging.info(sto)
-            #     jobids.append(sto)
-            # except Exception as E:
-            #     logging.error(E)
-            #     logging.error(traceback.format_exc())
-            #     logging.error("Messed up with ")
-            #     logging.error(cmd)
+            ssh_cmd = 'ssh aci-b.aci.ics.psu.edu "'
+            server = "aci-b.aci.ics.psu.edu"
+            server = "submit.aci.ics.psu.edu"
+            server = "submit-001.aci.ics.psu.edu"
+            server = "submit-010.aci.ics.psu.edu"
+            # client = paramiko.SSHClient()
+            # client.load_system_host_keys()
+            # client.connect(server)
+            client = get_ssh_client(server)
+            # base_sub_cmd = 'qsub %s -A %s -N %s -v '\
+            #             %(args.pbs_fname, args.queue, args.name)
+        if qos is not None:
+            if rhel7:
+                if q is None:
+                    base_sub_cmd = (
+                        "qsub %s -A %s -N %s -l nodes=1:ppn=%d -l qos=%s -l feature=rhel7 -v "
+                        % (pbs_fname, queue, name, ppn, qos)
+                    )
+                else:
+                    base_sub_cmd = (
+                        "qsub %s -A %s -q %s -N %s -l nodes=1:ppn=%d -l qos=%s -l feature=rhel7 -v "
+                        % (pbs_fname, queue, q, name, ppn, qos)
+                    )
+            else:
+                if q is None:
+                    base_sub_cmd = "qsub %s -A %s -N %s -l nodes=1:ppn=%d -l qos=%s -v " % (
+                        pbs_fname,
+                        queue,
+                        name,
+                        ppn,
+                        qos,
+                    )
+                else:
+                    base_sub_cmd = (
+                        "qsub %s -A %s -q %s -N %s -l nodes=1:ppn=%d -l qos=%s -v "
+                        % (pbs_fname, queue, q, name, ppn, qos)
+                    )
         else:
+            if rhel7:
+                if q is None:
+                    base_sub_cmd = (
+                        "qsub %s -A %s -N %s -l nodes=1:ppn=%d -l feature=rhel7 -v "
+                        % (pbs_fname, queue, name, ppn)
+                    )
+                else:
+                    base_sub_cmd = (
+                        "qsub %s -A %s -q %s -N %s -l nodes=1:ppn=%d -l feature=rhel7 -v "
+                        % (pbs_fname, queue, q, name, ppn)
+                    )
+            else:
+                if q is None:
+                    base_sub_cmd = "qsub %s -A %s -N %s -l nodes=1:ppn=%d -v " % (
+                        pbs_fname,
+                        queue,
+                        name,
+                        ppn,
+                    )
+                else:
+                    base_sub_cmd = "qsub %s -A %s -q %s -N %s -l nodes=1:ppn=%d -v " % (
+                        pbs_fname,
+                        queue,
+                        q,
+                        name,
+                        ppn,
+                    )
+
+        if workdir is None:
+            workdir = os.getcwd()
+        if extra_args is None:
+            extra_args = ""
+
+        cmd = ""
+        cmds = []
+        jobids = []
+
+        if array and not ssh:
+            if njobs > 1:
+                cmd_ = 'workdir=%s,njobs=%d,pyscript=%s,extra_args="%s" -t 0-%d' % (
+                    workdir,
+                    njobs,
+                    pyscript,
+                    extra_args,
+                    njobs - 1,
+                )
+            else:
+                cmd_ = 'workdir=%s,njobs=%d,pyscript=%s,extra_args="%s"' % (
+                    workdir,
+                    njobs,
+                    pyscript,
+                    extra_args,
+                )
             cmd = base_sub_cmd + cmd_
             logging.info("Trying to submit: ")
             logging.info(cmd)
@@ -1062,23 +1057,69 @@ def sub_jobs(
                 logging.error(E)
                 logging.error("Messed up with ")
                 logging.error(cmd)
+            return
+        for i in range(njobs):
+            # cmd_ = 'jobid=%d,workdir=%s,njobs=%d,pyscript=%s' %(i,workdir,njobs,pyscript)
+            cmd_ = 'jobid=%d,workdir=%s,njobs=%d,pyscript=%s,extra_args="%s"' % (
+                i,
+                workdir,
+                njobs,
+                pyscript,
+                extra_args,
+            )
+            if ssh:
+                cmd += base_sub_cmd + cmd_
+                # split up command if it's too long
+                # max packet size is 32768 bytes
+                if len(cmd) > 2e4:
+                    cmds.append(cmd)
+                    cmd = ""
+                    continue
+                if i < (njobs - 1):
+                    cmd += " | "
+                # cmd = base_sub_cmd + cmd_
+                # jbid = execute_ssh_cmd(client, cmd, server)
+                # jobids.append(jbid)
+                # try:
+                #     stdin, stdout, stderr = client.exec_command(cmd)
+                #     logging.info("stdout: ")
+                #     sto = stdout.read()
+                #     logging.info(sto)
+                #     jobids.append(sto)
+                # except Exception as E:
+                #     logging.error(E)
+                #     logging.error(traceback.format_exc())
+                #     logging.error("Messed up with ")
+                #     logging.error(cmd)
+            else:
+                cmd = base_sub_cmd + cmd_
+                logging.info("Trying to submit: ")
+                logging.info(cmd)
 
-            time.sleep(0.1)
-    if ssh:
-        # ssh_cmd = 'ssh aci-b.aci.ics.psu.edu "'
-        # cmd = ssh_cmd + cmd + '"'
-        for cmd in cmds:
-            logging.info("Full cmd to run:")
-            logging.info(cmd)
-            try:
-                jobids = execute_ssh_cmd(client, cmd, server)
-                logging.debug("jobids: ")
-                logging.debug(jobids)
-            except Exception as E:
-                logging.error(E)
-                logging.error("Messed up with ")
-                logging.error(cmd)
-        client.close()
+                try:
+                    os.system(cmd)
+                    # subprocess.check_call(cmd, shell=True)
+                except Exception as E:
+                    logging.error(E)
+                    logging.error("Messed up with ")
+                    logging.error(cmd)
+
+                time.sleep(0.1)
+        if ssh:
+            # ssh_cmd = 'ssh aci-b.aci.ics.psu.edu "'
+            # cmd = ssh_cmd + cmd + '"'
+            for cmd in cmds:
+                logging.info("Full cmd to run:")
+                logging.info(cmd)
+                try:
+                    jobids = execute_ssh_cmd(client, cmd, server)
+                    logging.debug("jobids: ")
+                    logging.debug(jobids)
+                except Exception as E:
+                    logging.error(E)
+                    logging.error("Messed up with ")
+                    logging.error(cmd)
+            client.close()
     return jobids
 
 
@@ -1341,6 +1382,7 @@ def main(args):
                 qos=None,
                 rhel7=args.rhel7,
                 q=args.q,
+                sub_type=args.sub_type,
             )
         else:
             sub_jobs(
@@ -1353,6 +1395,7 @@ def main(args):
                 qos=None,
                 rhel7=args.rhel7,
                 q=args.q,
+                sub_type=args.sub_type,
             )
         logging.info("Job submitted")
         if args.api_token is not None:
@@ -1411,6 +1454,7 @@ def main(args):
             extra_args=extra_args,
             rhel7=args.rhel7,
             q=args.q,
+            sub_type=args.sub_type,
         )
         logging.info("Jobs submitted")
         # except Exception as E:
@@ -1624,6 +1668,7 @@ def main(args):
             extra_args=extra_args,
             rhel7=args.rhel7,
             q=args.q,
+            sub_type=args.sub_type,
         )
 
         if args.api_token is not None:
@@ -1643,6 +1688,7 @@ def main(args):
             qos=args.qos,
             rhel7=args.rhel7,
             q=args.q,
+            sub_type=args.sub_type,
         )
         logging.info("Jobs submitted, now going to monitor progress")
 
