@@ -927,8 +927,8 @@ def sub_jobs(
 
     if sub_type == 'slurm':
         base_sub_cmd = (
-            "sbatch -J %s --export="
-            % (name)
+            "sbatch -J %s -n %d --export="
+            % (name, ppn)
         )
         if array and not ssh:
             if njobs > 1:
