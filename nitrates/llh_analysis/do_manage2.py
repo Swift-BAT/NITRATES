@@ -919,6 +919,12 @@ def sub_jobs(
 
     if "aci.ics" in hostname and "amon" not in hostname:
         ssh = False
+
+    if workdir is None:
+        workdir = os.getcwd()
+    if extra_args is None:
+        extra_args = ""
+
     if sub_type == 'slurm':
         base_sub_cmd = (
             "sbatch -J %s --export="
