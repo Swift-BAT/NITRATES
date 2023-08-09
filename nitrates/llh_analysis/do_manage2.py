@@ -905,7 +905,7 @@ def sub_jobs(
     workdir=None,
     qos=None,
     q=None,
-    ssh=True,
+    ssh=False,
     extra_args=None,
     ppn=1,
     rhel7=False,
