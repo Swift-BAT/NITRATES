@@ -155,7 +155,7 @@ def cli():
         "--pbs_arr_fname",
         type=str,
         help="Name of submit script",
-        default="/storage/group/jak51/Alfred/sub_scripts/slurm/pyscript_template_array_sub.sh",
+        default="/storage/group/jak51/default/Alfred/sub_scripts/slurm/pyscript_template_array_sub.sh",
     )
     parser.add_argument(
         "--min_pc", type=float, help="Min partial coding fraction to use", default=0.1
