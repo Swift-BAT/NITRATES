@@ -98,25 +98,25 @@ def cli():
         "--BKGpyscript",
         type=str,
         help="Name of python script for Bkg Estimation",
-        default="do_bkg_estimation_wPSs_mp2.py",
+        default="nitrates.llh_analysis.do_bkg_estimation_wPSs_mp2",
     )
     parser.add_argument(
         "--RATEpyscript",
         type=str,
         help="Name of python script for Rates analysis",
-        default="do_rates_mle_InOutFoV2.py",
+        default="nitrates.analysis_seeds.do_rates_mle_InOutFoV2",
     )
     parser.add_argument(
         "--LLHINpyscript",
         type=str,
         help="Name of python script for LLH analysis",
-        default="do_llh_inFoV4realtime2.py",
+        default="nitrates.llh_analysis.do_llh_inFoV4realtime2",
     )
     parser.add_argument(
         "--LLHOUTpyscript",
         type=str,
         help="Name of python script for LLH analysis",
-        default="do_llh_outFoV4realtime2.py",
+        default="nitrates.llh_analysis.do_llh_outFoV4realtime2",
     )
     # parser.add_argument('--SCANpyscript', type=str,\
     #         help="Name of python script for FoV scan",\
