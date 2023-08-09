@@ -597,25 +597,25 @@ def cli():
         "--data_dbfname",
         type=str,
         help="DB file name with information on the BAT data already downloaded from the QL site",
-        default="/gpfs/group/jak51/default/realtime_workdir/BATQL.db",
+        default="/storage/group/jak51/default/realtime_workdir/BATQL.db",
     )
     parser.add_argument(
         "--att_dname",
         type=str,
         help="Directory name that contains merged attfiles over chunks of time",
-        default="/gpfs/group/jak51/default/realtime_workdir/merged_atts/",
+        default="/storage/group/jak51/default/realtime_workdir/merged_atts/",
     )
     parser.add_argument(
         "--acs_dname",
         type=str,
         help="Directory name that contains merged acsfiles over chunks of time",
-        default="/gpfs/group/jak51/default/realtime_workdir/merged_acs/",
+        default="/storage/group/jak51/default/realtime_workdir/merged_acs/",
     )
     parser.add_argument(
         "--enb_dname",
         type=str,
         help="Directory name that contains merged enable/disable files over chunks of time",
-        default="/gpfs/group/jak51/default/realtime_workdir/merged_enbs/",
+        default="/storage/group/jak51/default/realtime_workdir/merged_enbs/",
     )
     parser.add_argument("--evfname", type=str, help="Event data file", default=None)
     parser.add_argument("--dmask", type=str, help="detmask file name", default=None)
