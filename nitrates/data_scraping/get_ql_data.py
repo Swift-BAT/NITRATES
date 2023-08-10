@@ -125,7 +125,7 @@ def cli():
         "--save_dir",
         type=str,
         help="Directory to save data to",
-        default="/gpfs/group/jak51/default/realtime_workdir/",
+        default="/storage/group/jak51/default/realtime_workdir/",
     )
     parser.add_argument(
         "--dbfname", type=str, help="Name of the sqlite database", default=None
