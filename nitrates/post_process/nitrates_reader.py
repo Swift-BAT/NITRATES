@@ -16,6 +16,7 @@ from ..lib.dbread_funcs import get_info_tab
 from ..lib.search_config import Config
 
 import argparse
+from pathlib import Path
 
 # Assume all nitrates archival jobs are running on computers with US/Eastern timestamps
 tzlocal = pytz.timezone("US/Eastern")
@@ -24,7 +25,7 @@ utc = pytz.timezone("UTC")
 def cli()
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--work_dir", type=str, help="Results directory", default= None)
+    parser.add_argument("--work_dir", type=str, help="Results directory", default= Path.cwd())
     parser.add_argument("--api_token", type=str, help="api token", default= None)
     parser.add_argument("--mpi4py", action='store_true', help="This switch, when set, will redirect some of the defaults to use the logs output from the mpi4py version of NITRATES.")
 
@@ -871,6 +872,5 @@ def read_results_dirs(paths, api_token, figures=True, ismpi4py=False):
 if __name__ == "__main__":
 
     args = cli()
-    
-    if args.work_dir is not None:
-        read_results_dirs('%s' %args.work_dir, api_token='%s' %args.api_token)
+        
+    read_results_dirs(args.work_dir, api_token=args.api_token, ismpi4py=args.mpi4py)
