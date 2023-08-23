@@ -26,13 +26,21 @@ def cli()
     parser = argparse.ArgumentParser()
     parser.add_argument("--work_dir", type=str, help="Results directory", default= None)
     parser.add_argument("--api_token", type=str, help="api token", default= None)
+    parser.add_argument("--mpi4py", action='store_true', help="This switch, when set, will redirect some of the defaults to use the logs output from the mpi4py version of NITRATES.")
 
     args = parser.parse_args()
 
     return args
 
 
-def read_manager_log(path):
+def read_manager_log(path, ismpi4py=False):
+
+    if ismpi4py:
+        #if this is set to true, we want to look at the nitrataes_0.log file
+        logfile="nitrates_0.log"
+    else:
+        logfile="manager.log"
+        
     start = None
     bkgstart = None
     splitstart = None
@@ -52,7 +60,7 @@ def read_manager_log(path):
     IFOVfilesDone = None
 
     try:
-        with open(os.path.join(path, "manager.log")) as fob:
+        with open(os.path.join(path, logfile)) as fob:
             x = fob.read()
             startlocal = datetime.fromisoformat(
                 re.search(
@@ -450,7 +458,7 @@ def get_dlogls_inout(res_tab, res_out_tab, trigger_id, config_id=0, imdistthresh
     return df
 
 
-def read_results_dirs(paths, api_token, figures=True):
+def read_results_dirs(paths, api_token, figures=True, ismpi4py=False):
     try:
         from swifttools.swift_too import Clock
         from EchoAPI import API
@@ -650,7 +658,7 @@ def read_results_dirs(paths, api_token, figures=True):
                 IFOVDone,
                 OFOVfilesDone,
                 IFOVfilesDone,
-            ) = read_manager_log(path)
+            ) = read_manager_log(path, ismpi4py=ismpi4py)
 
             try:
                 api.post_log(
