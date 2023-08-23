@@ -22,7 +22,7 @@ from pathlib import Path
 tzlocal = pytz.timezone("US/Eastern")
 utc = pytz.timezone("UTC")
 
-def cli()
+def cli():
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--work_dir", type=str, help="Results directory", default= Path.cwd())
@@ -41,6 +41,8 @@ def read_manager_log(path, ismpi4py=False):
         logfile="nitrates_0.log"
     else:
         logfile="manager.log"
+        
+    print(f"Reading from the log file {logfile}")
         
     start = None
     bkgstart = None
