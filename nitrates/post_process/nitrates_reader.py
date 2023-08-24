@@ -89,25 +89,34 @@ def read_manager_log(path, ismpi4py=False):
                 )
             else:
                 bkgstartlocal = datetime.fromisoformat(re.search(r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d+-INFO- Conducting the background estimation", x)[1] )
+                bkgendlocal = datetime.fromisoformat(re.search(r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d+-INFO- bkg_estimation.csv", x)[1] )
+                
             bkgstart = tzlocal.localize(bkgstartlocal).astimezone(utc)
+            bkgend = tzlocal.localize(bkgendlocal).astimezone(utc)
             # print(f'bkg start: {bkgstart}')
             
             #get the start of the splitrates analysis
-            splitstartlocal = datetime.fromisoformat(
-                re.search(
-                    r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d+-INFO- Jobs submitted", x
-                )[1]
-            )
+            if not ismpi4py:
+                splitstartlocal = datetime.fromisoformat(
+                    re.search(
+                        r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d+-INFO- Jobs submitted", x
+                    )[1]
+                )
+            else:
+                splitstartlocal = datetime.fromisoformat(re.search(r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d+-ERROR- .*SplitRatesStart *", x)[1] )
             splitstart = tzlocal.localize(splitstartlocal).astimezone(utc)
             # print(f'split start: {splitstart}')
             
             #get the end time of the splitrates analysis
-            splitdonelocal = datetime.fromisoformat(
-                re.search(
-                    r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d+-INFO-\s+Done with rates analysis",
-                    x,
-                )[1]
-            )
+            if not ismpi4py:
+                splitdonelocal = datetime.fromisoformat(
+                    re.search(
+                        r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d+-INFO-\s+Done with rates analysis",
+                        x,
+                    )[1]
+                )
+            else:
+                splitdonelocal = datetime.fromisoformat(re.search(r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d+-ERROR- .*SplitRatesDone *", x)[1] )
             splitdone = tzlocal.localize(splitdonelocal).astimezone(utc)
             # print(f'split done: {splitdone}')
             
@@ -117,60 +126,93 @@ def read_manager_log(path, ismpi4py=False):
             Ntotseeds = re.search(r"Ntot Seeds: ([0-9]+)\n", x)[1]
             
             #get how many have been completed already
-            OFOVfilesTot = re.search(r"of ([0-9]+) out files done\n", x[1])
-            IFOVfilesTot = re.search(r"of ([0-9]+) in files done\n", x[1])
+            if not ismpi4py:
+                OFOVfilesTot = re.search(r"of ([0-9]+) out files done\n", x[1])
+                IFOVfilesTot = re.search(r"of ([0-9]+) in files done\n", x[1])
+            else:
+                OFOVfilesTot = re.search("(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d+-INFO- .*OFOVfilesTot .* (\d+)", x)
+                IFOVfilesTot = re.search("(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d+-INFO- .*IFOVfilesTot .* (\d+)", x)
             
-            #get when the IFOV job has been submitted, this isnt applicable to the mpi4py code
-            submitIFOV = re.search(
-                r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d+-INFO- Submitting (\d+) in FoV Jobs now",
-                x,
-            )
+            #get when the IFOV job has been submitted, this isnt applicable to the mpi4py code. Instead Look a when this portion of the analysis started.
+            if not ismpi4py:
+                submitIFOV = re.search(
+                    r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d+-INFO- Submitting (\d+) in FoV Jobs now",
+                    x,
+                )
+            else:
+                submitIFOV = re.search(r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d+-INFO- .*IFOV analysis *", x)
             submitIFOVlocal = datetime.fromisoformat(submitIFOV[1])
             submitIFOVstamp = tzlocal.localize(submitIFOVlocal).astimezone(utc)
             
             #get the number of IFOV jobs submitted
-            NjobsIFOV = submitIFOV[2]
+            if not ismpi4py:
+                NjobsIFOV = submitIFOV[2]
+            else:
+                #get the number of requested mpi processes
+                NjobsIFOV = re.search(r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d+-DEBUG- Njobs, job_iter: (\d+), (\d+)", x)[2]
             # print(f'IFOV start: {submitIFOVstamp}')
             
             #get when the OFOV job has been submitted, this isnt applicable to the mpi4py code
-            submitOFOV = re.search(
-                r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d+-INFO- Submitting (\d+) out of FoV Jobs now",
-                x,
-            )
+            if not ismpi4py:
+                submitOFOV = re.search(
+                    r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d+-INFO- Submitting (\d+) out of FoV Jobs now",
+                    x,
+                )
+            else:
+                submitOFOV = re.search(r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d+-INFO- .*OFOV analysis *", x)
             submitOFOVlocal = datetime.fromisoformat(submitOFOV[1])
             submitOFOVstamp = tzlocal.localize(submitOFOVlocal).astimezone(utc)
             
-            #get the number of IFOV jobs submitted
-            NjobsOFOV = submitOFOV[2]
+            #get the number of IFOV jobs submitted. For mpi this is the same as the number of mpi processes which we got above
+            if not ismpi4py:
+                NjobsOFOV = submitOFOV[2]
+            else:
+                NjobsOFOV = NjobsIFOV
             # print(f'OFOV start: {submitOFOVstamp}')
             # print(Nsquares, Ntbins, Ntotseeds, NjobsIFOV, NjobsOFOV)
             
             #get the number of OFOV and IFOV jobs that have been completed
-            OFOVfilesTot = int(re.search(r"of ([0-9]+) out files done", x)[1])
-            IFOVfilesTot = int(re.search(r"of ([0-9]+) in files done", x)[1])
+            if not ismpi4py:
+                OFOVfilesTot = int(re.search(r"of ([0-9]+) out files done", x)[1])
+                IFOVfilesTot = int(re.search(r"of ([0-9]+) in files done", x)[1])
+            else:
+                OFOVfilesTot = int(OFOVfilesTot[2])
+                IFOVfilesTot = int(IFOVfilesTot[2])
+
             # print(OFOVfilesTot, IFOVfilesTot)
             
             #get the portion of each IFOV and OFOV jobs that are done
-            OFOVfilesDone = int(re.findall("(\d+) of (\d+) out files done", x)[-1][0])
-            IFOVfilesDone = int(re.findall("(\d+) of (\d+) in files done", x)[-1][0])
+            if not ismpi4py:
+                OFOVfilesDone = int(re.findall("(\d+) of (\d+) out files done", x)[-1][0])
+                IFOVfilesDone = int(re.findall("(\d+) of (\d+) in files done", x)[-1][0])
+            else:
+                #the mpi code has to all finish at the same time
+                OFOVfilesDone = OFOVfilesTot
+                IFOVfilesDone = IFOVfilesTot
             
             #get when the OFOV analysis is complete
-            OFOVdonelocal = datetime.fromisoformat(
-                re.search(
-                    r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d+-INFO- Got all of the out results now",
-                    x,
-                )[1]
-            )
+            if not ismpi4py:
+                OFOVdonelocal = datetime.fromisoformat(
+                    re.search(
+                        r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d+-INFO- Got all of the out results now",
+                        x,
+                    )[1]
+                )
+            else:
+                OFOVdonelocal = datetime.fromisoformat(re.search(r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d+-DEBUG- Completed the OFOV analysis", x)[1] )
             OFOVDone = tzlocal.localize(OFOVdonelocal).astimezone(utc)
             # print(f'OFOV done: {OFOVdone}')
             
             #get when the IFOV analysis is complete
-            IFOVdonelocal = datetime.fromisoformat(
-                re.search(
-                    r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d+-INFO- Got all of the in results now",
-                    x,
-                )[1]
-            )
+            if not ismpi4py:
+                IFOVdonelocal = datetime.fromisoformat(
+                    re.search(
+                        r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d+-INFO- Got all of the in results now",
+                        x,
+                    )[1]
+                )
+            else:
+                IFOVdonelocal = datetime.fromisoformat(re.search(r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d+-DEBUG- Completed the IFOV analysis", x)[1] )
             IFOVDone = tzlocal.localize(IFOVdonelocal).astimezone(utc)
             # print(f'IFOV done: {IFOVdone}')
     except Exception as e:
