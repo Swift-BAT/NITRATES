@@ -740,7 +740,7 @@ def read_results_dirs(paths, api_token, figures=True, ismpi4py=False):
                 OFOVfilesDone,
                 IFOVfilesDone,
             ) = read_manager_log(path, ismpi4py=ismpi4py)
-            stop
+            
             try:
                 api.post_log(
                     trigger=trig_ids[i],
