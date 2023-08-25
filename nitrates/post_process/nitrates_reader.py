@@ -148,8 +148,13 @@ def read_manager_log(path, ismpi4py=False):
             if not ismpi4py:
                 NjobsIFOV = submitIFOV[2]
             else:
-                #get the number of requested mpi processes
-                NjobsIFOV = re.search(r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d+-DEBUG- Njobs, job_iter: (\d+), (\d+)", x)[2]
+                try:
+                    #get the number of requested mpi processes
+                    NjobsIFOV = re.search(r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d+-DEBUG- Njobs, job_iter: (\d+), (\d+)", x)[2]
+                except TypeError as e:
+                    #sometimes the underlying nitrates function doesnt print the job_iter so can just look for Njobs
+                    print(e)
+                    NjobsIFOV = re.search(r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d+-DEBUG- Njobs*: (\d+)*", x)[2]
             # print(f'IFOV start: {submitIFOVstamp}')
             
             #get when the OFOV job has been submitted, this isnt applicable to the mpi4py code
