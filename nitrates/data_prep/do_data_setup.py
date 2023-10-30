@@ -508,11 +508,19 @@ def get_att(args, MET_time):
 
     if args.Obsid_Dir is not None:
         aux_dir = os.path.join(args.Obsid_Dir, "auxil")
-        att_fname = [
+        att_fnames = [
             os.path.join(aux_dir, fname)
             for fname in os.listdir(aux_dir)
             if "pat" in fname
-        ][0]
+        ]
+        if len(att_fnames) > 0:
+            att_fname = att_fnames[0]
+        else:
+            att_fname = [
+                os.path.join(aux_dir, fname)
+                for fname in os.listdir(aux_dir)
+                if "sat" in fname
+            ][0]
         return Table.read(att_fname)
 
     # min_ev_time = np.min(evdata['TIME'])
