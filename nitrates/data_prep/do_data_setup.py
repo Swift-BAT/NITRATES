@@ -557,6 +557,7 @@ def get_acs(args, trigtime):
         return Table.read(args.acs_fname, hdu="ACS_DATA")
 
     if args.Obsid_Dir is not None:
+        aux_dir = os.path.join(args.Obsid_Dir, "auxil")
         att_fnames = [
             os.path.join(aux_dir, fname)
             for fname in os.listdir(aux_dir)
