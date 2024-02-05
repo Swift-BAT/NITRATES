@@ -251,7 +251,7 @@ class shield_polygon(object):
                 pos = np.matmul(pos, self.rot_mat)
             return self.path.contains_point(pos[:2])
         else:
-            bl_goodz = np.ones(len(detx), dtype=np.bool)
+            bl_goodz = np.ones(len(detx), dtype=bool)
             if src_theta < np.pi / 2.0:
                 bl_goodz[((z - detz) < -0.2)] = False
             else:
@@ -822,7 +822,7 @@ class Shield_Interactions(object):
             if ident in polyIDs2ignore:
                 continue
             no_ints_yet = poly_idents == -1
-            does_int = np.zeros(len(x), dtype=np.bool)
+            does_int = np.zeros(len(x), dtype=bool)
             does_int[no_ints_yet] = self.does_intersect_poly(
                 theta, phi, x[no_ints_yet], y[no_ints_yet], z[no_ints_yet], ident
             )
@@ -952,7 +952,7 @@ class Sun_Shield_Interactions(object):
         poly_idents = -1 * np.ones(len(x), dtype=np.int64)
         for ident in range(self.Npolys):
             no_ints_yet = poly_idents == -1
-            does_int = np.zeros(len(x), dtype=np.bool)
+            does_int = np.zeros(len(x), dtype=bool)
             does_int[no_ints_yet] = self.does_intersect_poly(
                 theta, phi, x[no_ints_yet], y[no_ints_yet], z[no_ints_yet], ident
             )

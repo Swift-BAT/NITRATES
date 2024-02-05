@@ -1258,7 +1258,7 @@ class LLH_webins(object):
         self.dt = 0.0
         self.t1 = t1
 
-        t_bl = np.zeros(len(self._all_data), dtype=np.bool)
+        t_bl = np.zeros(len(self._all_data), dtype=bool)
         for i in range(len(self.t0)):
             t_bl = np.logical_or(
                 (self._all_data["TIME"] >= self.t0[i])

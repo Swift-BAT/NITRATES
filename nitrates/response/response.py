@@ -1162,7 +1162,7 @@ class Swift_Mask_Interactions(object):
             self.mask_trans *= get_passive_trans(self.energy, self.theta)
 
     def does_int_fix(self):
-        #         does_int_fix = np.zeros(self.ndets, dtype=np.bool)
+        #         does_int_fix = np.zeros(self.ndets, dtype=bool)
         self.fix_trans = np.ones((self.ndets, self.Ne))
         self.fix_struct.set_batxyzs(
             self.batxs[self.does_int_mask],

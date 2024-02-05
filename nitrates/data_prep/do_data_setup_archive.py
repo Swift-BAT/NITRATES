@@ -265,7 +265,7 @@ def get_event(args):
 
         # times2cover = np.arange(int(met_trig_time)-45,int(met_trig_time)+45)
         times2cover = np.arange(int(met_trig_time) - 30, int(met_trig_time) + 30)
-        times_coverd = np.zeros(len(times2cover), dtype=np.bool)
+        times_coverd = np.zeros(len(times2cover), dtype=bool)
 
         ev_fnames = []
         for index, row in ev_data_table.iterrows():

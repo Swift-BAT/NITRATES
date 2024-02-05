@@ -454,7 +454,7 @@ class Linear_Rates(object):
 
             for j in range(self.nebins):
                 try:
-                    bl = np.ones(len(_cnts[:, j]), dtype=np.bool)
+                    bl = np.ones(len(_cnts[:, j]), dtype=bool)
                     if self.sig_clip is not None:
                         avg = np.mean(_cnts[:, j])
                         std = np.std(_cnts[:, j])

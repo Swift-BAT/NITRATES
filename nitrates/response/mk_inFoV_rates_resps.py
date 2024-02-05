@@ -112,8 +112,8 @@ def mk_in_out_rates_tab_masks(sig_mod, theta, phi):
         print("Only %d dets in FoV" % (in_ndets))
         return None, None, None
 
-    mask_in = np.zeros(dpi_shape, dtype=np.bool)
-    mask_out = np.zeros(dpi_shape, dtype=np.bool)
+    mask_in = np.zeros(dpi_shape, dtype=bool)
+    mask_out = np.zeros(dpi_shape, dtype=bool)
     mask_in[sig_mod.bl_dmask] = in_fov_bl
     mask_out[sig_mod.bl_dmask] = out_fov_bl
 

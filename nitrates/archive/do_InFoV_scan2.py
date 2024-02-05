@@ -1301,7 +1301,7 @@ class Swift_Mask_Interactions(object):
         self.tot_rhomu_dists = self.dists[:, np.newaxis] * self.tot_rho_mus
 
     def does_int_fix(self):
-        #         does_int_fix = np.zeros(self.ndets, dtype=np.bool)
+        #         does_int_fix = np.zeros(self.ndets, dtype=bool)
         self.fix_trans = np.ones((self.ndets, self.Ne))
         self.fix_struct.set_batxyzs(
             self.batxs[self.does_int_mask],
@@ -1767,7 +1767,7 @@ class LLH_webins(object):
         self.dt = 0.0
         self.t1 = t1
 
-        t_bl = np.zeros(len(self._all_data), dtype=np.bool)
+        t_bl = np.zeros(len(self._all_data), dtype=bool)
         for i in range(len(self.t0)):
             t_bl = np.logical_or(
                 (self._all_data["TIME"] >= self.t0[i])

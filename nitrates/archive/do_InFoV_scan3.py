@@ -1316,7 +1316,7 @@ class LLH_webins(object):
         self.dt = 0.0
         self.t1 = t1
 
-        t_bl = np.zeros(len(self._all_data), dtype=np.bool)
+        t_bl = np.zeros(len(self._all_data), dtype=bool)
         for i in range(len(self.t0)):
             t_bl = np.logical_or(
                 (self._all_data["TIME"] >= self.t0[i])
@@ -2423,7 +2423,7 @@ def do_init_bkg_wPSs(
             break
         if len(PSs2keep) == 0:
             Nsrcs = 0
-            src_tab = src_tab[np.zeros(len(src_tab), dtype=np.bool)]
+            src_tab = src_tab[np.zeros(len(src_tab), dtype=bool)]
             break
         bl = np.array([src_tab["Name"][i] in PSs2keep for i in range(Nsrcs)])
         src_tab = src_tab[bl]
@@ -2874,7 +2874,7 @@ class Swift_Mask_Interactions(object):
         self.mask_trans = np.exp(-self.mask_tot_rhomu_dists)
 
     def does_int_fix(self):
-        #         does_int_fix = np.zeros(self.ndets, dtype=np.bool)
+        #         does_int_fix = np.zeros(self.ndets, dtype=bool)
         self.fix_trans = np.ones((self.ndets, self.Ne))
         self.fix_struct.set_batxyzs(
             self.batxs[self.does_int_mask],

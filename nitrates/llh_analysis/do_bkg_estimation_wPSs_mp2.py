@@ -455,7 +455,7 @@ def do_init_bkg_wPSs(
             break
         if len(PSs2keep) == 0:
             Nsrcs = 0
-            src_tab = src_tab[np.zeros(len(src_tab), dtype=np.bool)]
+            src_tab = src_tab[np.zeros(len(src_tab), dtype=bool)]
             break
         bl = np.array([src_tab["Name"][i] in PSs2keep for i in range(Nsrcs)])
         src_tab = src_tab[bl]

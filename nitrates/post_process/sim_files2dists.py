@@ -717,7 +717,7 @@ def get_dist_dicts2(dname, theta, phi):
             print()
             #     ndets = Nsands*Ndets_per_sand_no_edges
             #     print ndets
-            #     bl_cols = np.zeros(len(bl), dtype=np.bool)
+            #     bl_cols = np.zeros(len(bl), dtype=bool)
             bl_cols = (detxs >= detxs_by_sand0[col0]) & (
                 detxs <= detxs_by_sand1[col1 - 1]
             )
@@ -955,7 +955,7 @@ def get_dist_dicts2(dname, theta, phi):
             print()
             #     ndets = Nsands*Ndets_per_sand_no_edges
             #     print ndets
-            #     bl_cols = np.zeros(len(bl), dtype=np.bool)
+            #     bl_cols = np.zeros(len(bl), dtype=bool)
             bl_cols = (detxs >= detxs_by_sand0[col0]) & (
                 detxs <= detxs_by_sand1[col1 - 1]
             )

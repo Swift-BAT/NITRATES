@@ -498,7 +498,7 @@ def main(args):
     elif args.square_id >= 0:
         bl = square_tab["squareID"] == args.square_id
     else:
-        bl = np.ones(len(square_tab), dtype=np.bool)
+        bl = np.ones(len(square_tab), dtype=bool)
     square_tab = square_tab[bl]
 
     rate_res_tab = pd.read_csv(args.rate_fname)
