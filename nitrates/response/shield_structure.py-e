@@ -805,7 +805,7 @@ class Shield_Interactions(object):
         if (
             isinstance(ident, int)
             or isinstance(ident, float)
-            or isinstance(ident, np.integer)
+            or isinstance(ident, np.int64eger)
         ):
             name = self.shield_struct.shield_names[int(ident)]
         else:
@@ -937,7 +937,7 @@ class Sun_Shield_Interactions(object):
         if (
             isinstance(ident, int)
             or isinstance(ident, float)
-            or isinstance(ident, np.integer)
+            or isinstance(ident, np.int64eger)
         ):
             name = self.shield_struct.shield_names[int(ident)]
         else:
