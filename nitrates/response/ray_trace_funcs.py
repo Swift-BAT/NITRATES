@@ -476,7 +476,7 @@ class ray_trace_file_npy(object):
 
     def setup_intp(self):
         self.a0_grid = np.zeros(
-            (len(self.imx_ax), len(self.imy_ax), 173, 286), dtype=np.float6432
+            (len(self.imx_ax), len(self.imy_ax), 173, 286), dtype=np.float32
         )
         self.a1_grid = np.zeros_like(self.a0_grid)
         self.a2_grid = np.zeros_like(self.a0_grid)
