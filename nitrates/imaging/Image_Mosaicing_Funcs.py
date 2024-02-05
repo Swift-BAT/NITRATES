@@ -177,7 +177,7 @@ def sky_map2bkg_maps(sky_map, pc_map, pc_min=1e-1, sig_rad=0.5, bkg_rad=2.5):
     print(np.shape(good_hp_inds))
     Npix2use = np.sum(bl_good)
     print(Npix2use)
-    all_hp_inds = np.arange(hp.nside2npix(nside), dtype=np.int)
+    all_hp_inds = np.arange(hp.nside2npix(nside), dtype=np.int64)
     hp_map_vecs = hp.pix2vec(nside, all_hp_inds)
     hp_map_vecs = np.swapaxes(np.array(hp_map_vecs), 0, 1)
 
@@ -253,7 +253,7 @@ def sky_map2bkg_maps_mp(
     print(np.shape(good_hp_inds))
     Npix2use = np.sum(bl_good)
     print(Npix2use)
-    all_hp_inds = np.arange(hp.nside2npix(nside), dtype=np.int)
+    all_hp_inds = np.arange(hp.nside2npix(nside), dtype=np.int64)
     hp_map_vecs = hp.pix2vec(nside, all_hp_inds)
     hp_map_vecs = np.swapaxes(np.array(hp_map_vecs), 0, 1)
 

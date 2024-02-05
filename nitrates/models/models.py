@@ -1326,7 +1326,7 @@ class Point_Source_Model_Wuncoded(Model):
             return self._fp
         else:
             fp = self.fp_obj.get_fp(imx, imy)
-            self._fp = fp[self.bl_dmask].astype(np.int)
+            self._fp = fp[self.bl_dmask].astype(np.int64)
             self._fp[(self._rt > 1e-2)] = 1
             self._unfp = 1 - self._fp
             self.uncoded = self._fp < 0.1

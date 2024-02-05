@@ -41,19 +41,19 @@ def get_bldmask_alldets():
 
     all_good_detxs = np.ravel(
         [
-            np.arange(detxs_by_sand0[i], detxs_by_sand1[i] + 1, 1, dtype=np.int)
+            np.arange(detxs_by_sand0[i], detxs_by_sand1[i] + 1, 1, dtype=np.int64)
             for i in range(16)
         ]
     )
     all_good_detys = np.ravel(
         [
-            np.arange(detys_by_sand0[i], detys_by_sand1[i] + 1, 1, dtype=np.int)
+            np.arange(detys_by_sand0[i], detys_by_sand1[i] + 1, 1, dtype=np.int64)
             for i in range(16)
         ]
     )
 
-    detxax = np.arange(286, dtype=np.int)
-    detyax = np.arange(173, dtype=np.int)
+    detxax = np.arange(286, dtype=np.int64)
+    detyax = np.arange(173, dtype=np.int64)
     detx_dpi, dety_dpi = np.meshgrid(detxax, detyax)
     bl_alldets = np.isin(detx_dpi, all_good_detxs) & np.isin(dety_dpi, all_good_detys)
     return bl_alldets
@@ -209,7 +209,7 @@ def main(args):
     bl_alldets = get_bldmask_alldets()
     # sig_mod = Source_Model_InFoV(flux_mod, [ebins0,ebins1], bl_alldets, rt_obj)
 
-    hpinds = np.arange(hp.nside2npix(2**2), dtype=np.int)
+    hpinds = np.arange(hp.nside2npix(2**2), dtype=np.int64)
     phis, lats = hp.pix2ang(2**2, hpinds, lonlat=True, nest=True)
     thetas = 90.0 - lats
 

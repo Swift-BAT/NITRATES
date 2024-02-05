@@ -143,7 +143,7 @@ def get_rates_resp_arr_outFoV(drm_dir):
     thetas = 90.0 - lats
 
     dtp = [
-        ("hp_ind", np.int),
+        ("hp_ind", np.int64),
         ("theta", np.float),
         ("phi", np.float),
         ("fname", fnames.dtype),

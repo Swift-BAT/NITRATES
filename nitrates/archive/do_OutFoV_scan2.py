@@ -356,18 +356,18 @@ detys_by_sand1 = detys_by_sand0 + 7
 print(len(detys_by_sand0))
 
 detxs_in_cols_not_edges = [
-    np.arange(detxs_by_sand0[i] + 1, detxs_by_sand1[i], 1, dtype=np.int)
+    np.arange(detxs_by_sand0[i] + 1, detxs_by_sand1[i], 1, dtype=np.int64)
     for i in range(16)
 ]
 detys_in_rows_not_edges = [
-    np.arange(detys_by_sand0[i] + 1, detys_by_sand1[i], 1, dtype=np.int)
+    np.arange(detys_by_sand0[i] + 1, detys_by_sand1[i], 1, dtype=np.int64)
     for i in range(16)
 ]
 print(detxs_in_cols_not_edges)
 
 dpi_shape = (173, 286)
-detxax = np.arange(286, dtype=np.int)
-detyax = np.arange(173, dtype=np.int)
+detxax = np.arange(286, dtype=np.int64)
+detyax = np.arange(173, dtype=np.int64)
 detx_dpi, dety_dpi = np.meshgrid(detxax, detyax)
 print(np.shape(detx_dpi), np.shape(dety_dpi))
 print(np.max(detx_dpi), np.max(dety_dpi))
@@ -680,8 +680,8 @@ class ResponseDPI(object):
 
 
 def get_flor_intp_inds_wts(batxs, batys):
-    detxax = np.arange(-1, 286 + 2, 8, dtype=np.int)
-    detyax = np.arange(-2, 173 + 2, 8, dtype=np.int)
+    detxax = np.arange(-1, 286 + 2, 8, dtype=np.int64)
+    detyax = np.arange(-2, 173 + 2, 8, dtype=np.int64)
     batxax, batyax = detxy2batxy(detxax, detyax)
     flor_detx_dpi, flor_dety_dpi = np.meshgrid(detxax, detyax)
     shp = flor_detx_dpi.shape
@@ -848,9 +848,9 @@ class FlorResponseDPI(object):
     def open_new_file(self, hp_ind):
         fname = "hp_order_3_ind_%d_.npy" % (hp_ind)
         resp_arr = np.load(os.path.join(self.resp_dname, fname))
-        sn_inds = np.arange(1, 13, dtype=np.int)
-        ta_inds = np.arange(14, 29, dtype=np.int)
-        pb_inds = np.arange(29, 39, dtype=np.int)
+        sn_inds = np.arange(1, 13, dtype=np.int64)
+        ta_inds = np.arange(14, 29, dtype=np.int64)
+        pb_inds = np.arange(29, 39, dtype=np.int64)
         for sn_ind in sn_inds:
             resp_arr[:, :, sn_ind] *= self.sn_ratios
         for ta_ind in ta_inds:
@@ -2169,7 +2169,7 @@ def bkg_withPS_fit(
     imgs = np.meshgrid(*imlist)
     Npnts = imgs[0].size
     if im_steps == 2:
-        ind_grids = np.meshgrid(*(np.arange(3, dtype=np.int) for i in range(Nps)))
+        ind_grids = np.meshgrid(*(np.arange(3, dtype=np.int64) for i in range(Nps)))
         Npnts = ind_grids[0].size
     logging.info("Npnts: %d" % (Npnts))
 

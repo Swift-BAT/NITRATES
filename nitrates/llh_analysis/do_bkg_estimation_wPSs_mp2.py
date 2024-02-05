@@ -214,7 +214,7 @@ def bkg_withPS_fit(
     imgs = np.meshgrid(*imlist)
     Npnts = imgs[0].size
     if im_steps == 2:
-        ind_grids = np.meshgrid(*(np.arange(3, dtype=np.int) for i in range(Nps)))
+        ind_grids = np.meshgrid(*(np.arange(3, dtype=np.int64) for i in range(Nps)))
         Npnts = ind_grids[0].size
     logging.info("Npnts: %d" % (Npnts))
 

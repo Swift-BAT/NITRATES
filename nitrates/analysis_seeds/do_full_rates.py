@@ -145,7 +145,7 @@ class Linear_Rates(object):
         self.ints = np.zeros_like(self.slopes)
         self.errs = np.zeros_like(self.slopes)
         self.chi2s = np.zeros_like(self.errs)
-        self.dof = np.zeros_like(self.slopes, dtype=np.int)
+        self.dof = np.zeros_like(self.slopes, dtype=np.int64)
         self.sig_clip = sig_clip
 
         self.npars = self.deg + 1

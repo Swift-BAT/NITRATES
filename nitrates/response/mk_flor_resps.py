@@ -296,8 +296,8 @@ def calc_flor_resp(
     Nlines = len(Elines)
 
     dpi_shape = (173, 286)
-    detxax = np.arange(-1, 286 + 2, 8, dtype=np.int)
-    detyax = np.arange(-2, 173 + 2, 8, dtype=np.int)
+    detxax = np.arange(-1, 286 + 2, 8, dtype=np.int64)
+    detyax = np.arange(-2, 173 + 2, 8, dtype=np.int64)
     detx_dpi, dety_dpi = np.meshgrid(detxax, detyax)
     batxs, batys = detxy2batxy(detx_dpi.ravel(), dety_dpi.ravel())
 

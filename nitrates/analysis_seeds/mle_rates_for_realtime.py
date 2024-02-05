@@ -300,7 +300,7 @@ def get_data_cube(tbins0, tbins1, ebins0, ebins1, evd, dmask_bl):
     nebins = len(ebins0)
     ndets = np.sum(dmask_bl)
 
-    data_cube = np.zeros((ntbins, nebins, ndets), dtype=np.int)
+    data_cube = np.zeros((ntbins, nebins, ndets), dtype=np.int64)
 
     for i in range(ntbins):
         blt = (evd["TIME"] >= tbins0[i]) & (evd["TIME"] < tbins1[i])

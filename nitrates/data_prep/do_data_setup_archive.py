@@ -118,16 +118,16 @@ def evfnames2write(
     for evf in evfnames:
         tab = Table.read(evf)
         if "bevshpo" in evf:
-            tab["SLEW"] = np.zeros(len(tab), dtype=np.int)
+            tab["SLEW"] = np.zeros(len(tab), dtype=np.int64)
             gti_pnts.append(Table.read(evf, hdu=2))
         elif "bevshsl" in evf:
-            tab["SLEW"] = np.ones(len(tab), dtype=np.int)
+            tab["SLEW"] = np.ones(len(tab), dtype=np.int64)
             gti_slews.append(Table.read(evf, hdu=2))
         elif "bevshsp" in evf:
-            tab["SLEW"] = 2 * np.ones(len(tab), dtype=np.int)
+            tab["SLEW"] = 2 * np.ones(len(tab), dtype=np.int64)
             gti_slewpnts.append(Table.read(evf, hdu=2))
         else:
-            tab["SLEW"] = 2 * np.ones(len(tab), dtype=np.int)
+            tab["SLEW"] = 2 * np.ones(len(tab), dtype=np.int64)
             gti_slewpnts.append(Table.read(evf, hdu=2))
         tabs.append(tab)
     ev_data = vstack(tabs)

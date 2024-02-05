@@ -80,7 +80,7 @@ def check_if_in_GTI(GTI, t0, t1):
 def flags2gti(times, flags):
     # make it seem that it's changing to bad at the end
     Ntimes = len(times)
-    diffs = np.append(np.diff(flags.astype(np.int)), [-1])
+    diffs = np.append(np.diff(flags.astype(np.int64)), [-1])
     if not flags[-1]:
         diffs[-1] = 0
 

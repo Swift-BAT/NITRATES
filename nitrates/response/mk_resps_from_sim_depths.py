@@ -537,9 +537,9 @@ def main(args):
     drm_tab = Table(data=res_dicts)
 
     ebounds_tab = Table(
-        data=[np.arange(len(pha_emaxs), dtype=np.int), pha_emins, pha_emaxs],
+        data=[np.arange(len(pha_emaxs), dtype=np.int64), pha_emins, pha_emaxs],
         names=["CHANNEL", "E_MIN", "E_MAX"],
-        dtype=[np.int, np.float, np.float],
+        dtype=[np.int64, np.float, np.float],
     )
 
     primary_hdu = fits.PrimaryHDU()

@@ -388,7 +388,7 @@ def min_det_fp_nllh2(
 
 def get_cnts_from_tbins_ebins(evdata, tbins0, tbins1, ebins0, ebins1):
     nebins = len(ebins0)
-    hist = np.zeros((len(tbins0), nebins), dtype=np.int)
+    hist = np.zeros((len(tbins0), nebins), dtype=np.int64)
 
     ebins = np.append(ebins0, [ebins1[-1]])
     ntbins = len(tbins0)

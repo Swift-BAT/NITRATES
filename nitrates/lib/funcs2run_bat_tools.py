@@ -379,7 +379,7 @@ def get_sig_pix(arg_dict):
     imy_inds = np.digitize(imxys[1], bins=bins[1]) - 1
 
     job_inds = np.arange(19)
-    job_ids = -1 * np.ones(len(imx_inds), dtype=np.int)
+    job_ids = -1 * np.ones(len(imx_inds), dtype=np.int64)
 
     imx_bins0 = [
         -1.2,
