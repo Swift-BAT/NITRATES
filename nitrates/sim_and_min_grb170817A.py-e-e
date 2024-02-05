@@ -93,7 +93,7 @@ def mk_sim_evdata(sim_mod, sim_params, dur, tstart):
     col_names = ["TIME", "DET_ID", "EVENT_FLAGS", "PHA", "DETX", "DETY", "PI", "ENERGY"]
     # only need to assign, TIME, DETX, and DETY
     # make all flags 0, and the rest don't matter
-    tab = Table(names=["DETX", "DETY", "ENERGY"], dtype=(np.int64, np.int64, np.float))
+    tab = Table(names=["DETX", "DETY", "ENERGY"], dtype=(np.int, np.int, np.float))
 
     ebins0 = sim_mod.ebins0
     ebins1 = sim_mod.ebins1
@@ -103,7 +103,7 @@ def mk_sim_evdata(sim_mod, sim_params, dur, tstart):
     sim_dpis = np.random.poisson(lam=(rate_dpis * dur))
 
     for ebin, sim_dpi in enumerate(sim_dpis):
-        simdpi = np.zeros_like(sim_mod.bl_dmask, dtype=np.int64)
+        simdpi = np.zeros_like(sim_mod.bl_dmask, dtype=np.int)
         simdpi[sim_mod.bl_dmask] = sim_dpi
         detys, detxs = np.where(simdpi > 0)
         emid = (ebins1[ebin] + ebins0[ebin]) / 2.0
@@ -115,10 +115,10 @@ def mk_sim_evdata(sim_mod, sim_params, dur, tstart):
                 tab.add_row(row)
 
     tab["TIME"] = dur * np.random.random(size=len(tab)) + tstart
-    tab["DET_ID"] = np.zeros(len(tab), dtype=np.int64)
-    tab["PHA"] = np.ones(len(tab), dtype=np.int64)
-    tab["EVENT_FLAGS"] = np.zeros(len(tab), dtype=np.int64)
-    tab["PI"] = np.rint(tab["ENERGY"] * 10).astype(np.int64)
+    tab["DET_ID"] = np.zeros(len(tab), dtype=np.int)
+    tab["PHA"] = np.ones(len(tab), dtype=np.int)
+    tab["EVENT_FLAGS"] = np.zeros(len(tab), dtype=np.int)
+    tab["PI"] = np.rint(tab["ENERGY"] * 10).astype(np.int)
     tab.sort(keys="TIME")
     return tab
 
@@ -157,7 +157,7 @@ def analysis_for_imxy_square(
     imx_ax = np.arange(0, dimxy, imxstep)
     imy_ax = np.arange(0, dimxy, imstep)
     imxg, imyg = np.meshgrid(imx_ax, imy_ax)
-    bl = np.isclose((imyg * 1e4).astype(np.int64) % int(imstep * 2 * 1e4), 0)
+    bl = np.isclose((imyg * 1e4).astype(np.int) % int(imstep * 2 * 1e4), 0)
     imxg[bl] += imxstep / 2.0
     imxs = np.ravel(imxg) + imx0
     imys = np.ravel(imyg) + imy0
@@ -743,7 +743,7 @@ def main(args):
     )
 
     df["Afact"] = np.ones(len(df)) * Afact
-    df["jobID"] = np.ones(len(df), dtype=np.int64) * jobid
+    df["jobID"] = np.ones(len(df), dtype=np.int) * jobid
 
     df.to_csv(fname)
 

@@ -41,7 +41,7 @@ def get_resp_arr(drm_dir):
     thetas = np.array([float(fn.split("_")[2]) for fn in fnames])
     phis = np.array([float(fn.split("_")[4]) for fn in fnames])
 
-    dtp = [("theta", np.float), ("phi", np.float), ("fname", fnames.dtype)]
+    dtp = [("theta", np.float64), ("phi", np.float64), ("fname", fnames.dtype)]
     drm_arr = np.empty(len(thetas), dtype=dtp)
     drm_arr["theta"] = thetas
     drm_arr["phi"] = phis
@@ -461,7 +461,7 @@ def main(args):
     resp_dir = "/storage/work/jjd330/local/bat_data/resp_tabs/"
     resp_arr = get_resp_arr(resp_dir)
     tab = Table.read(os.path.join(resp_dir, resp_arr["fname"][0]))
-    photonEs = ((tab["ENERG_LO"] + tab["ENERG_HI"]) / 2.0).astype(np.float)
+    photonEs = ((tab["ENERG_LO"] + tab["ENERG_HI"]) / 2.0).astype(np.float64)
     Nphabins = len(tab[2][2])
 
     in_layers = [1, 2, 3]

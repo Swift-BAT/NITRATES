@@ -164,11 +164,11 @@ def shift_resp_tab_pha_bins(
         new_resp = np.zeros((NphotonEs, len(new_pha_bins0)))
         for i in range(NphotonEs):
             new_resp[i] += shift_pha_bins(
-                resp_tab[cname][i].astype(np.float),
-                pha_bins0.astype(np.float),
-                pha_bins1.astype(np.float),
-                new_pha_bins0.astype(np.float),
-                new_pha_bins1.astype(np.float),
+                resp_tab[cname][i].astype(np.float64),
+                pha_bins0.astype(np.float64),
+                pha_bins1.astype(np.float64),
+                new_pha_bins0.astype(np.float64),
+                new_pha_bins1.astype(np.float64),
             )
         new_tab[cname] = new_resp
 
@@ -620,7 +620,7 @@ def get_resp_arr(drm_dir):
     thetas = np.array([float(fn.split("_")[2]) for fn in fnames])
     phis = np.array([float(fn.split("_")[4]) for fn in fnames])
 
-    dtp = [("theta", np.float), ("phi", np.float), ("fname", fnames.dtype)]
+    dtp = [("theta", np.float64), ("phi", np.float64), ("fname", fnames.dtype)]
     drm_arr = np.empty(len(thetas), dtype=dtp)
     drm_arr["theta"] = thetas
     drm_arr["phi"] = phis
@@ -746,8 +746,8 @@ class FlorResponseDPI(object):
     ):
         self.resp_dname = resp_dname
         self.pha_tab = pha_tab
-        self.orig_pha_emins = self.pha_tab["E_MIN"].astype(np.float)
-        self.orig_pha_emaxs = self.pha_tab["E_MAX"].astype(np.float)
+        self.orig_pha_emins = self.pha_tab["E_MIN"].astype(np.float64)
+        self.orig_pha_emaxs = self.pha_tab["E_MAX"].astype(np.float64)
         self.pha_emins = pha_emins
         self.pha_emaxs = pha_emaxs
         self.Nphabins = len(pha_emins)
@@ -813,8 +813,8 @@ class FlorResponseDPI(object):
     ):
         self.resp_dname = resp_dname
         self.pha_tab = pha_tab
-        self.orig_pha_emins = self.pha_tab["E_MIN"].astype(np.float)
-        self.orig_pha_emaxs = self.pha_tab["E_MAX"].astype(np.float)
+        self.orig_pha_emins = self.pha_tab["E_MIN"].astype(np.float64)
+        self.orig_pha_emaxs = self.pha_tab["E_MAX"].astype(np.float64)
         self.pha_emins = pha_emins
         self.pha_emaxs = pha_emaxs
         self.Nphabins = len(pha_emins)
@@ -902,7 +902,7 @@ class ResponseOutFoV(object):
         )
         self.PhotonEmins = tab["ENERG_LO"]
         self.PhotonEmaxs = tab["ENERG_HI"]
-        self.PhotonEs = ((self.PhotonEmins + self.PhotonEmaxs) / 2.0).astype(np.float)
+        self.PhotonEs = ((self.PhotonEmins + self.PhotonEmaxs) / 2.0).astype(np.float64)
         self.NphotonEs = len(self.PhotonEs)
 
         self.pha_emins = pha_emins
@@ -2863,7 +2863,7 @@ class Swift_Mask_Interactions(object):
         )
 
     def calc_dists(self):
-        self.dists = (self.does_int_mask.astype(np.float)) * self.d
+        self.dists = (self.does_int_mask.astype(np.float64)) * self.d
 
     def calc_tot_rhomu_dist(self):
         #         self.tot_rhomu_dists = np.zeros((self.ndets,self.Ne))
@@ -2958,7 +2958,7 @@ class ResponseInFoV(object):
         )
         self.PhotonEmins = tab["ENERG_LO"]
         self.PhotonEmaxs = tab["ENERG_HI"]
-        self.PhotonEs = ((self.PhotonEmins + self.PhotonEmaxs) / 2.0).astype(np.float)
+        self.PhotonEs = ((self.PhotonEmins + self.PhotonEmaxs) / 2.0).astype(np.float64)
         self.NphotonEs = len(self.PhotonEs)
 
         self.pha_emins = pha_emins
@@ -3827,9 +3827,9 @@ def main(args):
     )
 
     resp_file = fits.open(resp_fname)
-    pha_emins, pha_emaxs = resp_file[2].data["E_MIN"].astype(np.float), resp_file[
+    pha_emins, pha_emaxs = resp_file[2].data["E_MIN"].astype(np.float64), resp_file[
         2
-    ].data["E_MAX"].astype(np.float)
+    ].data["E_MAX"].astype(np.float64)
 
     ebins0 = np.array([15.0, 24.0, 35.0, 48.0, 64.0])
     ebins0 = np.append(ebins0, np.logspace(np.log10(84.0), np.log10(500.0), 5 + 1))[:-1]

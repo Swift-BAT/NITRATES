@@ -60,8 +60,8 @@ def get_sky_and_bkgvar_fnames(dname, t0, t1):
 
     dtp = [
         ("sky_fname", sky_fnames.dtype),
-        ("t0", np.float),
-        ("t1", np.float),
+        ("t0", np.float64),
+        ("t1", np.float64),
         ("bkgvar_fname", bkgvar_fnames.dtype),
     ]
 

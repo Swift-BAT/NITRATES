@@ -410,10 +410,10 @@ def multi_mutau_func(
 
     result = gauss_conv(
         res_pre_gauss,
-        pha_emins.astype(np.float),
-        pha_emaxs.astype(np.float),
-        emin_pre.astype(np.float),
-        emax_pre.astype(np.float),
+        pha_emins.astype(np.float64),
+        pha_emaxs.astype(np.float64),
+        emin_pre.astype(np.float64),
+        emax_pre.astype(np.float64),
         sigma,
     )
 
@@ -906,8 +906,8 @@ def main(args):
 
     pha_emins = ebins_tab["E_MIN"]
     pha_emaxs = ebins_tab["E_MAX"]
-    pha_emins = np.round(pha_emins.astype(np.float)[:-1], decimals=1)
-    pha_emaxs = np.round(pha_emaxs.astype(np.float)[:-1], decimals=1)
+    pha_emins = np.round(pha_emins.astype(np.float64)[:-1], decimals=1)
+    pha_emaxs = np.round(pha_emaxs.astype(np.float64)[:-1], decimals=1)
     pha_extras = np.round(
         np.logspace(np.log10(194.9), np.log10(500.0), 24 + 1), decimals=1
     )
@@ -938,7 +938,7 @@ def main(args):
     ebounds_tab = Table(
         data=[np.arange(len(pha_emaxs), dtype=np.int64), pha_emins, pha_emaxs],
         names=["CHANNEL", "E_MIN", "E_MAX"],
-        dtype=[np.int64, np.float, np.float],
+        dtype=[np.int64, np.float64, np.float64],
     )
 
     primary_hdu = fits.PrimaryHDU()

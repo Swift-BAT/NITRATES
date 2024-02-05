@@ -130,7 +130,7 @@ def get_fp_arr(fp_dir):
     fnames = np.array(os.listdir(fp_dir))
     imxs = np.array([float(fn.split("_")[1]) for fn in fnames])
     imys = np.array([float(fn.split("_")[2][:-4]) for fn in fnames])
-    dtp = [("imx", np.float), ("imy", np.float), ("fname", fnames.dtype)]
+    dtp = [("imx", np.float64), ("imy", np.float64), ("fname", fnames.dtype)]
     fp_arr = np.empty(len(imxs), dtype=dtp)
     fp_arr["imx"] = imxs
     fp_arr["imy"] = imys

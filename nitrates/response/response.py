@@ -22,11 +22,11 @@ class Response(object):
     def __init__(self, drm, ebins=None, cor_type="op"):
         self.drm = drm
         self.drm_mat = drm[1].data["MATRIX"]
-        self.drm_e0s = (drm[1].data["ENERG_LO"]).astype(np.float)
-        self.drm_e1s = (drm[1].data["ENERG_HI"]).astype(np.float)
+        self.drm_e0s = (drm[1].data["ENERG_LO"]).astype(np.float64)
+        self.drm_e1s = (drm[1].data["ENERG_HI"]).astype(np.float64)
         self.drm_emids = (
             (drm[1].data["ENERG_LO"] + drm[1].data["ENERG_HI"]) / 2.0
-        ).astype(np.float)
+        ).astype(np.float64)
         self.drm_nebins = len(self.drm_e0s)
         if ebins is not None:
             self.set_ebins(ebins[0], ebins[1])
@@ -166,11 +166,11 @@ def shift_resp_tab_pha_bins(
         new_resp = np.zeros((NphotonEs, len(new_pha_bins0)))
         for i in range(NphotonEs):
             new_resp[i] += shift_pha_bins(
-                resp_tab[cname][i].astype(np.float),
-                pha_bins0.astype(np.float),
-                pha_bins1.astype(np.float),
-                new_pha_bins0.astype(np.float),
-                new_pha_bins1.astype(np.float),
+                resp_tab[cname][i].astype(np.float64),
+                pha_bins0.astype(np.float64),
+                pha_bins1.astype(np.float64),
+                new_pha_bins0.astype(np.float64),
+                new_pha_bins1.astype(np.float64),
             )
         new_tab[cname] = new_resp
 
@@ -643,7 +643,7 @@ def get_resp_arr(drm_dir):
     thetas = np.array([float(fn.split("_")[2]) for fn in fnames])
     phis = np.array([float(fn.split("_")[4]) for fn in fnames])
 
-    dtp = [("theta", np.float), ("phi", np.float), ("fname", fnames.dtype)]
+    dtp = [("theta", np.float64), ("phi", np.float64), ("fname", fnames.dtype)]
     drm_arr = np.empty(len(thetas), dtype=dtp)
     drm_arr["theta"] = thetas
     drm_arr["phi"] = phis
@@ -782,8 +782,8 @@ class FlorResponseDPI(object):
     ):
         self.resp_dname = resp_dname
         self.pha_tab = pha_tab
-        self.orig_pha_emins = self.pha_tab["E_MIN"].astype(np.float)
-        self.orig_pha_emaxs = self.pha_tab["E_MAX"].astype(np.float)
+        self.orig_pha_emins = self.pha_tab["E_MIN"].astype(np.float64)
+        self.orig_pha_emaxs = self.pha_tab["E_MAX"].astype(np.float64)
         self.pha_emins = pha_emins
         self.pha_emaxs = pha_emaxs
         self.Nphabins = len(pha_emins)
@@ -1149,7 +1149,7 @@ class Swift_Mask_Interactions(object):
         self.Ndets_int_mask = np.sum(self.does_int_mask)
 
     def calc_dists(self):
-        self.dists = (self.does_int_mask.astype(np.float)) * self.d
+        self.dists = (self.does_int_mask.astype(np.float64)) * self.d
 
     def calc_tot_rhomu_dist(self):
         #         self.tot_rhomu_dists = np.zeros((self.ndets,self.Ne))
@@ -1251,7 +1251,7 @@ class ResponseInFoV(object):
         )
         self.PhotonEmins = tab["ENERG_LO"]
         self.PhotonEmaxs = tab["ENERG_HI"]
-        self.PhotonEs = ((self.PhotonEmins + self.PhotonEmaxs) / 2.0).astype(np.float)
+        self.PhotonEs = ((self.PhotonEmins + self.PhotonEmaxs) / 2.0).astype(np.float64)
         self.NphotonEs = len(self.PhotonEs)
 
         self.pha_emins = pha_emins
@@ -1554,8 +1554,8 @@ class CompFlorResponseDPI(object):
             fits_file0 = fits.open(fits_fname0)
         self.orig_photonEs = fits_file0[1].data["Ephoton"]
         self.Norig_photonEs = len(self.orig_photonEs)
-        self.orig_pha_emins = fits_file0[2].data["E_MIN"].astype(np.float)
-        self.orig_pha_emaxs = fits_file0[2].data["E_MAX"].astype(np.float)
+        self.orig_pha_emins = fits_file0[2].data["E_MIN"].astype(np.float64)
+        self.orig_pha_emaxs = fits_file0[2].data["E_MAX"].astype(np.float64)
         fits_file0.close()
 
         self.ndets = np.sum(bl_dmask)
@@ -1697,7 +1697,7 @@ class CompFlorResponseDPI(object):
             fname = "resp_by_sand_hpind_%d.fits" % (hp_ind)
         logging.debug("Openning file: %s" % (fname))
         fits_file = fits.open(os.path.join(self.resp_dname, fname))
-        resp_sand_imgs0 = fits_file[1].data["RESPONSE"].astype(np.float)
+        resp_sand_imgs0 = fits_file[1].data["RESPONSE"].astype(np.float64)
         if self.ShiftEbins:
             resp_sand_imgs0 = shift_sand_img_pha_bins(
                 resp_sand_imgs0,
@@ -1760,7 +1760,7 @@ class ResponseInFoV2(object):
         )
         self.PhotonEmins = tab["ENERG_LO"]
         self.PhotonEmaxs = tab["ENERG_HI"]
-        self.PhotonEs = ((self.PhotonEmins + self.PhotonEmaxs) / 2.0).astype(np.float)
+        self.PhotonEs = ((self.PhotonEmins + self.PhotonEmaxs) / 2.0).astype(np.float64)
         self.NphotonEs = len(self.PhotonEs)
 
         self.pha_emins = pha_emins

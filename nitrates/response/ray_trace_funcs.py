@@ -22,12 +22,12 @@ def get_rt_arr(rt_dir, ident="fwd_ray_trace"):
     imy1s = np.array([float(fn.split("_")[i0 + 3]) for fn in ray_trace_fnames])
 
     dtp = [
-        ("imx0", np.float),
-        ("imy0", np.float),
-        ("imx1", np.float),
-        ("imy1", np.float),
+        ("imx0", np.float64),
+        ("imy0", np.float64),
+        ("imx1", np.float64),
+        ("imy1", np.float64),
         ("fname", ray_trace_fnames.dtype),
-        ("time", np.float),
+        ("time", np.float64),
     ]
     ray_trace_arr = np.empty(len(imx0s), dtype=dtp)
     ray_trace_arr["imx0"] = imx0s
@@ -476,7 +476,7 @@ class ray_trace_file_npy(object):
 
     def setup_intp(self):
         self.a0_grid = np.zeros(
-            (len(self.imx_ax), len(self.imy_ax), 173, 286), dtype=np.float32
+            (len(self.imx_ax), len(self.imy_ax), 173, 286), dtype=np.float6432
         )
         self.a1_grid = np.zeros_like(self.a0_grid)
         self.a2_grid = np.zeros_like(self.a0_grid)
