@@ -10,7 +10,7 @@ def get_drm_arr(drm_dir):
     imxs = np.array([float(fn.split("_")[1]) for fn in drm_fnames])
     imys = np.array([float(fn.split("_")[2]) for fn in drm_fnames])
 
-    dtp = [("imx", np.float), ("imy", np.float), ("fname", drm_fnames.dtype)]
+    dtp = [("imx", np.float64), ("imy", np.float64), ("fname", drm_fnames.dtype)]
     drm_arr = np.empty(len(imxs), dtype=dtp)
     drm_arr["imx"] = imxs
     drm_arr["imy"] = imys

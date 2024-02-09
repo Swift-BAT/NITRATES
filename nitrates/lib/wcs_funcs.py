@@ -5,8 +5,8 @@ from astropy.wcs import WCS
 def world2val(w, img, imxs, imys):
     #     pnts = np.vstack([imxs, imys]).T
     xinds, yinds = w.wcs_world2pix(imxs, imys, 0)
-    int0_xinds = np.floor(xinds).astype(np.int)
-    int0_yinds = np.floor(yinds).astype(np.int)
+    int0_xinds = np.floor(xinds).astype(np.int64)
+    int0_yinds = np.floor(yinds).astype(np.int64)
     if np.any(int0_xinds <= 0):
         int0_xinds[(int0_xinds <= 0)] = 0
     if np.any(int0_yinds <= 0):

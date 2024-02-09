@@ -412,7 +412,7 @@ def analysis_for_imxy_square(
     imx_ax = np.arange(0, dimxy, imxstep)
     imy_ax = np.arange(0, dimxy, imstep)
     imxg, imyg = np.meshgrid(imx_ax, imy_ax)
-    bl = np.isclose((imyg * 1e4).astype(np.int) % int(imstep * 2 * 1e4), 0)
+    bl = np.isclose((imyg * 1e4).astype(np.int64) % int(imstep * 2 * 1e4), 0)
     imxg[bl] += imxstep / 2.0
     imxs = np.ravel(imxg) + imx0
     imys = np.ravel(imyg) + imy0
@@ -962,7 +962,7 @@ def main(args):
     #     elif args.square_id >= 0:
     #         bl = (square_tab['squareID']==args.square_id)
     #     else:
-    #         bl = np.ones(len(square_tab), dtype=np.bool)
+    #         bl = np.ones(len(square_tab), dtype=bool)
     #     square_tab = square_tab[bl]
 
     logging.info("Read in Square Seed Table, now to do analysis")

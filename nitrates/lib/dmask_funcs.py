@@ -8,7 +8,7 @@ from ..lib.gti_funcs import check_if_in_GTI
 
 def combine_detmasks(detmask_list):
     dmask = np.ones(detmask_list[0].shape)
-    bl = np.ones(detmask_list[0].shape, dtype=np.bool)
+    bl = np.ones(detmask_list[0].shape, dtype=bool)
 
     for detmask in detmask_list:
         bl = bl & (detmask == 0)

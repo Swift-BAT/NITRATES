@@ -221,8 +221,8 @@ def get_Es_Zs_PixIDs_detxys_from_root_file(fname):
     pos_xs = np.array(pos_xs)
     pos_ys = np.array(pos_ys)
     detxs, detys = batxy2detxy(pos_xs / 10.0, pos_ys / 10.0)
-    detxs = np.round(detxs).astype(np.int)
-    detys = np.round(detys).astype(np.int)
+    detxs = np.round(detxs).astype(np.int64)
+    detys = np.round(detys).astype(np.int64)
 
     return Edeps * 1e3, (wtd_zs - 29.87) / 10.0, pix_ids, detxs, detys
 
@@ -235,9 +235,9 @@ def get_stuff_from_Erun(dname):
     print(fnames)
     edeps = np.empty(0)
     zs = np.empty(0)
-    pix_ids = np.empty(0, dtype=np.int)
-    detxs = np.empty(0, dtype=np.int)
-    detys = np.empty(0, dtype=np.int)
+    pix_ids = np.empty(0, dtype=np.int64)
+    detxs = np.empty(0, dtype=np.int64)
+    detys = np.empty(0, dtype=np.int64)
     Ngammas = 0
     for i, fname in enumerate(fnames):
         print(i)
@@ -266,13 +266,13 @@ def get_stuff_from_Erun(dname):
     return PrimaryE, Ngammas, edeps, zs, pix_ids, detxs, detys
 
 
-left_pixids = np.arange(8, dtype=np.int)
-right_pixids = np.arange(120, 128, dtype=np.int)
+left_pixids = np.arange(8, dtype=np.int64)
+right_pixids = np.arange(120, 128, dtype=np.int64)
 bot_pixids = np.append(
-    np.arange(0, 57, 8, dtype=np.int), np.arange(71, 128, 8, dtype=np.int)
+    np.arange(0, 57, 8, dtype=np.int64), np.arange(71, 128, 8, dtype=np.int64)
 )
 top_pixids = np.append(
-    np.arange(7, 64, 8, dtype=np.int), np.arange(64, 121, 8, dtype=np.int)
+    np.arange(7, 64, 8, dtype=np.int64), np.arange(64, 121, 8, dtype=np.int64)
 )
 Ntot_dets = 32768
 Nleft_dets = len(left_pixids) * 256
@@ -315,7 +315,7 @@ def get_dist_dicts(dname):
         fnames = [fname for fname in os.listdir(direc) if "root" in fname]
         Edeps = np.empty(0)
         wtd_zs = np.empty(0)
-        pix_ids = np.empty(0, dtype=np.int)
+        pix_ids = np.empty(0, dtype=np.int64)
         Ngammas_tot = 0
 
         for fname in fnames:
@@ -717,7 +717,7 @@ def get_dist_dicts2(dname, theta, phi):
             print()
             #     ndets = Nsands*Ndets_per_sand_no_edges
             #     print ndets
-            #     bl_cols = np.zeros(len(bl), dtype=np.bool)
+            #     bl_cols = np.zeros(len(bl), dtype=bool)
             bl_cols = (detxs >= detxs_by_sand0[col0]) & (
                 detxs <= detxs_by_sand1[col1 - 1]
             )
@@ -955,7 +955,7 @@ def get_dist_dicts2(dname, theta, phi):
             print()
             #     ndets = Nsands*Ndets_per_sand_no_edges
             #     print ndets
-            #     bl_cols = np.zeros(len(bl), dtype=np.bool)
+            #     bl_cols = np.zeros(len(bl), dtype=bool)
             bl_cols = (detxs >= detxs_by_sand0[col0]) & (
                 detxs <= detxs_by_sand1[col1 - 1]
             )

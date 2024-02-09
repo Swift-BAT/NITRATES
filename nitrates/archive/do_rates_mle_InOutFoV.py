@@ -117,7 +117,7 @@ def get_rates_resp_arr(drm_dir):
     imxs = np.array([float(fn.split("_")[2]) for fn in fnames])
     imys = np.array([float(fn.split("_")[4]) for fn in fnames])
 
-    dtp = [("imx", np.float), ("imy", np.float), ("fname", fnames.dtype)]
+    dtp = [("imx", np.float64), ("imy", np.float64), ("fname", fnames.dtype)]
     drm_arr = np.empty(len(imxs), dtype=dtp)
     drm_arr["imx"] = imxs
     drm_arr["imy"] = imys
@@ -133,9 +133,9 @@ def get_rates_resp_arr_outFoV(drm_dir):
     thetas = 90.0 - lats
 
     dtp = [
-        ("hp_ind", np.int),
-        ("theta", np.float),
-        ("phi", np.float),
+        ("hp_ind", np.int64),
+        ("theta", np.float64),
+        ("phi", np.float64),
         ("fname", fnames.dtype),
     ]
     drm_arr = np.empty(len(thetas), dtype=dtp)

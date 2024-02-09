@@ -93,7 +93,7 @@ def mk_sim_evdata(sim_mod, sim_params, dur, tstart):
     col_names = ["TIME", "DET_ID", "EVENT_FLAGS", "PHA", "DETX", "DETY", "PI", "ENERGY"]
     # only need to assign, TIME, DETX, and DETY
     # make all flags 0, and the rest don't matter
-    tab = Table(names=["DETX", "DETY", "ENERGY"], dtype=(np.int64, np.int64, np.float64))
+    tab = Table(names=["DETX", "DETY", "ENERGY"], dtype=(np.int64, np.int64, np.float))
 
     ebins0 = sim_mod.ebins0
     ebins1 = sim_mod.ebins1
