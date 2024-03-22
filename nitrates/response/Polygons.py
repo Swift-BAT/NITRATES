@@ -335,7 +335,7 @@ class Polygon2D(object):
             else:
                 return self.path.contains_point(path_pnt)
         else:
-            bl_goodz = np.ones(len(detx), dtype=np.bool)
+            bl_goodz = np.ones(len(detx), dtype=bool)
             if src_theta < np.pi / 2.0:
                 bl_goodz[((z - detz) < (-z_height / 2.0))] = False
             else:
@@ -431,8 +431,8 @@ class Box_Polygon(object):
         y1s = np.nan * np.ones_like(detx)
         z1s = np.nan * np.ones_like(detx)
 
-        has_int0 = np.zeros_like(detx, dtype=np.bool)
-        has_int1 = np.zeros_like(detx, dtype=np.bool)
+        has_int0 = np.zeros_like(detx, dtype=bool)
+        has_int1 = np.zeros_like(detx, dtype=bool)
 
         for poly_face in self.face_poly_list:
             does_int, x, y, z = poly_face.does_intersect(

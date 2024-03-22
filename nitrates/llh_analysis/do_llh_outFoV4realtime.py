@@ -163,7 +163,7 @@ def get_new_Epeaks_gammas2scan(
     gammas = gammas.ravel()
     Epeaks = Epeaks.ravel()
 
-    bl = np.ones(len(Epeaks), dtype=np.bool)
+    bl = np.ones(len(Epeaks), dtype=bool)
     for i in range(len(Epeaks)):
         bl[i] = np.any(
             ~(np.isclose(Epeaks[i], Epeaks_done) & np.isclose(gammas[i], gammas_done))
@@ -462,7 +462,7 @@ def main(args):
     if proc_num >= 0:
         bl = seed_tab["proc_group"] == proc_num
     else:
-        bl = np.ones(len(seed_tab), dtype=np.bool)
+        bl = np.ones(len(seed_tab), dtype=bool)
     seed_tab = seed_tab[bl]
 
     logging.info("Read in Seed Table, now to do analysis")

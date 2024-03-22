@@ -130,7 +130,7 @@ def get_fp_arr(fp_dir):
     fnames = np.array(os.listdir(fp_dir))
     imxs = np.array([float(fn.split("_")[1]) for fn in fnames])
     imys = np.array([float(fn.split("_")[2][:-4]) for fn in fnames])
-    dtp = [("imx", np.float), ("imy", np.float), ("fname", fnames.dtype)]
+    dtp = [("imx", np.float64), ("imy", np.float64), ("fname", fnames.dtype)]
     fp_arr = np.empty(len(imxs), dtype=dtp)
     fp_arr["imx"] = imxs
     fp_arr["imy"] = imys
@@ -388,7 +388,7 @@ def min_det_fp_nllh2(
 
 def get_cnts_from_tbins_ebins(evdata, tbins0, tbins1, ebins0, ebins1):
     nebins = len(ebins0)
-    hist = np.zeros((len(tbins0), nebins), dtype=np.int)
+    hist = np.zeros((len(tbins0), nebins), dtype=np.int64)
 
     ebins = np.append(ebins0, [ebins1[-1]])
     ntbins = len(tbins0)

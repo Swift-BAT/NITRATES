@@ -255,11 +255,11 @@ def get_merged_csv_df(csv_fnames, direc=None, ignore_index=False):
     for csv_fname in csv_fnames:
         try:
             if direc is None:
-                dfs.append(pd.read_csv(csv_fname, dtype={"timeID": np.int}))
+                dfs.append(pd.read_csv(csv_fname, dtype={"timeID": np.int64}))
             else:
                 dfs.append(
                     pd.read_csv(
-                        os.path.join(direc, csv_fname), dtype={"timeID": np.int}
+                        os.path.join(direc, csv_fname), dtype={"timeID": np.int64}
                     )
                 )
         except Exception as E:
@@ -286,10 +286,10 @@ def get_merged_csv_df_wpos(
     for csv_fname in csv_fnames:
         try:
             if direc is None:
-                tab = pd.read_csv(csv_fname, dtype={"timeID": np.int})
+                tab = pd.read_csv(csv_fname, dtype={"timeID": np.int64})
             else:
                 tab = pd.read_csv(
-                    os.path.join(direc, csv_fname), dtype={"timeID": np.int}
+                    os.path.join(direc, csv_fname), dtype={"timeID": np.int64}
                 )
             if len(tab) > 0:
                 # att_ind = np.argmin(np.abs(attfile['TIME'] - trigger_time))
@@ -425,7 +425,7 @@ def mk_seed_tab(rates_res, TS_min=3.75, im_steps=20):
 
 
 def get_hist2d_neib_inds(shape, indss, bins):
-    sqids = []  # np.empty(0,dtype=np.int)
+    sqids = []  # np.empty(0,dtype=np.int64)
     imx0s = []  # np.empty(0)
     imx1s = []  # np.empty(0)
     imy0s = []  # np.empty(0)
@@ -665,7 +665,7 @@ def assign_in_seeds2jobs(seed_tab, Nmax_jobs=96):
     Ntbins_perSq = float(Ntot) / Nsquares
     logging.info("Tbins per Square: %.2f" % (Ntbins_perSq))
 
-    job_ids = np.zeros(Ntot, dtype=np.int) - 1
+    job_ids = np.zeros(Ntot, dtype=np.int64) - 1
 
     if Nsquares <= Nmax_jobs and Ntbins_perSq < 4:
         Njobs = Nsquares
@@ -748,10 +748,10 @@ def mk_out_seed_tab(in_seed_tab, hp_inds, att_q, Nside=2**4, Nmax_jobs=24):
         durs.append(np.nanmean(df["dur"]))
 
     Nseeds = Npix * Ntbins
-    job_ids = np.zeros(Nseeds, dtype=np.int) - 1
+    job_ids = np.zeros(Nseeds, dtype=np.int64) - 1
     times = np.zeros(Nseeds)
     durss = np.zeros(Nseeds)
-    hpinds = np.zeros(Nseeds, dtype=np.int)
+    hpinds = np.zeros(Nseeds, dtype=np.int64)
     ras = np.zeros(Nseeds)
     decs = np.zeros(Nseeds)
     thetas = np.zeros(Nseeds)
@@ -2090,7 +2090,7 @@ def main(args):
     #
     # if Npeaks < Njobs:
     #     Njobs = Npeaks
-    #     peaks_tab['jobID'] = np.arange(Njobs, dtype=np.int)
+    #     peaks_tab['jobID'] = np.arange(Njobs, dtype=np.int64)
     # else:
     #     jobids = np.array([i%Njobs for i in range(Npeaks)])
     #     peaks_tab['jobID'] = jobids

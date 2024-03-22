@@ -229,7 +229,7 @@ def main(args):
             bl = ~np.isin(obsids, ql_db_tab["obsid"])
         except Exception as E:
             logging.error(E)
-            bl = np.ones(len(obsids), dtype=np.bool)
+            bl = np.ones(len(obsids), dtype=bool)
         new_obsids = obsids[bl]
         Nnew = len(new_obsids)
         Nobsids = len(obsids)

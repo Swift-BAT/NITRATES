@@ -102,7 +102,7 @@ def mk_sig_imgs_pix(
     w_t = WCS(PC.header, key="T")
     pc = PC.data
     pc_bl = pc >= 0.1
-    dtp = [("snr", np.float), ("imx", np.float), ("imy", np.float)]
+    dtp = [("snr", np.float64), ("imx", np.float64), ("imy", np.float64)]
 
     Nimgs = len(args_dict_list)
     for i in range(Nimgs):
@@ -379,7 +379,7 @@ def get_sig_pix(arg_dict):
     imy_inds = np.digitize(imxys[1], bins=bins[1]) - 1
 
     job_inds = np.arange(19)
-    job_ids = -1 * np.ones(len(imx_inds), dtype=np.int)
+    job_ids = -1 * np.ones(len(imx_inds), dtype=np.int64)
 
     imx_bins0 = [
         -1.2,

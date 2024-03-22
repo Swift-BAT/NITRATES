@@ -41,19 +41,19 @@ def get_bldmask_alldets():
 
     all_good_detxs = np.ravel(
         [
-            np.arange(detxs_by_sand0[i], detxs_by_sand1[i] + 1, 1, dtype=np.int)
+            np.arange(detxs_by_sand0[i], detxs_by_sand1[i] + 1, 1, dtype=np.int64)
             for i in range(16)
         ]
     )
     all_good_detys = np.ravel(
         [
-            np.arange(detys_by_sand0[i], detys_by_sand1[i] + 1, 1, dtype=np.int)
+            np.arange(detys_by_sand0[i], detys_by_sand1[i] + 1, 1, dtype=np.int64)
             for i in range(16)
         ]
     )
 
-    detxax = np.arange(286, dtype=np.int)
-    detyax = np.arange(173, dtype=np.int)
+    detxax = np.arange(286, dtype=np.int64)
+    detyax = np.arange(173, dtype=np.int64)
     detx_dpi, dety_dpi = np.meshgrid(detxax, detyax)
     bl_alldets = np.isin(detx_dpi, all_good_detxs) & np.isin(dety_dpi, all_good_detys)
     return bl_alldets
@@ -112,8 +112,8 @@ def mk_in_out_rates_tab_masks(sig_mod, theta, phi):
         print("Only %d dets in FoV" % (in_ndets))
         return None, None, None
 
-    mask_in = np.zeros(dpi_shape, dtype=np.bool)
-    mask_out = np.zeros(dpi_shape, dtype=np.bool)
+    mask_in = np.zeros(dpi_shape, dtype=bool)
+    mask_out = np.zeros(dpi_shape, dtype=bool)
     mask_in[sig_mod.bl_dmask] = in_fov_bl
     mask_out[sig_mod.bl_dmask] = out_fov_bl
 

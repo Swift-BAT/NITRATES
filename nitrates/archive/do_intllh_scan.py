@@ -850,7 +850,7 @@ class Point_Source_Model_Wuncoded(Model):
             return self._fp
         else:
             fp = self.fp_obj.get_fp(imx, imy)
-            self._fp = fp[self.bl_dmask].astype(np.int)
+            self._fp = fp[self.bl_dmask].astype(np.int64)
             self._unfp = 1 - self._fp
             self.uncoded = self._fp < 0.1
             # self._drt_dx = drt_dx[self.bl_dmask]
@@ -1259,7 +1259,7 @@ class LLH_webins(object):
         self.dt = 0.0
         self.t1 = t1
 
-        t_bl = np.zeros(len(self._all_data), dtype=np.bool)
+        t_bl = np.zeros(len(self._all_data), dtype=bool)
         for i in range(len(self.t0)):
             t_bl = np.logical_or(
                 (self._all_data["TIME"] >= self.t0[i])
@@ -1644,8 +1644,8 @@ def do_analysis(
             gammas = np.zeros(Npix)
             imxs_ = np.zeros(Npix)
             imys_ = np.zeros(Npix)
-            Nfevs = np.zeros(Npix, dtype=np.int)
-            Statuss = np.zeros(Npix, dtype=np.int)
+            Nfevs = np.zeros(Npix, dtype=np.int64)
+            Statuss = np.zeros(Npix, dtype=np.int64)
 
             for ii in range(Npix):
                 params_["Signal_imx"] = imxs[ii]

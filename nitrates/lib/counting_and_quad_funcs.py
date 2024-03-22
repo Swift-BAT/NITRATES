@@ -29,7 +29,7 @@ def ev2quad_ids(ev):
     x_mid = 142
     y_mid = 86
 
-    quad_ids = -1 * np.ones(len(ev), dtype=np.int)
+    quad_ids = -1 * np.ones(len(ev), dtype=np.int64)
 
     bl0 = (ev["DETX"] < x_mid) & (ev["DETY"] < y_mid)
     quad_ids[bl0] = 0

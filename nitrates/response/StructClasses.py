@@ -434,7 +434,7 @@ class Swift_Structure_Mask(object):
         does_int = self.mask_poly.does_intersect(
             self.theta, self.phi, self.batxs, self.batys, self.batzs
         )
-        self.dists = does_int.astype(np.float) * self.d
+        self.dists = does_int.astype(np.float64) * self.d
 
     def calc_tot_rhomu_dist(self):
         #         self.tot_rhomu_dists = np.zeros((self.ndets,self.Ne))

@@ -118,16 +118,16 @@ def evfnames2write(
     for evf in evfnames:
         tab = Table.read(evf)
         if "bevshpo" in evf:
-            tab["SLEW"] = np.zeros(len(tab), dtype=np.int)
+            tab["SLEW"] = np.zeros(len(tab), dtype=np.int64)
             gti_pnts.append(Table.read(evf, hdu=2))
         elif "bevshsl" in evf:
-            tab["SLEW"] = np.ones(len(tab), dtype=np.int)
+            tab["SLEW"] = np.ones(len(tab), dtype=np.int64)
             gti_slews.append(Table.read(evf, hdu=2))
         elif "bevshsp" in evf:
-            tab["SLEW"] = 2 * np.ones(len(tab), dtype=np.int)
+            tab["SLEW"] = 2 * np.ones(len(tab), dtype=np.int64)
             gti_slewpnts.append(Table.read(evf, hdu=2))
         else:
-            tab["SLEW"] = 2 * np.ones(len(tab), dtype=np.int)
+            tab["SLEW"] = 2 * np.ones(len(tab), dtype=np.int64)
             gti_slewpnts.append(Table.read(evf, hdu=2))
         tabs.append(tab)
     ev_data = vstack(tabs)
@@ -265,7 +265,7 @@ def get_event(args):
 
         # times2cover = np.arange(int(met_trig_time)-45,int(met_trig_time)+45)
         times2cover = np.arange(int(met_trig_time) - 30, int(met_trig_time) + 30)
-        times_coverd = np.zeros(len(times2cover), dtype=np.bool)
+        times_coverd = np.zeros(len(times2cover), dtype=bool)
 
         ev_fnames = []
         for index, row in ev_data_table.iterrows():

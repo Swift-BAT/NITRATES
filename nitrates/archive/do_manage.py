@@ -173,7 +173,7 @@ def get_merged_csv_df(csv_fnames):
     dfs = []
     for csv_fname in csv_fnames:
         try:
-            dfs.append(pd.read_csv(csv_fname, dtype={"timeID": np.int}))
+            dfs.append(pd.read_csv(csv_fname, dtype={"timeID": np.int64}))
         except Exception as E:
             logging.error(E)
             continue
@@ -196,10 +196,10 @@ def get_merged_csv_df_wpos(csv_fnames, attfile, perc_map=None, direc=None):
     for csv_fname in csv_fnames:
         try:
             if direc is None:
-                tab = pd.read_csv(csv_fname, dtype={"timeID": np.int})
+                tab = pd.read_csv(csv_fname, dtype={"timeID": np.int64})
             else:
                 tab = pd.read_csv(
-                    os.path.join(direc, csv_fname), dtype={"timeID": np.int}
+                    os.path.join(direc, csv_fname), dtype={"timeID": np.int64}
                 )
             if len(tab) > 0:
                 # att_ind = np.argmin(np.abs(attfile['TIME'] - trigger_time))
@@ -1128,7 +1128,7 @@ def main(args):
 
     if Npeaks < Njobs:
         Njobs = Npeaks
-        peaks_tab["jobID"] = np.arange(Njobs, dtype=np.int)
+        peaks_tab["jobID"] = np.arange(Njobs, dtype=np.int64)
     else:
         jobids = np.array([i % Njobs for i in range(Npeaks)])
         peaks_tab["jobID"] = jobids

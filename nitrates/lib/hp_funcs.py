@@ -130,7 +130,7 @@ def pc_gwmap2good_pix(
     good_decs = pc_decs[pc_gw_bl]
 
     dtp = np.dtype(
-        [("imx", np.float), ("imy", np.float), ("ra", np.float), ("dec", np.float)]
+        [("imx", np.float64), ("imy", np.float64), ("ra", np.float64), ("dec", np.float64)]
     )
 
     pix_arr = np.empty(np.sum(pc_gw_bl), dtype=dtp)

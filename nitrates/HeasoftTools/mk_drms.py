@@ -204,8 +204,8 @@ def main(args):
 
     inds = w.all_world2pix(imxs.ravel(), imys.ravel(), 0)
 
-    inds[0] = inds[0].astype(np.int)
-    inds[1] = inds[1].astype(np.int)
+    inds[0] = inds[0].astype(np.int64)
+    inds[1] = inds[1].astype(np.int64)
 
     pcs = pc0.data[inds[1], inds[0]]
     ras, decs = w2.all_pix2world(inds[0], inds[1], 0)

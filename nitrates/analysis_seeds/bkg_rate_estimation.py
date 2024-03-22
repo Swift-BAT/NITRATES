@@ -291,7 +291,7 @@ class Cubic_Rates(object):
         self.A3s = np.zeros((self.n_lin_pnts, self.nebins))
         self.errs = np.zeros((self.n_lin_pnts, self.nebins))
         self.chi2s = np.zeros_like(self.errs)
-        self.dof = np.zeros((self.n_lin_pnts, self.nebins), dtype=np.int)
+        self.dof = np.zeros((self.n_lin_pnts, self.nebins), dtype=np.int64)
 
         self.npars = self.deg + 1
         # self.dof = int(self.bkg_exp/self.bin_size) - self.npars
@@ -420,7 +420,7 @@ class Linear_Rates(object):
         self.ints = np.zeros_like(self.slopes)
         self.errs = np.zeros_like(self.slopes)
         self.chi2s = np.zeros_like(self.errs)
-        self.dof = np.zeros((self.n_lin_pnts, self.nebins), dtype=np.int)
+        self.dof = np.zeros((self.n_lin_pnts, self.nebins), dtype=np.int64)
         self.sig_clip = sig_clip
 
         self.npars = self.deg + 1
@@ -454,7 +454,7 @@ class Linear_Rates(object):
 
             for j in range(self.nebins):
                 try:
-                    bl = np.ones(len(_cnts[:, j]), dtype=np.bool)
+                    bl = np.ones(len(_cnts[:, j]), dtype=bool)
                     if self.sig_clip is not None:
                         avg = np.mean(_cnts[:, j])
                         std = np.std(_cnts[:, j])
@@ -553,7 +553,7 @@ class Average_Rates(object):
         self.means = np.zeros((self.n_lin_pnts, self.nebins))
         self.errs = np.zeros_like(self.means)
         self.chi2s = np.zeros_like(self.errs)
-        self.dof = np.zeros((self.n_lin_pnts, self.nebins), dtype=np.int)
+        self.dof = np.zeros((self.n_lin_pnts, self.nebins), dtype=np.int64)
 
         self.npars = self.deg + 1
         # self.dof = int(self.bkg_exp/self.bin_size) - self.npars

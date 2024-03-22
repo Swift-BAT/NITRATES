@@ -310,9 +310,9 @@ def make_timeID(time, duration, trig_time):
 
 def make_timeIDs(times, durs, trig_time):
     dts = times - trig_time
-    dts = np.round(dts * 1000, decimals=0).astype(np.int)
+    dts = np.round(dts * 1000, decimals=0).astype(np.int64)
     str0s = dts.astype(np.str_)
-    durs_ = np.round(durs * 1000, decimals=0).astype(np.int)
+    durs_ = np.round(durs * 1000, decimals=0).astype(np.int64)
     str1s = durs_.astype(np.str_)
 
     bl = durs < 1
@@ -650,7 +650,7 @@ def update_twind_stat(conn, timeID, col="BlipsFounds", val=1):
 def write_cat2db(conn, cat_fname, timeID):
     cat = fits.open(cat_fname)[1].data
 
-    blipIDs = np.arange(len(cat), dtype=np.int)
+    blipIDs = np.arange(len(cat), dtype=np.int64)
 
     df_dict = {
         "blipID": blipIDs,
@@ -673,7 +673,7 @@ def write_cats2db(conn, cat_fnames, timeID):
     for i, cat_fname in enumerate(cat_fnames):
         cat = fits.open(cat_fname)[1].data
 
-        blipIDs = np.arange(len(cat), dtype=np.int) + blipID0
+        blipIDs = np.arange(len(cat), dtype=np.int64) + blipID0
         blipID0 = np.max(blipIDs) + 1
 
         df_dict = {
