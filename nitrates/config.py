@@ -14,7 +14,7 @@ if bat_data_dir is None:
     bat_data_dir = "."
 
 
-NITRATES_RESP_DIR = "/gpfs/group/jak51/default/responses/"  # None #"/Users/tparsota/Documents/BAT_SCRIPTS/NITRATES_BAT_RSP_FILES/" # env variable can be used or this can be set
+NITRATES_RESP_DIR = "/storage/group/jak51/default/responses/"  # None #"/Users/tparsota/Documents/BAT_SCRIPTS/NITRATES_BAT_RSP_FILES/" # env variable can be used or this can be set
 if NITRATES_RESP_DIR is None:
     NITRATES_RESP_DIR = os.getenv("NITRATES_RESP_DIR")
 if NITRATES_RESP_DIR is None:

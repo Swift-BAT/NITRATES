@@ -130,7 +130,7 @@ def cli():
         "--save_dir",
         type=str,
         help="Directory to save data to",
-        default="/gpfs/group/jak51/default/realtime_workdir/",
+        default="/storage/group/jak51/default/realtime_workdir/",
     )
     parser.add_argument(
         "--dbfname", type=str, help="Name of the sqlite database", default=None
@@ -139,7 +139,7 @@ def cli():
         "--htmldir",
         type=str,
         help="bash script to run analysis",
-        default="/gpfs/group/jak51/default/realtime_workdir/htmls",
+        default="/storage/group/jak51/default/realtime_workdir/htmls",
     )
     args = parser.parse_args()
     return args
