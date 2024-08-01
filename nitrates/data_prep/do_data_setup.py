@@ -325,8 +325,8 @@ def get_event(args):
         N_evfiles = len(ev_data_table)
         logging.info(str(N_evfiles) + " event files found")
 
-        tstarts = Time(ev_data_table.UTCstart.values.astype(np.str), format="isot")
-        tstops = Time(ev_data_table.UTCstop.values.astype(np.str), format="isot")
+        tstarts = Time(ev_data_table.UTCstart.values.astype(str), format="isot")
+        tstops = Time(ev_data_table.UTCstop.values.astype(str), format="isot")
         logging.info("Tstarts: ")
         logging.info(tstarts.isot)
         logging.info("Tstopts: ")
