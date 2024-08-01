@@ -168,3 +168,72 @@ def err_circle2prob_map(ra, dec, err_rad, Nside=None, sys_err=5.0):
 
     m /= m.sum()
     return m
+
+
+def get_dlogl_skymap(res_peak_tab, res_in_tab, res_out_tab, timeID, att_q, pc_map):
+    
+
+    bl = np.isclose(res_peak_tab['timeID'],timeID)
+    bl0 = np.isclose(res_in_tab['timeID'],timeID)
+    bl_out = np.isclose(res_out_tab['timeID'],timeID)
+
+    res_all_in = pd.concat([res_peak_tab[bl], res_in_tab[bl0]])
+    idx = res_all_in.groupby(['imx','imy'])['TS'].transform(max) == res_all_in['TS']
+    tab_imxy = res_all_in[idx]
+    
+    tab_imxy['ra'], tab_imxy['dec'] = convert_imxy2radec(tab_imxy['imx'], tab_imxy['imy'], att_q)
+    
+    min_nllh = np.min(tab_imxy['nllh'])
+    
+    Nside = 2**4
+    res_out_tab['ra'], res_out_tab['dec'] = hp.pix2ang(Nside, res_out_tab['hp_ind'], nest=True, lonlat=True)
+
+    idx = res_out_tab[bl_out].groupby(['hp_ind'])['TS'].transform(max) == res_out_tab[bl_out]['TS']
+    res_hpmax_tab = res_out_tab[bl_out][idx]
+    
+    diff_nllh_out = np.max(res_hpmax_tab['nllh'][np.isfinite(res_hpmax_tab['nllh'])]) - np.min(res_hpmax_tab['nllh'])
+    print('diff nllh out: ', diff_nllh_out)
+    
+    min_nllh = min(min_nllh, np.min(res_hpmax_tab['nllh']))
+    
+    ras, decs = tab_imxy['ra'].values, tab_imxy['dec'].values
+    nllhs = tab_imxy['nllh'].values
+    ras = np.append(ras, res_hpmax_tab['ra'].values)
+    decs = np.append(decs, res_hpmax_tab['dec'].values)
+    nllhs = np.append(nllhs, res_hpmax_tab['nllh'].values)
+    
+    bl = (ras>310)
+    ras = np.append(ras, ras[bl] - 360.0)
+    decs = np.append(decs, decs[bl])
+    nllhs = np.append(nllhs, nllhs[bl])
+
+    bl = (ras<50)
+    ras = np.append(ras, ras[bl] + 360.0)
+    decs = np.append(decs, decs[bl])
+    nllhs = np.append(nllhs, nllhs[bl])
+
+    max_dec = np.max(decs)
+
+    dec_add = 2*(90.0 - max_dec)
+
+    bl = (decs > (max_dec - 0.1))
+
+    ras = np.append(ras, ras[bl])
+    decs = np.append(decs, decs[bl] + dec_add)
+    nllhs = np.append(nllhs, nllhs[bl])
+
+    bl = (decs < -(max_dec - 0.1))
+
+    ras = np.append(ras, ras[bl])
+    decs = np.append(decs, decs[bl] - dec_add)
+    nllhs = np.append(nllhs, nllhs[bl])
+    
+    pnts = np.array([ras, decs]).T
+    interp = interpolate.LinearNDInterpolator(pnts, nllhs)
+    
+    nside = 2**11
+    ra_m, dec_m = hp.pix2ang(nside, np.arange(hp.nside2npix(nside), dtype=np.int64), lonlat=True, nest=True)
+    nllhs0 = np.zeros_like(ra_m)
+    nllhs0 = interp(ra_m, dec_m)
+    
+    return nllhs0
