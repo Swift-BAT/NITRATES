@@ -5,6 +5,8 @@ from astropy.io import fits
 from ..lib.coord_conv_funcs import convert_imxy2radec, convert_radec2imxy
 from ..lib.wcs_funcs import world2val
 import logging, traceback
+import pandas as pd
+from scipy import interpolate
 
 
 def ang_sep(ra0, dec0, ra1, dec1):
