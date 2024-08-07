@@ -237,5 +237,9 @@ def get_dlogl_skymap(res_peak_tab, res_in_tab, res_out_tab, timeID, att_q, pc_ma
     ra_m, dec_m = hp.pix2ang(nside, np.arange(hp.nside2npix(nside), dtype=np.int64), lonlat=True, nest=True)
     nllhs0 = np.zeros_like(ra_m)
     nllhs0 = interp(ra_m, dec_m)
-    
+    logging.debug('max(nllhs0) = %.3f'%(np.nanmax(nllhs0)))
+    logging.debug('min(nllhs0) = %.3f'%(np.nanmin(nllhs0)))
+    logging.debug('len(nllhs0) = %d'%(len(nllhs0)))
+    logging.debug('sum(np.isnan(nllhs0)) = %d'%(np.sum(np.isnan(nllhs0))))
+
     return nllhs0
