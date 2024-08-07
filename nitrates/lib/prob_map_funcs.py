@@ -244,7 +244,9 @@ def write_moc_skymap(skymap, filename, name=0):
     tab = Table()
     tab['UNIQ'] = skymap.uniq.astype(np.int32)
 #     tab['PROB'] = (skymap.data*skymap.pixarea()).astype(np.float32) / u.steradian
-    tab['PROBDENSITY'] = (skymap.data).astype(np.float32) / u.steradian
+    prob_dens = (skymap.data).astype(np.float32)
+    prob_dens[(prob_dens<=0)] = 0.0
+    tab['PROBDENSITY'] = prob_dens / u.steradian
     
     tab.write(filename, overwrite=True)
     
