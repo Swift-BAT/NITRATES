@@ -5,6 +5,8 @@ import mhealpy as mhp
 from astropy import units as u
 from astropy.table import Table
 from astropy.io import fits
+import logging, traceback
+
 
 from ..lib.coord_conv_funcs import (
     convert_imxy2radec,
@@ -28,8 +30,11 @@ def get_prob_map(nllhs0, att_q, pc_map, ifov_fact=1.0, ofov_fact=0.5, dllh_out=0
     diff_nllh_out = np.max(nllhs0[bl_out&bl_good]) - np.min(nllhs0[bl_out&bl_good])
     print('diff nllh out: ', diff_nllh_out)
     
+    logging.debug('len(ra_m) = %d'%(len(ra_m)))
     
     theta_m, phi_m = convert_radec2thetaphi(ra_m, dec_m, att_q)
+
+    logging.debug('converted ra, dec to theta, phi')
     
     bl = (theta_m>=40)&(theta_m<71)&(phi_m>240)&(phi_m<=270)&(pc_map<=1e-3)
     nllhs0[bl] -= 0.25*diff_nllh_out*((71 - theta_m[bl])/(71-40))*(np.abs(phi_m[bl] - 240)/(270-240))
@@ -38,6 +43,8 @@ def get_prob_map(nllhs0, att_q, pc_map, ifov_fact=1.0, ofov_fact=0.5, dllh_out=0
     
     bl = (theta_m>=93)
     nllhs0[bl] -= 0.05*diff_nllh_out*(np.abs(theta_m[bl] - 93) / (180-93))
+
+    logging.debug('adjusted ofov llh')
 
     dlogls = (nllhs0 - np.nanmin(nllhs0))
     
@@ -126,6 +133,7 @@ def get_earth_sat_pos(sao_row):
 
 def rm_earth_prob_map(prob_map, sao_tab, trigger_time):
 
+    nside = hp.npix2nside(len(prob_map))
 
     sao_ind = np.argmin(np.abs(sao_tab['TIME']-trigger_time))
     sao_row = sao_tab[sao_ind]    
@@ -156,13 +164,16 @@ def probm2perc(pmap):
 
     return perc_map
 
-def pmap2moc_map(prob_map, pc_map, att_row, max_bytes=2.9e6):
+def pmap2moc_map(prob_map, pcfname, att_row, max_bytes=2.9e6):
 
     nside = hp.npix2nside(len(prob_map))
+
+    logging.debug('nside = %d'%(nside))
 
     prob_map2 = np.copy(prob_map)
     perc_map2 = probm2perc(prob_map)
     pc_map2 = pcfile2hpmap(pcfname, att_row, nside)
+
     max_perc = 0.999
 
     
@@ -195,19 +206,19 @@ def pmap2moc_map(prob_map, pc_map, att_row, max_bytes=2.9e6):
             return False
         
         
-    mmap = mhp.HealpixMap.adaptive_moc_mesh(nside2, split_func, density=True, unit=1/u.steradian)
+    mmap = mhp.HealpixMap.adaptive_moc_mesh(nside, split_func, density=True, unit=1/u.steradian)
     if mmap.uniq.nbytes >= max_bytes:
         max_perc = 0.99
         print(max_perc, mmap.uniq.nbytes)
-        mmap = mhp.HealpixMap.adaptive_moc_mesh(nside2, split_func, density=True, unit=1/u.steradian)
+        mmap = mhp.HealpixMap.adaptive_moc_mesh(nside, split_func, density=True, unit=1/u.steradian)
         if mmap.uniq.nbytes >= max_bytes:
             max_perc = 0.98
             print(max_perc, mmap.uniq.nbytes)
-            mmap = mhp.HealpixMap.adaptive_moc_mesh(nside2, split_func, density=True, unit=1/u.steradian)
+            mmap = mhp.HealpixMap.adaptive_moc_mesh(nside, split_func, density=True, unit=1/u.steradian)
             if mmap.uniq.nbytes >= max_bytes:
                 max_perc = 0.97
                 print(max_perc, mmap.uniq.nbytes)
-                mmap = mhp.HealpixMap.adaptive_moc_mesh(nside2, split_func, density=True, unit=1/u.steradian)
+                mmap = mhp.HealpixMap.adaptive_moc_mesh(nside, split_func, density=True, unit=1/u.steradian)
                 if mmap.uniq.nbytes >= max_bytes:
                     nside2 = 2**9
                     print('nside to', nside2)
@@ -222,7 +233,7 @@ def pmap2moc_map(prob_map, pc_map, att_row, max_bytes=2.9e6):
                         print(max_perc, mmap.uniq.nbytes)
                         mmap = mhp.HealpixMap.adaptive_moc_mesh(nside2, split_func, density=True, unit=1/u.steradian)
 
-    ras, decs = mmap.pix2ang(np.arange(len(mmap.uniq)), lonlat=True)   
+    ras, decs = mmap.pix2ang(np.arange(len(mmap.uniq)), lonlat=True)
     mmap[:] = hp.get_interp_val(prob_map/hp.nside2pixarea(nside), ras, decs, nest=True, lonlat=True)/u.steradian
             
     return mmap
