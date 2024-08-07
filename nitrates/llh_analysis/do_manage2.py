@@ -33,10 +33,10 @@ from ..lib.coord_conv_funcs import (
     imxy2theta_phi,
     convert_radec2imxy,
 )
-from ..lib.hp_funcs import pc_probmap2good_outFoVmap_inds, get_dlogl_skymap
+from ..lib.hp_funcs import pc_probmap2good_outFoVmap_inds, get_dlogl_skymap, pcfile2hpmap
 from ..lib.search_config import Config
 from ..response.response import get_pc
-from ..lib.prob_map_funcs import pmap2moc_map, rm_earth_prob_map, write_moc_skymap
+from ..lib.prob_map_funcs import pmap2moc_map, rm_earth_prob_map, write_moc_skymap, get_prob_map
 
 
 def cli():
@@ -713,7 +713,7 @@ def mk_seeds_tab_rest_of_ifov(timeID, orig_seed_tab, trigtime, bl_dmask, im_step
     seed_tab0['proc_group'] = np.arange(len(seed_tab0), dtype=int)%max_jobid
 
     seed_tab = pd.concat([seed_tab0, orig_seed_tab])
-    seed_tab.drop_duplicates(["timeID", 'squareID'], inplace=True)
+    seed_tab.drop_duplicates(["timeID", 'squareID'], inplace=True, keep='last')
     return seed_tab
 
 
@@ -2055,12 +2055,14 @@ def main(args):
         seed_tab = mk_seeds_tab_rest_of_ifov(best_timeID, seed_in_tab, trigtime, bl_dmask)
         seed_tab.to_csv("rate_seeds.csv", index=False)
 
-        Ntot_in_fnames = len(seed_in_tab.groupby(["squareID", "proc_group"]))
+        Ntot_in_fnames = len(seed_tab.groupby(["squareID", "proc_group"]))
+
+        logging.info("Ntot_in_fnames = %d"%(Ntot_in_fnames))
 
         Njobs_in = args.N_infov_jobs + args.N_outfov_jobs
 
         logging.info("Submitting %d in FoV Jobs now" % (Njobs_in))
-        extra_args = '--logfname scan --keep_all'
+        extra_args = '--log_fname scan --keep_all'
         sub_jobs(
             Njobs_in,
             "Scan_" + args.GWname,
@@ -2097,34 +2099,45 @@ def main(args):
 
         if DoneIn:
 
+            logging.info("Done running IFOV Scan")
+
             res_in_fnames = get_in_res_fnames()
-            print(len(res_in_fnames))
+            logging.debug("%d in fnames"%(len(res_in_fnames)))
             res_in_tab = get_max_merged_csv_df(res_in_fnames)
             bl = (res_in_tab['timeID']==best_timeID)
             res_in_tab = res_in_tab[bl]
+            logging.debug("read in all in files")
 
             res_peak_fnames = get_peak_res_fnames()
-            print(len(res_peak_fnames))
+            logging.debug("%d in peak fnames"%(len(res_peak_fnames)))
             res_peak_tab = get_merged_csv_df(res_peak_fnames)
             print(len(res_peak_tab))
             bl = (res_peak_tab['timeID']==best_timeID)
             res_peak_tab = res_peak_tab[bl]
+            logging.debug("read in all peak files")
 
             res_out_fnames = get_out_res_fnames()
-            print(len(res_out_fnames))
+            logging.debug("%d out fnames"%(len(res_out_fnames)))
             res_out_tab = get_merged_csv_df(res_out_fnames)
             print(len(res_out_tab))
-            bl = (res_peak_tab['timeID']==best_timeID)
+            bl = (res_out_tab['timeID']==best_timeID)
             res_out_tab = res_out_tab[bl]
-            tmid = np.nanmean(res_out_tab['TIME'])
+            logging.debug("read in all out files")
+            logging.debug('len(res_out_tab) = %d'%(len(res_out_tab)))
+            logging.debug('mean(res_out_tab[time]) = %.3f'%(np.mean(res_out_tab['time'])))
+            tmid = np.nanmean(res_out_tab['time'])
+            logging.debug('tmid = %.3f'%(tmid))
 
             att_ind = np.argmin(np.abs(attfile["TIME"] - tmid))
-            att_row = att_tab[att_ind]
+            att_row = attfile[att_ind]
             att_q = att_row['QPARAM']
+            logging.debug('att_q:')
+            logging.debug(att_q)
 
 
             nside = 2**11
             # TODO: Need to have option for when pc_file is not there
+            logging.debug("Trying to make pc map now")
             try:
                 pc_map = pcfile2hpmap(args.pcfname, att_row, nside)
             except Exception as E:
@@ -2153,7 +2166,7 @@ def main(args):
                 logging.warn("trouble getting sao file, Earth is still there")
 
             logging.info('converting to moc map')
-            moc_map = pmap2moc_map(prob_map, pc_map, att_row)
+            moc_map = pmap2moc_map(prob_map, args.pcfname, att_row)
 
             moc_map_fname = args.GWname + '_moc_prob_map.fits'
             logging.info('writing moc map to ')
