@@ -329,7 +329,7 @@ def timeID2time_dur(timeID, trig_time):
     if len(strID) <= 4:
         dur = float(strID) / 1000.0
         dt = 0.0
-    elif strID[-5] == '16384':
+    elif strID[-5:] == '16384':
         dur = float(strID[-5:]) / 1000.0
         if len(strID) == 5:
             dt = 0.0
