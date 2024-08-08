@@ -139,6 +139,8 @@ def rm_earth_prob_map(prob_map, sao_tab, trigger_time):
     sao_row = sao_tab[sao_ind]    
 
     earth_ra, earth_dec, earth_rad = get_earth_sat_pos(sao_row)
+    logging.debug('Earth ra, dec = %.2f, %.2f, Radius = %.2f'%(earth_ra, earth_dec, earth_rad))
+    logging.debug('sao dt = %.3f'%(sao_row['TIME'] - trigger_time))
 
     earth_vec = hp.ang2vec(earth_ra, earth_dec, lonlat=True)
     earth_inds = hp.query_disc(nside, earth_vec, np.radians(earth_rad), nest=True)
