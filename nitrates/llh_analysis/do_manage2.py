@@ -1273,6 +1273,9 @@ def get_sao_file(trigtime):
 
     obsid = None
 
+    if trigtime[-1] != 'z':
+        trigtime += 'z'
+
     afst = ObsQuery(begin=trigtime)
     if len(afst) == 1:
         obsid = afst[0].obsid
@@ -2154,6 +2157,7 @@ def main(args):
 
             try:
                 sao_fname = get_sao_file(search_config.trigtime)
+                logging.debug('sao_fname: ' + sao_fname)
                 if sao_fname is not None:
                     sao_tab = Table.read(sao_fname)
                     prob_map = rm_earth_prob_map(prob_map, sao_tab, tmid)
