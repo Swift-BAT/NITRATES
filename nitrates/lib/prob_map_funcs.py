@@ -196,6 +196,10 @@ def pmap2moc_map(prob_map, pcfname, att_row, max_bytes=2.9e6):
         if order >= 10:
             return False
 
+        if order < ofov_order:
+            return True
+
+
         for ind in range(start, stop):
 
             if pc_map2[ind] > 1e-3 and perc_map2[ind] < max_perc:
