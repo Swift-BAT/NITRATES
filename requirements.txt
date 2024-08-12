@@ -33,6 +33,7 @@ pytz>=2022.2.1
 requests>=2.27.1
 scipy>=1.5.4
 six>=1.16.0
+swifttools>=3.0.22
 soupsieve>=2.3.2.post1
 urllib3>=1.26.12
 voevent-parse>=1.0.3
