@@ -224,7 +224,7 @@ def analysis_at_theta_phi(
 
     # sig_mod = Source_Model_OutFoV(flux_mod, [ebins0,ebins1], bl_dmask, use_deriv=True)
     sig_mod = Source_Model_InOutFoV(
-        flux_mod, [ebins0, ebins1], bl_dmask, rt_obj, use_deriv=True
+        flux_mod, [ebins0, ebins1], bl_dmask, rt_obj, use_deriv=True, use_tube_corr=True, use_under_corr=True
     )
     # sig_mod.flor_resp_dname = '/gpfs/scratch/jjd330/bat_data/flor_resps_ebins/'
     sig_mod.set_theta_phi(theta, phi)

@@ -7,7 +7,7 @@
 
 # CALDB stuff
 #CALDB=/storage/work/jjd330/caldb_files; export CALDB
-source $CALDB/software/tools/caldbinit.sh
+#source $CALDB/software/tools/caldbinit.sh
 
 
 

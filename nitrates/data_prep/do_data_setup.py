@@ -5,6 +5,7 @@ from astropy.io import fits
 from astropy.time import Time, TimeDelta
 from astropy.table import Table, vstack
 import os
+import shutil
 import sys
 import time
 from datetime import datetime
@@ -46,6 +47,7 @@ from ..lib.gti_funcs import (
     find_and_remove_cr_glitches,
 )
 from ..data_scraping.db_ql_funcs import get_gainoff_fname
+from ..data_scraping.api_funcs import get_sao_file
 from ..HeasoftTools.bat_tool_funcs import bateconvert
 from ..lib.search_config import Config
 
@@ -325,8 +327,8 @@ def get_event(args):
         N_evfiles = len(ev_data_table)
         logging.info(str(N_evfiles) + " event files found")
 
-        tstarts = Time(ev_data_table.UTCstart.values.astype(np.str), format="isot")
-        tstops = Time(ev_data_table.UTCstop.values.astype(np.str), format="isot")
+        tstarts = Time(ev_data_table.UTCstart.values.astype(str), format="isot")
+        tstops = Time(ev_data_table.UTCstop.values.astype(str), format="isot")
         logging.info("Tstarts: ")
         logging.info(tstarts.isot)
         logging.info("Tstopts: ")
@@ -596,6 +598,12 @@ def get_acs(args, trigtime):
         return
     return acs_tab
 
+def get_sao(args):
+
+    fname = get_sao_file(args.trig_time)
+    new_fname = os.path.join(args.work_dir,'sao.fits')
+    shutil.move(fname, new_fname)
+    return new_fname
 
 def cli():
     parser = argparse.ArgumentParser()
@@ -786,6 +794,13 @@ def main(args):
         return -1
 
     ev_fname = evfnames2write(evfname, dmask, args.work_dir, acs_tab)
+
+    try:
+        sao_fname = get_sao(args)
+    except Exception as E:
+        logging.warning("Couldn't get sao file")
+        logging.error(E)
+        logging.error(traceback.format_exc())        
 
     logging.info("Finally got all the data")
 
