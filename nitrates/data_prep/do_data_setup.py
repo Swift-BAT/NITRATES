@@ -46,6 +46,7 @@ from ..lib.gti_funcs import (
     find_and_remove_cr_glitches,
 )
 from ..data_scraping.db_ql_funcs import get_gainoff_fname
+from ..data_scraping.api_funcs import get_sao_file
 from ..HeasoftTools.bat_tool_funcs import bateconvert
 from ..lib.search_config import Config
 
@@ -596,6 +597,12 @@ def get_acs(args, trigtime):
         return
     return acs_tab
 
+def get_sao(args):
+
+    fname = get_sao_file(args.trig_time)
+    new_fname = os.path.join(args.work_dir,'sao.fits')
+    shutil.move(fname, new_fname)
+    return new_fname
 
 def cli():
     parser = argparse.ArgumentParser()
@@ -786,6 +793,13 @@ def main(args):
         return -1
 
     ev_fname = evfnames2write(evfname, dmask, args.work_dir, acs_tab)
+
+    try:
+        sao_fname = get_sao(args)
+    except Exception as E:
+        logging.warning("Couldn't get sao file")
+        logging.error(E)
+        logging.error(traceback.format_exc())        
 
     logging.info("Finally got all the data")
 
