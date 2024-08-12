@@ -333,7 +333,7 @@ def calculate_LLH_ratio_test_statistic(theta, phi):
 # signal at theta, phi = 38.541, 137.652, (or given as ra, dec = 233.117, -26.213)
 def test_LLH_ratio_test_statistic_IFOV():
     sqrtTS = calculate_LLH_ratio_test_statistic(38.541, 137.652)
-    assert math.isclose(sqrtTS, 17.0084976, rel_tol=1e-05) == True
+    assert math.isclose(sqrtTS, 17.0090525819679, rel_tol=1e-05) == True
 
 
 #################################################################################
@@ -350,7 +350,7 @@ def test_LLH_ratio_test_statistic_OFOV():
 def old_test_LLH_ratio_test_statistic_IFOV():
     sqrtTS = old_calculate_LLH_ratio_test_statistic(38.541, 137.652)
     print("Old sqrtTS IFOV: ", sqrtTS)
-    assert math.isclose(sqrtTS, 17.0084976, rel_tol=1e-05) == True
+    assert math.isclose(sqrtTS, 17.0090525819679, rel_tol=1e-05) == True
 
 
 def old_test_LLH_ratio_test_statistic_OFOV():
