@@ -37,6 +37,7 @@ from ..lib.hp_funcs import pc_probmap2good_outFoVmap_inds, get_dlogl_skymap, pcf
 from ..lib.search_config import Config
 from ..response.response import get_pc
 from ..lib.prob_map_funcs import pmap2moc_map, rm_earth_prob_map, write_moc_skymap, get_prob_map
+from ..data_scraping.api_funcs import get_sao_file
 
 
 def cli():
@@ -1264,37 +1265,6 @@ def get_outFoVmap_inds(
     return good_map, good_hp_inds
 
 
-def get_sao_file(trigtime):
-
-    from swifttools.swift_too import Data, Clock, ObsQuery
-    from urllib.request import urlretrieve
-
-    filename_suffix = "sao.fits.gz"
-
-    obsid = None
-
-    if trigtime[-1] != 'z':
-        trigtime += 'z'
-
-    afst = ObsQuery(begin=trigtime)
-    if len(afst) == 1:
-        obsid = afst[0].obsid
-    print(obsid)
-
-        
-    d = Data()
-    d.obsid = obsid
-    d.bat = True
-    d.match = f"*{filename_suffix}"
-    d.uksdc = True
-
-    if d.submit():
-        if len(d.entries) == 1:
-            urlretrieve(d[0].url, d[0].filename)
-            fname = d[0].filename
-
-    return fname
-
 
 def main(args):
     fname = "manager"
@@ -2156,7 +2126,10 @@ def main(args):
             prob_map = get_prob_map(dlogl_map, att_q, pc_map)
 
             try:
-                sao_fname = get_sao_file(search_config.trigtime)
+                if os.path.exists('sao.fits'):
+                    sao_fname = 'sao.fits'
+                else:
+                    sao_fname = get_sao_file(search_config.trigtime)
                 logging.debug('sao_fname: ' + sao_fname)
                 if sao_fname is not None:
                     sao_tab = Table.read(sao_fname)
