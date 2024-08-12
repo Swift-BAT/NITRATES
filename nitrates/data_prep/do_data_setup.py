@@ -5,6 +5,7 @@ from astropy.io import fits
 from astropy.time import Time, TimeDelta
 from astropy.table import Table, vstack
 import os
+import shutil
 import sys
 import time
 from datetime import datetime
