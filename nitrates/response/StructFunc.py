@@ -66,10 +66,55 @@ def get_full_struct_manager(Es=None, structs2ignore=[]):
     )
     XRT_fast = Swift_Structure(XRT_fast_cyl, AL, Name="XRTfast")
 
+
+    # Star tracker
+
+    star_track_cent = (25.4+31.855+2., 88.45-11.594+6.0, 113.486)
+
+    star_track_elec_box0_cent = (star_track_cent[0] + 0, star_track_cent[1] + 9, star_track_cent[2] - 9)
+    star_track_elec_box1_cent = (star_track_cent[0] + 0, star_track_cent[1] - 9, star_track_cent[2] - 9)
+
+
+    star_track_elecs_half_dims = [8.5, 8.5, 8.5]
+
+    star_track_elecs_box0 = Box_Polygon(
+        star_track_elecs_half_dims[0],
+        star_track_elecs_half_dims[1],
+        star_track_elecs_half_dims[2],
+        np.array(star_track_elec_box0_cent),
+    )
+
+    star_track_elecs_box1 = Box_Polygon(
+        star_track_elecs_half_dims[0],
+        star_track_elecs_half_dims[1],
+        star_track_elecs_half_dims[2],
+        np.array(star_track_elec_box1_cent),
+    )
+
+    Star_Track_Elecs_Box0 = Swift_Structure(star_track_elecs_box0, ElecMixDense, Name='StarTrackElecBox0')
+    Star_Track_Elecs_Box1 = Swift_Structure(star_track_elecs_box1, ElecMixDense, Name='StarTrackElecBox1')
+
+    star_track_col_r0 = 5.0
+    star_track_col_r1 = 5.7
+    star_track_col_half_length = 9.0
+
+    star_track_cyl0_cent = (star_track_cent[0] + 0, star_track_cent[1] + 9, star_track_cent[2] - 8.5)
+    star_track_cyl1_cent = (star_track_cent[0] + 0, star_track_cent[1] - 9, star_track_cent[2] - 8.5)
+
+    star_track_cyl0 = Cylinder_Polygon(star_track_cyl0_cent[0], star_track_cyl0_cent[1], star_track_cyl0_cent[2],\
+                                    star_track_col_r0, star_track_col_r1, star_track_col_half_length)
+
+    star_track_cyl1 = Cylinder_Polygon(star_track_cyl1_cent[0], star_track_cyl1_cent[1], star_track_cyl1_cent[2],\
+                                    star_track_col_r0, star_track_col_r1, star_track_col_half_length)
+
+    star_track_col0 = Swift_Structure(star_track_cyl0, CarbonFibre, Name='StarTrackColl0')
+    star_track_col1 = Swift_Structure(star_track_cyl1, CarbonFibre, Name='StarTrackColl1')
+
+
     # Spacecraft Body
     body_pos = (0.0, 43.0, -198.701)
     body_r0 = 79.0
-    body_r1 = 80.0
+    body_r1 = 82.0
     body_half_height = 150.0
 
     body_cyl = Cylinder_Polygon(
@@ -247,13 +292,17 @@ def get_full_struct_manager(Es=None, structs2ignore=[]):
         XRT_baffe,
         XRT_optics,
         XRT_fast,
-        PCB0,
-        PCB1,
+        # PCB0,
+        # PCB1,
         Obs_Bench,
         DAP,
-        ElecBox0,
-        ElecBox1,
+        # ElecBox0,
+        # ElecBox1,
         Body,
+        Star_Track_Elecs_Box0,
+        Star_Track_Elecs_Box1,
+        star_track_col0,
+        star_track_col1
     ]
 
     if not "Shield" in structs2ignore:

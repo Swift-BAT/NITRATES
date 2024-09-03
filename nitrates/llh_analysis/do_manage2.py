@@ -7,6 +7,7 @@ from astropy.table import Table
 from astropy.io import fits
 from astropy.wcs import WCS
 from scipy import interpolate
+from scipy.special import logsumexp
 import os, socket, subprocess
 import argparse
 import logging, traceback
@@ -23,7 +24,7 @@ from ..lib.helper_funcs import (
     send_email_wHTML,
 )
 
-from ..lib.sqlite_funcs import get_conn
+from ..lib.sqlite_funcs import get_conn, timeID2time_dur
 from ..lib.dbread_funcs import get_files_tab, get_info_tab, guess_dbfname
 from ..lib.coord_conv_funcs import (
     convert_imxy2radec,
@@ -32,9 +33,11 @@ from ..lib.coord_conv_funcs import (
     imxy2theta_phi,
     convert_radec2imxy,
 )
-from ..lib.hp_funcs import pc_probmap2good_outFoVmap_inds
+from ..lib.hp_funcs import pc_probmap2good_outFoVmap_inds, get_dlogl_skymap, pcfile2hpmap
 from ..lib.search_config import Config
 from ..response.response import get_pc
+from ..lib.prob_map_funcs import pmap2moc_map, rm_earth_prob_map, write_moc_skymap, get_prob_map
+from ..data_scraping.api_funcs import get_sao_file
 
 
 def cli():
@@ -98,25 +101,25 @@ def cli():
         "--BKGpyscript",
         type=str,
         help="Name of python script for Bkg Estimation",
-        default="do_bkg_estimation_wPSs_mp2.py",
+        default="nitrates.llh_analysis.do_bkg_estimation_wPSs_mp2",
     )
     parser.add_argument(
         "--RATEpyscript",
         type=str,
         help="Name of python script for Rates analysis",
-        default="do_rates_mle_InOutFoV2.py",
+        default="nitrates.analysis_seeds.do_rates_mle_InOutFoV2",
     )
     parser.add_argument(
         "--LLHINpyscript",
         type=str,
         help="Name of python script for LLH analysis",
-        default="do_llh_inFoV4realtime2.py",
+        default="nitrates.llh_analysis.do_llh_inFoV4realtime2",
     )
     parser.add_argument(
         "--LLHOUTpyscript",
         type=str,
         help="Name of python script for LLH analysis",
-        default="do_llh_outFoV4realtime2.py",
+        default="nitrates.llh_analysis.do_llh_outFoV4realtime2",
     )
     # parser.add_argument('--SCANpyscript', type=str,\
     #         help="Name of python script for FoV scan",\
@@ -154,8 +157,8 @@ def cli():
     parser.add_argument(
         "--pbs_arr_fname",
         type=str,
-        help="Name of pbs script",
-        default="/gpfs/group/jak51/default/nitrates_realtime/NITRATES/submission_scripts/pyscript_template_array.pbs",
+        help="Name of submit script",
+        default="/storage/group/jak51/default/Alfred/sub_scripts/slurm/pyscript_template_array_sub.sh",
     )
     parser.add_argument(
         "--min_pc", type=float, help="Min partial coding fraction to use", default=0.1
@@ -170,10 +173,19 @@ def cli():
         "--rateTScut", type=float, help="Min split det TS for seeding", default=4.5
     )
     parser.add_argument(
+        "--TS4map", type=float, help="Min TS for making skymap", default=7.0
+    )
+    parser.add_argument(
         "--api_token",
         type=str,
         help="EchoAPI key for interactions.",
         default=None
+    )
+    parser.add_argument(
+        "--sub_type",
+        type=str,
+        help="cluster submission type, (slurm, pbs)",
+        default='slurm'
     )
 
     args = parser.parse_args()
@@ -320,6 +332,25 @@ def get_merged_csv_df_wpos(
     df = pd.concat(dfs, ignore_index=ignore_index)
     return df
 
+
+def get_max_merged_csv_df(fnames, dname=None):
+    
+    dfs = []
+    for fname in fnames:
+        try:
+            if dname is None:
+                df = pd.read_csv(fname)            
+            else:
+                df = pd.read_csv(os.path.join(dname,fname))
+            idx = df.groupby(['imx','imy','timeID'])['TS'].transform(max) == df['TS']
+            tab_imxy = df[idx]
+            dfs.append(tab_imxy)
+        except Exception as E:
+            logging.error(E)
+            print(fname)
+            continue
+    df = pd.concat(dfs, ignore_index=True)
+    return df
 
 def mk_seed_tab4scans(
     res_tab, pc_fname, rate_seed_tab, TS_min=6.5, im_steps=20, pc_min=0.1
@@ -629,6 +660,64 @@ def mk_in_seed_tab(
     return seed_tab
 
 
+def mk_seeds_tab_rest_of_ifov(timeID, orig_seed_tab, trigtime, bl_dmask, im_steps=25):
+    
+    met, dur = timeID2time_dur(timeID, trigtime)
+
+    imxax = np.linspace(-2, 2, im_steps * 4 + 1)
+    imyax = np.linspace(-1, 1, im_steps * 2 + 1)
+    # imyg, imxg = np.meshgrid((imyax[1:]+imyax[:-1])/2., (imxax[1:]+imxax[:-1])/2.)
+    bins = [imxax, imyax]
+
+
+    xs = np.linspace(-1.8, 1.8, 4*36+1)
+    ys = np.linspace(-1, 1, 4*20+1)
+    xgrid, ygrid = np.meshgrid(xs, ys)
+    xs = xgrid.ravel()
+    ys = ygrid.ravel()
+    thetas = np.rad2deg(np.arctan(np.sqrt(xs**2 + ys**2)))
+
+
+    blgood = (thetas<40.0)
+
+    print(np.sum(~blgood))
+
+    pcs = np.zeros(np.sum(~blgood))
+
+    thetas, phis = imxy2theta_phi(xs[~blgood],ys[~blgood])
+
+    pcs = get_pc(bl_dmask, thetas, phis)
+
+    pcs_ = np.ones_like(xs)
+    pcs_[~blgood] = pcs
+
+    blgood = (pcs_>5e-3)
+    xs = xs[blgood]
+    ys = ys[blgood]
+
+    h = np.histogram2d(xs, ys, bins=bins)[0]
+    inds = np.where(h > 0)
+
+    seed_dict = {}
+
+    seed_dict["timeID"] = timeID
+    seed_dict["dur"] = dur
+    seed_dict["time"] = met
+
+    seed_dict["squareID"],seed_dict["imx0"],seed_dict["imx1"],seed_dict["imy0"],seed_dict["imy1"] =\
+        get_hist2d_neib_inds(h.shape, inds, bins)
+
+    seed_tab0 = pd.DataFrame(seed_dict)
+    
+    max_jobid = np.max(orig_seed_tab['proc_group'])
+    
+    seed_tab0['proc_group'] = np.arange(len(seed_tab0), dtype=int)%max_jobid
+
+    seed_tab = pd.concat([seed_tab0, orig_seed_tab])
+    seed_tab.drop_duplicates(["timeID", 'squareID'], inplace=True, keep='last')
+    return seed_tab
+
+
 def mk_in_seed_tab_archive(rates_res, twind_size, tbin_size=60.0, TS_min=4.5):
     tbins0 = np.arange(-twind_size - 1.0, twind_size + 1.0, tbin_size)
     tbins1 = tbins0 + tbin_size
@@ -899,11 +988,12 @@ def sub_jobs(
     workdir=None,
     qos=None,
     q=None,
-    ssh=True,
+    ssh=False,
     extra_args=None,
     ppn=1,
     rhel7=False,
     array=True,
+    sub_type='slurm'
 ):
     hostname = socket.gethostname()
 
@@ -913,144 +1003,138 @@ def sub_jobs(
     if "aci.ics" in hostname and "amon" not in hostname:
         ssh = False
 
-    if ssh:
-        ssh_cmd = 'ssh aci-b.aci.ics.psu.edu "'
-        server = "aci-b.aci.ics.psu.edu"
-        server = "submit.aci.ics.psu.edu"
-        server = "submit-001.aci.ics.psu.edu"
-        server = "submit-010.aci.ics.psu.edu"
-        # client = paramiko.SSHClient()
-        # client.load_system_host_keys()
-        # client.connect(server)
-        client = get_ssh_client(server)
-        # base_sub_cmd = 'qsub %s -A %s -N %s -v '\
-        #             %(args.pbs_fname, args.queue, args.name)
-    if qos is not None:
-        if rhel7:
-            if q is None:
-                base_sub_cmd = (
-                    "qsub %s -A %s -N %s -l nodes=1:ppn=%d -l qos=%s -l feature=rhel7 -v "
-                    % (pbs_fname, queue, name, ppn, qos)
-                )
-            else:
-                base_sub_cmd = (
-                    "qsub %s -A %s -q %s -N %s -l nodes=1:ppn=%d -l qos=%s -l feature=rhel7 -v "
-                    % (pbs_fname, queue, q, name, ppn, qos)
-                )
-        else:
-            if q is None:
-                base_sub_cmd = "qsub %s -A %s -N %s -l nodes=1:ppn=%d -l qos=%s -v " % (
-                    pbs_fname,
-                    queue,
-                    name,
-                    ppn,
-                    qos,
-                )
-            else:
-                base_sub_cmd = (
-                    "qsub %s -A %s -q %s -N %s -l nodes=1:ppn=%d -l qos=%s -v "
-                    % (pbs_fname, queue, q, name, ppn, qos)
-                )
-    else:
-        if rhel7:
-            if q is None:
-                base_sub_cmd = (
-                    "qsub %s -A %s -N %s -l nodes=1:ppn=%d -l feature=rhel7 -v "
-                    % (pbs_fname, queue, name, ppn)
-                )
-            else:
-                base_sub_cmd = (
-                    "qsub %s -A %s -q %s -N %s -l nodes=1:ppn=%d -l feature=rhel7 -v "
-                    % (pbs_fname, queue, q, name, ppn)
-                )
-        else:
-            if q is None:
-                base_sub_cmd = "qsub %s -A %s -N %s -l nodes=1:ppn=%d -v " % (
-                    pbs_fname,
-                    queue,
-                    name,
-                    ppn,
-                )
-            else:
-                base_sub_cmd = "qsub %s -A %s -q %s -N %s -l nodes=1:ppn=%d -v " % (
-                    pbs_fname,
-                    queue,
-                    q,
-                    name,
-                    ppn,
-                )
-
     if workdir is None:
         workdir = os.getcwd()
     if extra_args is None:
         extra_args = ""
 
-    cmd = ""
-    cmds = []
-    jobids = []
-
-    if array and not ssh:
-        if njobs > 1:
-            cmd_ = 'workdir=%s,njobs=%d,pyscript=%s,extra_args="%s" -t 0-%d' % (
-                workdir,
-                njobs,
-                pyscript,
-                extra_args,
-                njobs - 1,
-            )
-        else:
-            cmd_ = 'workdir=%s,njobs=%d,pyscript=%s,extra_args="%s"' % (
-                workdir,
-                njobs,
-                pyscript,
-                extra_args,
-            )
-        cmd = base_sub_cmd + cmd_
-        logging.info("Trying to submit: ")
-        logging.info(cmd)
-
-        try:
-            os.system(cmd)
-            # subprocess.check_call(cmd, shell=True)
-        except Exception as E:
-            logging.error(E)
-            logging.error("Messed up with ")
-            logging.error(cmd)
-        return
-    for i in range(njobs):
-        # cmd_ = 'jobid=%d,workdir=%s,njobs=%d,pyscript=%s' %(i,workdir,njobs,pyscript)
-        cmd_ = 'jobid=%d,workdir=%s,njobs=%d,pyscript=%s,extra_args="%s"' % (
-            i,
-            workdir,
-            njobs,
-            pyscript,
-            extra_args,
+    if sub_type == 'slurm':
+        base_sub_cmd = (
+            "sbatch -J %s -n %d --export="
+            % (name, ppn)
         )
+        if array and not ssh:
+            if njobs > 1:
+                cmd_ = 'workdir=%s,njobs=%d,pyscript=%s,extra_args="%s" --array 0-%d' % (
+                    workdir,
+                    njobs,
+                    pyscript,
+                    extra_args,
+                    njobs - 1,
+                )
+            else:
+                cmd_ = 'workdir=%s,njobs=%d,pyscript=%s,extra_args="%s"' % (
+                    workdir,
+                    njobs,
+                    pyscript,
+                    extra_args,
+                )
+            cmd = base_sub_cmd + cmd_ + ' ' + pbs_fname
+            logging.info("Trying to submit: ")
+            logging.info(cmd)
+
+            try:
+                os.system(cmd)
+                # subprocess.check_call(cmd, shell=True)
+            except Exception as E:
+                logging.error(E)
+                logging.error("Messed up with ")
+                logging.error(cmd)
+            return
+
+    elif sub_type == 'pbs':
         if ssh:
-            cmd += base_sub_cmd + cmd_
-            # split up command if it's too long
-            # max packet size is 32768 bytes
-            if len(cmd) > 2e4:
-                cmds.append(cmd)
-                cmd = ""
-                continue
-            if i < (njobs - 1):
-                cmd += " | "
-            # cmd = base_sub_cmd + cmd_
-            # jbid = execute_ssh_cmd(client, cmd, server)
-            # jobids.append(jbid)
-            # try:
-            #     stdin, stdout, stderr = client.exec_command(cmd)
-            #     logging.info("stdout: ")
-            #     sto = stdout.read()
-            #     logging.info(sto)
-            #     jobids.append(sto)
-            # except Exception as E:
-            #     logging.error(E)
-            #     logging.error(traceback.format_exc())
-            #     logging.error("Messed up with ")
-            #     logging.error(cmd)
+            ssh_cmd = 'ssh aci-b.aci.ics.psu.edu "'
+            server = "aci-b.aci.ics.psu.edu"
+            server = "submit.aci.ics.psu.edu"
+            server = "submit-001.aci.ics.psu.edu"
+            server = "submit-010.aci.ics.psu.edu"
+            # client = paramiko.SSHClient()
+            # client.load_system_host_keys()
+            # client.connect(server)
+            client = get_ssh_client(server)
+            # base_sub_cmd = 'qsub %s -A %s -N %s -v '\
+            #             %(args.pbs_fname, args.queue, args.name)
+        if qos is not None:
+            if rhel7:
+                if q is None:
+                    base_sub_cmd = (
+                        "qsub %s -A %s -N %s -l nodes=1:ppn=%d -l qos=%s -l feature=rhel7 -v "
+                        % (pbs_fname, queue, name, ppn, qos)
+                    )
+                else:
+                    base_sub_cmd = (
+                        "qsub %s -A %s -q %s -N %s -l nodes=1:ppn=%d -l qos=%s -l feature=rhel7 -v "
+                        % (pbs_fname, queue, q, name, ppn, qos)
+                    )
+            else:
+                if q is None:
+                    base_sub_cmd = "qsub %s -A %s -N %s -l nodes=1:ppn=%d -l qos=%s -v " % (
+                        pbs_fname,
+                        queue,
+                        name,
+                        ppn,
+                        qos,
+                    )
+                else:
+                    base_sub_cmd = (
+                        "qsub %s -A %s -q %s -N %s -l nodes=1:ppn=%d -l qos=%s -v "
+                        % (pbs_fname, queue, q, name, ppn, qos)
+                    )
         else:
+            if rhel7:
+                if q is None:
+                    base_sub_cmd = (
+                        "qsub %s -A %s -N %s -l nodes=1:ppn=%d -l feature=rhel7 -v "
+                        % (pbs_fname, queue, name, ppn)
+                    )
+                else:
+                    base_sub_cmd = (
+                        "qsub %s -A %s -q %s -N %s -l nodes=1:ppn=%d -l feature=rhel7 -v "
+                        % (pbs_fname, queue, q, name, ppn)
+                    )
+            else:
+                if q is None:
+                    base_sub_cmd = "qsub %s -A %s -N %s -l nodes=1:ppn=%d -v " % (
+                        pbs_fname,
+                        queue,
+                        name,
+                        ppn,
+                    )
+                else:
+                    base_sub_cmd = "qsub %s -A %s -q %s -N %s -l nodes=1:ppn=%d -v " % (
+                        pbs_fname,
+                        queue,
+                        q,
+                        name,
+                        ppn,
+                    )
+
+        if workdir is None:
+            workdir = os.getcwd()
+        if extra_args is None:
+            extra_args = ""
+
+        cmd = ""
+        cmds = []
+        jobids = []
+
+        if array and not ssh:
+            if njobs > 1:
+                cmd_ = 'workdir=%s,njobs=%d,pyscript=%s,extra_args="%s" -t 0-%d' % (
+                    workdir,
+                    njobs,
+                    pyscript,
+                    extra_args,
+                    njobs - 1,
+                )
+            else:
+                cmd_ = 'workdir=%s,njobs=%d,pyscript=%s,extra_args="%s"' % (
+                    workdir,
+                    njobs,
+                    pyscript,
+                    extra_args,
+                )
             cmd = base_sub_cmd + cmd_
             logging.info("Trying to submit: ")
             logging.info(cmd)
@@ -1062,23 +1146,69 @@ def sub_jobs(
                 logging.error(E)
                 logging.error("Messed up with ")
                 logging.error(cmd)
+            return
+        for i in range(njobs):
+            # cmd_ = 'jobid=%d,workdir=%s,njobs=%d,pyscript=%s' %(i,workdir,njobs,pyscript)
+            cmd_ = 'jobid=%d,workdir=%s,njobs=%d,pyscript=%s,extra_args="%s"' % (
+                i,
+                workdir,
+                njobs,
+                pyscript,
+                extra_args,
+            )
+            if ssh:
+                cmd += base_sub_cmd + cmd_
+                # split up command if it's too long
+                # max packet size is 32768 bytes
+                if len(cmd) > 2e4:
+                    cmds.append(cmd)
+                    cmd = ""
+                    continue
+                if i < (njobs - 1):
+                    cmd += " | "
+                # cmd = base_sub_cmd + cmd_
+                # jbid = execute_ssh_cmd(client, cmd, server)
+                # jobids.append(jbid)
+                # try:
+                #     stdin, stdout, stderr = client.exec_command(cmd)
+                #     logging.info("stdout: ")
+                #     sto = stdout.read()
+                #     logging.info(sto)
+                #     jobids.append(sto)
+                # except Exception as E:
+                #     logging.error(E)
+                #     logging.error(traceback.format_exc())
+                #     logging.error("Messed up with ")
+                #     logging.error(cmd)
+            else:
+                cmd = base_sub_cmd + cmd_
+                logging.info("Trying to submit: ")
+                logging.info(cmd)
 
-            time.sleep(0.1)
-    if ssh:
-        # ssh_cmd = 'ssh aci-b.aci.ics.psu.edu "'
-        # cmd = ssh_cmd + cmd + '"'
-        for cmd in cmds:
-            logging.info("Full cmd to run:")
-            logging.info(cmd)
-            try:
-                jobids = execute_ssh_cmd(client, cmd, server)
-                logging.debug("jobids: ")
-                logging.debug(jobids)
-            except Exception as E:
-                logging.error(E)
-                logging.error("Messed up with ")
-                logging.error(cmd)
-        client.close()
+                try:
+                    os.system(cmd)
+                    # subprocess.check_call(cmd, shell=True)
+                except Exception as E:
+                    logging.error(E)
+                    logging.error("Messed up with ")
+                    logging.error(cmd)
+
+                time.sleep(0.1)
+        if ssh:
+            # ssh_cmd = 'ssh aci-b.aci.ics.psu.edu "'
+            # cmd = ssh_cmd + cmd + '"'
+            for cmd in cmds:
+                logging.info("Full cmd to run:")
+                logging.info(cmd)
+                try:
+                    jobids = execute_ssh_cmd(client, cmd, server)
+                    logging.debug("jobids: ")
+                    logging.debug(jobids)
+                except Exception as E:
+                    logging.error(E)
+                    logging.error("Messed up with ")
+                    logging.error(cmd)
+            client.close()
     return jobids
 
 
@@ -1133,6 +1263,7 @@ def get_outFoVmap_inds(
     good_hp_inds = np.where(good_map)[0]
 
     return good_map, good_hp_inds
+
 
 
 def main(args):
@@ -1341,6 +1472,7 @@ def main(args):
                 qos=None,
                 rhel7=args.rhel7,
                 q=args.q,
+                sub_type=args.sub_type,
             )
         else:
             sub_jobs(
@@ -1353,6 +1485,7 @@ def main(args):
                 qos=None,
                 rhel7=args.rhel7,
                 q=args.q,
+                sub_type=args.sub_type,
             )
         logging.info("Job submitted")
         if args.api_token is not None:
@@ -1411,6 +1544,7 @@ def main(args):
             extra_args=extra_args,
             rhel7=args.rhel7,
             q=args.q,
+            sub_type=args.sub_type,
         )
         logging.info("Jobs submitted")
         # except Exception as E:
@@ -1614,6 +1748,7 @@ def main(args):
     # also maybe add some emails in here for progress and info and errors
     if args.do_llh:
         logging.info("Submitting %d in FoV Jobs now" % (Njobs_in))
+        extra_args = '--keep_all'
         sub_jobs(
             Njobs_in,
             "LLHin_" + args.GWname,
@@ -1624,6 +1759,7 @@ def main(args):
             extra_args=extra_args,
             rhel7=args.rhel7,
             q=args.q,
+            sub_type=args.sub_type,
         )
 
         if args.api_token is not None:
@@ -1643,6 +1779,7 @@ def main(args):
             qos=args.qos,
             rhel7=args.rhel7,
             q=args.q,
+            sub_type=args.sub_type,
         )
         logging.info("Jobs submitted, now going to monitor progress")
 
@@ -1874,272 +2011,158 @@ def main(args):
         time.sleep(30.0)
         dt = time.time() - t_0
 
-    # logging.info("Saving full result table to: ")
-    # save_fname = 'full_res_tab.csv'
-    # logging.info(save_fname)
-    # res_tab.to_csv(save_fname)
+    maxTS = max(np.nanmax(res_out_tab['TS']), np.nanmax(res_peak_tab['TS']), np.nanmax(res_in_tab['TS']))
 
-    # try:
-    #     # body = "Done with LLH analysis\n"
-    #     # body += "Max TS is %.3f\n\n" %(np.max(res_tab['TS']))
-    #     res_tab_top = res_tab.sort_values("TS").tail(16)
-    #     body = "LLH analysis results\n"
-    #     body += res_tab_top.to_html()
-    #     logging.info(body)
-    #     # send_email(subject, body, to)
-    #     send_email_wHTML(subject, body, to)
-    # except Exception as E:
-    #     logging.error(E)
-    #     logging.error("Trouble sending email")
+    # if TS is above 7 or so then start steps to make a skymap
+    if maxTS > args.TS4map:
+        logging.info("starting skymap process")
+        if maxTS == np.nanmax(res_out_tab['TS']):
+            max_row = res_out_tab.iloc[np.argmax(res_out_tab['TS'])]
+        elif maxTS == np.nanmax(res_peak_tab['TS']):
+            max_row = res_peak_tab.iloc[np.argmax(res_peak_tab['TS'])]
+        else:
+            max_row = res_in_tab.iloc[np.argmax(res_in_tab['TS'])]
+        best_timeID = max_row['timeID']
 
-    # Now need to find anything interesting and investigate it further
-    # probably find each time bin with a TS>6 and scan around each
-    # blip with a nllh that's within 5-10 or so
 
-    # Should also probably do submit jobs for a full FoV scan
-    # if a TS is found above something border line alert, like
-    # TS ~>7-8
+        seed_tab = mk_seeds_tab_rest_of_ifov(best_timeID, seed_in_tab, trigtime, bl_dmask)
+        seed_tab.to_csv("rate_seeds.csv", index=False)
 
-    # if np.nanmax(res_tab['TS']) < args.TSscan:
-    #     return
-    #
-    # scan_seed_tab = mk_seed_tab4scans(res_tab, args.pcfname, seed_tab,\
-    #                             TS_min=args.TSscan, pc_min=args.min_pc)
-    #
-    # Nscan_seeds = len(scan_seed_tab)
-    # logging.info("%d scan seeds"%(Nscan_seeds))
-    # Nscan_squares = len(np.unique(scan_seed_tab['squareID']))
-    #
-    #
-    # Njobs = 64
-    # if Nscan_squares < 64:
-    #     Njobs = Nscan_squares/2
-    # if Nscan_seeds > 1e3:
-    #     Njobs = 72
-    # if Nscan_seeds > 2.5e3:
-    #     Njobs = 96
-    # if Nscan_seeds > 5e3:
-    #     Njobs = 128
-    # if Nscan_seeds > 1e4:
-    #     Njobs = 160
-    #
-    #
-    # scan_job_tab = mk_job_tab(scan_seed_tab, Njobs)
-    #
-    # scan_seed_tab.to_csv('scan_seeds.csv', index=False)
-    # scan_job_tab.to_csv('scan_job_table.csv', index=False)
-    #
-    # if args.do_scan:
-    #     logging.info("Submitting %d Scan Jobs now"%(Njobs))
-    #     sub_jobs(Njobs, 'SCAN_'+args.GWname, args.SCANpyscript,\
-    #                 args.pbs_fname, queue=args.queue, qos=args.qos,\
-    #                 extra_args=extra_args)
-    #     logging.info("Jobs submitted, now going to monitor progress")
-    #
-    #
-    #
-    # t_0 = time.time()
-    # dt = 0.0
-    # Ndone = 0
-    #
-    # while (dt < 3600.0*40.0):
-    #
-    #     res_fnames = get_scan_res_fnames()
-    #
-    #     if args.skip_waiting:
-    #         if len(res_fnames) < 1:
-    #             scan_res_tab = pd.DataFrame()
-    #             break
-    #         try:
-    #             if has_sky_map:
-    #                 scan_res_tab = get_merged_csv_df_wpos(res_fnames, attfile, perc_map)
-    #             else:
-    #                 scan_res_tab = get_merged_csv_df_wpos(res_fnames, attfile)
-    #             logging.info("Got merged scan results with RA Decs")
-    #         except Exception as E:
-    #             logging.error(E)
-    #             scan_res_tab = get_merged_csv_df(res_fnames)
-    #             logging.info("Got merged scan results without RA Decs")
-    #         logging.info("Max TS: %.3f" %(np.max(scan_res_tab['TS'])))
-    #         break
-    #
-    #
-    #
-    #     if len(res_fnames) == Ndone:
-    #         time.sleep(30.0)
-    #         dt = time.time() - t_0
-    #
-    #     else:
-    #         Ndone = len(res_fnames)
-    #         logging.info("%d of %d squares scanned" %(Ndone,Nscan_squares))
-    #
-    #         if Ndone < Nscan_squares:
-    #
-    #             scan_res_tab = get_merged_csv_df(res_fnames)
-    #
-    #             time.sleep(30.0)
-    #             dt = time.time() - t_0
-    #
-    #         else:
-    #
-    #             logging.info("Got all of the scan results now")
-    #             try:
-    #                 if has_sky_map:
-    #                     scan_res_tab = get_merged_csv_df_wpos(res_fnames, attfile, perc_map)
-    #                 else:
-    #                     scan_res_tab = get_merged_csv_df_wpos(res_fnames, attfile)
-    #                 logging.info("Got merged scan results with RA Decs")
-    #             except Exception as E:
-    #                 logging.error(E)
-    #                 scan_res_tab = get_merged_csv_df(res_fnames)
-    #                 logging.info("Got merged scan results without RA Decs")
-    #             logging.info("Max TS: %.3f" %(np.max(scan_res_tab['TS'])))
-    #             break
-    #
-    #
-    # try:
-    #     scan_res_tab['dt'] = scan_res_tab['time'] - trigtime
-    # except Exception:
-    #     pass
-    #
-    # # logging.info("Saving full result table to: ")
-    # # save_fname = 'full_scanRes_tab.csv'
-    # # logging.info(save_fname)
-    # # scan_res_tab.to_csv(save_fname)
-    #
-    # full_res_tab = pd.concat([res_tab,scan_res_tab], ignore_index=True)
-    #
-    # try:
-    #     # body = "Done with LLH analysis\n"
-    #     # body += "Max TS is %.3f\n\n" %(np.max(res_tab['TS']))
-    #     body = "All LLH analysis results\n"
-    #     full_res_tab_top = full_res_tab.sort_values("TS").tail(16)
-    #     body += full_res_tab_top.to_html()
-    #     logging.info(body)
-    #     # send_email(subject, body, to)
-    #     send_email_wHTML(subject, body, to)
-    # except Exception as E:
-    #     logging.error(E)
-    #     logging.error("Trouble sending email")
-    #
-    # if has_sky_map:
-    #     if np.all(full_res_tab_top['cls']>.995):
-    #         logging.info("None of the top 16 TSs are in the 0.995 credible region.")
-    #
-    # # Now need to put in the part where I find good candidates
-    # # then do the integrated LLH
-    #
-    # logging.info("Making Peaks Table now")
-    # peaks_tab = find_peaks2scan(full_res_tab, minTS=args.TSscan)
-    #
-    # Npeaks = len(peaks_tab)
-    # logging.info("Found %d Peaks to scan"%(Npeaks))
-    # Njobs = 96
-    #
-    # if Npeaks < Njobs:
-    #     Njobs = Npeaks
-    #     peaks_tab['jobID'] = np.arange(Njobs, dtype=np.int64)
-    # else:
-    #     jobids = np.array([i%Njobs for i in range(Npeaks)])
-    #     peaks_tab['jobID'] = jobids
-    #
-    # peaks_fname = 'peaks.csv'
-    # peaks_tab.to_csv(peaks_fname)
-    #
-    #
-    # logging.info("Submitting %d Jobs now"%(Njobs))
-    # sub_jobs(Njobs, 'Peak_'+args.GWname, args.PEAKpyscript,\
-    #             args.pbs_fname, queue=args.queue, qos=args.qos)
-    # logging.info("Jobs submitted, now going to monitor progress")
-    #
-    #
-    # t_0 = time.time()
-    # dt = 0.0
-    # Ndone = 0
-    #
-    # while (dt < 3600.0*20.0):
-    #
-    #     res_fnames = get_peak_res_fnames()
-    #
-    #     if len(res_fnames) == Ndone:
-    #         time.sleep(30.0)
-    #         dt = time.time() - t_0
-    #
-    #     else:
-    #         Ndone = len(res_fnames)
-    #         logging.info("%d of %d peaks scanned" %(Ndone,Npeaks))
-    #
-    #         if Ndone < Npeaks:
-    #
-    #             peak_res_tab = get_merged_csv_df(res_fnames)
-    #
-    #             time.sleep(30.0)
-    #             dt = time.time() - t_0
-    #
-    #         else:
-    #
-    #             logging.info("Got all of the peak results now")
-    #             try:
-    #                 if has_sky_map:
-    #                     peak_res_tab = get_merged_csv_df_wpos(res_fnames, attfile, perc_map)
-    #                 else:
-    #                     peak_res_tab = get_merged_csv_df_wpos(res_fnames, attfile)
-    #                 logging.info("Got merged peak results with RA Decs")
-    #             except Exception as E:
-    #                 logging.error(E)
-    #                 peak_res_tab = get_merged_csv_df(res_fnames)
-    #                 logging.info("Got merged peak results without RA Decs")
-    #             logging.info("Max TS: %.3f" %(np.max(peak_res_tab['TS'])))
-    #             break
-    #
-    #
-    # try:
-    #     peak_res_tab['dt'] = peak_res_tab['time'] - trigtime
-    # except Exception:
-    #     pass
-    #
-    # idx = peak_res_tab.groupby(['timeID'])['TS'].transform(max) == peak_res_tab['TS']
-    # peak_res_max_tab = peak_res_tab[idx]
-    #
-    # maxTS = np.max(peak_res_max_tab['TS'])
-    # for timeID, df in peak_res_tab.groupby('timeID'):
-    #     if has_sky_map:
-    #         if (np.max(df['TS']) > 7.0) and (df['cls'].iloc[np.argmax(df['TS'])]<.995):
-    #             try:
-    #                 subject2 = subject + ' Possible Signal'
-    #                 peak_res_tab_top = df.sort_values("TS").tail(16)
-    #                 body = peak_res_tab_top.to_html()
-    #                 send_email_wHTML(subject2, body, to)
-    #             except Exception as E:
-    #                 logging.error(E)
-    #                 logging.error("Trouble sending email")
-    #     else:
-    #         if (np.max(df['TS']) > 7.0):
-    #             try:
-    #                 subject2 = subject + ' Possible Signal'
-    #                 peak_res_tab_top = df.sort_values("TS").tail(16)
-    #                 body = peak_res_tab_top.to_html()
-    #                 send_email_wHTML(subject2, body, to)
-    #             except Exception as E:
-    #                 logging.error(E)
-    #                 logging.error("Trouble sending email")
-    #
-    #
-    # try:
-    #     # body = "Done with LLH analysis\n"
-    #     # body += "Max TS is %.3f\n\n" %(np.max(res_tab['TS']))
-    #     peak_res_tab_top = peak_res_tab.sort_values("TS").tail(16)
-    #     body = peak_res_tab_top.to_html()
-    #     logging.info(body)
-    #     # send_email(subject, body, to)
-    #     send_email_wHTML(subject, body, to)
-    # except Exception as E:
-    #     logging.error(E)
-    #     logging.error("Trouble sending email")
-    #
-    # if has_sky_map:
-    #     if np.all(peak_res_tab_top['cls']>.995):
-    #         logging.info("None of the top 16 TSs are in the 0.995 credible region.")
+        Ntot_in_fnames = len(seed_tab.groupby(["squareID", "proc_group"]))
+
+        logging.info("Ntot_in_fnames = %d"%(Ntot_in_fnames))
+
+        Njobs_in = args.N_infov_jobs + args.N_outfov_jobs
+
+        logging.info("Submitting %d in FoV Jobs now" % (Njobs_in))
+        extra_args = '--log_fname scan --keep_all'
+        sub_jobs(
+            Njobs_in,
+            "Scan_" + args.GWname,
+            args.LLHINpyscript,
+            pbs_script,
+            queue=args.queue,
+            qos=args.qos,
+            extra_args=extra_args,
+            rhel7=args.rhel7,
+            q=args.q,
+            sub_type=args.sub_type,
+        )
+
+
+        t_0 = time.time()
+        dt = 0.0
+        Ndone_in = 0
+        Ndone_out = 0
+
+        DoneIn = False
+        DoneOut = False
+
+        while dt < 3600.0 * 40.0:
+            res_in_fnames = get_in_res_fnames()
+
+            if len(res_in_fnames) < Ntot_in_fnames:
+                Ndone_in = len(res_in_fnames)
+                logging.info("%d of %d in files done" % (Ndone_in, Ntot_in_fnames))
+            else:
+                DoneIn = True
+                break
+            time.sleep(30.0)
+            dt = time.time() - t_0
+
+        if DoneIn:
+
+            logging.info("Done running IFOV Scan")
+
+            res_in_fnames = get_in_res_fnames()
+            logging.debug("%d in fnames"%(len(res_in_fnames)))
+            res_in_tab = get_max_merged_csv_df(res_in_fnames)
+            bl = (res_in_tab['timeID']==best_timeID)
+            res_in_tab = res_in_tab[bl]
+            logging.debug("read in all in files")
+
+            res_peak_fnames = get_peak_res_fnames()
+            logging.debug("%d in peak fnames"%(len(res_peak_fnames)))
+            res_peak_tab = get_merged_csv_df(res_peak_fnames)
+            print(len(res_peak_tab))
+            bl = (res_peak_tab['timeID']==best_timeID)
+            res_peak_tab = res_peak_tab[bl]
+            logging.debug("read in all peak files")
+
+            res_out_fnames = get_out_res_fnames()
+            logging.debug("%d out fnames"%(len(res_out_fnames)))
+            res_out_tab = get_merged_csv_df(res_out_fnames)
+            print(len(res_out_tab))
+            bl = (res_out_tab['timeID']==best_timeID)
+            res_out_tab = res_out_tab[bl]
+            logging.debug("read in all out files")
+            logging.debug('len(res_out_tab) = %d'%(len(res_out_tab)))
+            logging.debug('mean(res_out_tab[time]) = %.3f'%(np.mean(res_out_tab['time'])))
+            tmid = np.nanmean(res_out_tab['time'])
+            logging.debug('tmid = %.3f'%(tmid))
+
+            att_ind = np.argmin(np.abs(attfile["TIME"] - tmid))
+            att_row = attfile[att_ind]
+            att_q = att_row['QPARAM']
+            logging.debug('att_q:')
+            logging.debug(att_q)
+
+
+            nside = 2**11
+            # TODO: Need to have option for when pc_file is not there
+            logging.debug("Trying to make pc map now")
+            try:
+                pc_map = pcfile2hpmap(args.pcfname, att_row, nside)
+            except Exception as E:
+                logging.error(E)
+                logging.error(traceback.format_exc())
+                logging.warn("trouble using pc file")
+
+            logging.info('Making dlogl map')
+
+            dlogl_map = get_dlogl_skymap(res_peak_tab, res_in_tab, res_out_tab, best_timeID, att_q, pc_map)
+            logging.info('Making prob map')
+
+            prob_map = get_prob_map(dlogl_map, att_q, pc_map)
+
+            try:
+                if os.path.exists('sao.fits'):
+                    sao_fname = 'sao.fits'
+                else:
+                    sao_fname = get_sao_file(search_config.trigtime)
+                logging.debug('sao_fname: ' + sao_fname)
+                if sao_fname is not None:
+                    sao_tab = Table.read(sao_fname)
+                    prob_map = rm_earth_prob_map(prob_map, sao_tab, tmid)
+                    logging.debug('Removed Earth')
+                else:
+                    logging.warn('No sao file, Earth is still there')
+            except Exception as E:
+                logging.error(E)
+                logging.error(traceback.format_exc())
+                logging.warn("trouble getting sao file, Earth is still there")
+
+            logging.info('converting to moc map')
+            moc_map = pmap2moc_map(prob_map, args.pcfname, att_row)
+
+            moc_map_fname = args.GWname + '_moc_prob_map.fits'
+            logging.info('writing moc map to ')
+            logging.info(moc_map_fname)
+            write_moc_skymap(moc_map, moc_map_fname, name=args.GWname)
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
 
 
 if __name__ == "__main__":
