@@ -993,7 +993,8 @@ def sub_jobs(
     ppn=1,
     rhel7=False,
     array=True,
-    sub_type='slurm'
+    sub_type='slurm',
+    mem_per_cpu=None
 ):
     hostname = socket.gethostname()
 
@@ -1009,10 +1010,16 @@ def sub_jobs(
         extra_args = ""
 
     if sub_type == 'slurm':
-        base_sub_cmd = (
-            "sbatch -J %s -n %d --export="
-            % (name, ppn)
-        )
+        if mem_per_cpu is None:
+            base_sub_cmd = (
+                "sbatch -J %s -n %d --export="
+                % (name, ppn)
+            )
+        else:
+            base_sub_cmd = (
+                "sbatch -J %s -n %d --mem-per-cpu %s --export="
+                % (name, ppn, mem_per_cpu)
+            )
         if array and not ssh:
             if njobs > 1:
                 cmd_ = 'workdir=%s,njobs=%d,pyscript=%s,extra_args="%s" --array 0-%d' % (
@@ -1780,6 +1787,7 @@ def main(args):
             rhel7=args.rhel7,
             q=args.q,
             sub_type=args.sub_type,
+            mem_per_cpu='9GB',
         )
         logging.info("Jobs submitted, now going to monitor progress")
 

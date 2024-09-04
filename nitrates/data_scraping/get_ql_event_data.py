@@ -261,13 +261,22 @@ def main(args):
         conn = get_conn(args.dbfname)
 
         if new_obsid:
-            logging.debug("Making DB row for obsid " + obsid)
-            write_new_obsid_line(
-                conn, obsid, data_dict=db_obs_dict, table="SwiftQLeventOBS"
-            )
+            try:
+                logging.debug("Making DB row for obsid " + obsid)
+                write_new_obsid_line(
+                    conn, obsid, data_dict=db_obs_dict, table="SwiftQLeventOBS"
+                )
+            except Exception as E:
+                logging.error(E)
+                logging.warn("Troub making obsid line for obside " + obsid)
+
         else:
-            logging.debug("Updating DB for obsid " + obsid)
-            update_obsid_line(conn, obsid, db_obs_dict, table="SwiftQLeventOBS")
+            try:
+                logging.debug("Updating DB for obsid " + obsid)
+                update_obsid_line(conn, obsid, db_obs_dict, table="SwiftQLeventOBS")
+            except Exception as E:
+                logging.error(E)
+                logging.warn("Troub updating obsid line for obside " + obsid)
 
         if len(db_data_dicts) > 0:
             logging.info("Writing Event Files to DB for obsid " + obsid)
@@ -275,14 +284,14 @@ def main(args):
 
         conn.close()
 
-    conn = get_conn(args.dbfname)
-    table_name = "SwiftQLevent"
-    pd.set_option("display.max_colwidth", -1)
-    ql_db_tab = get_db_tab(conn, table_name)
-    html_file = os.path.join(args.htmldir, table_name + ".html")
+    #conn = get_conn(args.dbfname)
+    #table_name = "SwiftQLevent"
+    #pd.set_option("display.max_colwidth", -1)
+    #ql_db_tab = get_db_tab(conn, table_name)
+    #html_file = os.path.join(args.htmldir, table_name + ".html")
     #    ql_db_tab.sort_values('METstart', ascending=False).to_html(\
     #            html_file, render_links=True, float_format='{0:.4f}'.format)
-    conn.close()
+    #conn.close()
 
 
 if __name__ == "__main__":
