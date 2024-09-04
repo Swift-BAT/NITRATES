@@ -1017,7 +1017,7 @@ def sub_jobs(
             )
         else:
             base_sub_cmd = (
-                "sbatch -J %s -n %d --mem_per_cpu %s --export="
+                "sbatch -J %s -n %d --mem-per-cpu %s --export="
                 % (name, ppn, mem_per_cpu)
             )
         if array and not ssh:
