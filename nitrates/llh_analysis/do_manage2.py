@@ -2188,7 +2188,13 @@ def main(args):
             logging.info(moc_map_fname)
             write_moc_skymap(moc_map, moc_map_fname, name=args.GWname)
 
-
+            if args.api_token is not None:
+                try:
+                    api.post_nitrates_results(trigger=search_config.triggerID,config_id=search_config.id,result_type='n_PROBMAP',result_data=moc_map_fname)
+                except Exception as e:
+                    logging.error(e)
+                    logging.error(traceback.format_exc())
+                    logging.error('Could not report PROBMAP file via EchoAPI.')   
 
 
 

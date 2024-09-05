@@ -18,7 +18,7 @@ from ..lib.coord_conv_funcs import (
 from .hp_funcs import pcfile2hpmap
 
 
-def get_prob_map(nllhs0, att_q, pc_map, ifov_fact=1.0, ofov_fact=0.5, dllh_out=0.0):
+def get_prob_map(nllhs0, att_q, pc_map, ifov_fact=1.0, ofov_fact=0.5, dllh_out=0.0, infov_smooth=None):
     
     nside = 2**11
     ra_m, dec_m = hp.pix2ang(nside, np.arange(hp.nside2npix(nside), dtype=np.int64), lonlat=True, nest=True)
@@ -71,7 +71,10 @@ def get_prob_map(nllhs0, att_q, pc_map, ifov_fact=1.0, ofov_fact=0.5, dllh_out=0
     
     pc_map2 = hp.ud_grade(pc_map, nside2, order_in='NEST', order_out='NEST')
 
-    smooth_prob_a3 = hp.sphtfunc.smoothing(prob_map0, sigma=np.radians((2.0/60.0)), nest=True)
+    if infov_smooth is None:
+        smooth_prob_a3 = prob_map0
+    else:
+        smooth_prob_a3 = hp.sphtfunc.smoothing(prob_map0, sigma=np.radians(infov_smooth), nest=True)
     prob_map_a32 = hp.ud_grade(smooth_prob_a3 / hp.nside2pixarea(nside), nside2, order_in='NEST',\
                                 order_out='NEST')*hp.nside2pixarea(nside2)
 
