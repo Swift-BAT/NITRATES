@@ -935,6 +935,22 @@ def read_results_dirs(paths, api_token, figures=True, ismpi4py=False):
                 print(e)
                 failed[path] = "Failed to ingest top results."
 
+            # ProbSkymap
+            try:
+                fname = [fname for fname in os.listdir(paths[i]) if 'moc_prob_map.fits' in fname][0]
+                skymap_fname = os.path.join(paths[i], fname)
+                result = api.post_nitrates_results(
+                    trigger=trig_ids[i],
+                    config_id=config_id,
+                    result_type="n_PROBMAP",
+                    result_data=skymap_fname,
+                )
+                print(result)
+            except Exception as e:
+                print("Failed to ingest prob skymap :(")
+                print(e)
+                failed[path] = "Failed to ingest prob skymap."
+
             print("Successfully loaded into database.")
         except Exception as e:
             print("Failed for untested reason")
