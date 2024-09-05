@@ -110,7 +110,7 @@ def main(args):
     tmax = GTI_PNT["STOP"][-1]
     twind = 20
 
-    poly_trng = np.int(twind)
+    poly_trng = np.int64(twind)
 
     bkg_obj = Linear_Rates(ev_data0, tmin, tmax, trigger_time, GTI_PNT, sig_clip=4.0, poly_trng=poly_trng)
     bkg_obj.do_fits()

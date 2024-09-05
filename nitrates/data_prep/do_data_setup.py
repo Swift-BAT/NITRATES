@@ -5,6 +5,7 @@ from astropy.io import fits
 from astropy.time import Time, TimeDelta
 from astropy.table import Table, vstack
 import os
+import shutil
 import sys
 import time
 from datetime import datetime
@@ -46,6 +47,7 @@ from ..lib.gti_funcs import (
     find_and_remove_cr_glitches,
 )
 from ..data_scraping.db_ql_funcs import get_gainoff_fname
+from ..data_scraping.api_funcs import get_sao_file
 from ..HeasoftTools.bat_tool_funcs import bateconvert
 from ..lib.search_config import Config
 
@@ -95,16 +97,16 @@ def evfnames2write(
     for evf in evfnames:
         tab = Table.read(evf)
         if "bevshpo" in evf or "filter_evdata" in evf:
-            tab["SLEW"] = np.zeros(len(tab), dtype=np.int)
+            tab["SLEW"] = np.zeros(len(tab), dtype=np.int64)
             gti_pnts.append(Table.read(evf, hdu=2))
         elif "bevshsl" in evf:
-            tab["SLEW"] = np.ones(len(tab), dtype=np.int)
+            tab["SLEW"] = np.ones(len(tab), dtype=np.int64)
             gti_slews.append(Table.read(evf, hdu=2))
         elif "bevshsp" in evf:
-            tab["SLEW"] = 2 * np.ones(len(tab), dtype=np.int)
+            tab["SLEW"] = 2 * np.ones(len(tab), dtype=np.int64)
             gti_slewpnts.append(Table.read(evf, hdu=2))
         else:
-            tab["SLEW"] = 2 * np.ones(len(tab), dtype=np.int)
+            tab["SLEW"] = 2 * np.ones(len(tab), dtype=np.int64)
             gti_slewpnts.append(Table.read(evf, hdu=2))
         tabs.append(tab)
     ev_data = vstack(tabs)
@@ -209,7 +211,7 @@ def get_event_failed_trigs(args, UTCFINIT_guess=-24.0):
     logging.info(str(N_evfiles) + " failed trig event files found")
 
     times2cover = np.arange(int(met_trig_time) - 30, int(met_trig_time) + 30)
-    times_coverd = np.zeros(len(times2cover), dtype=np.bool)
+    times_coverd = np.zeros(len(times2cover), dtype=bool)
 
     ev_fnames = []
     for index, row in ev_data_table.iterrows():
@@ -325,8 +327,8 @@ def get_event(args):
         N_evfiles = len(ev_data_table)
         logging.info(str(N_evfiles) + " event files found")
 
-        tstarts = Time(ev_data_table.UTCstart.values.astype(np.str), format="isot")
-        tstops = Time(ev_data_table.UTCstop.values.astype(np.str), format="isot")
+        tstarts = Time(ev_data_table.UTCstart.values.astype(str), format="isot")
+        tstops = Time(ev_data_table.UTCstop.values.astype(str), format="isot")
         logging.info("Tstarts: ")
         logging.info(tstarts.isot)
         logging.info("Tstopts: ")
@@ -344,7 +346,7 @@ def get_event(args):
 
         # times2cover = np.arange(int(met_trig_time)-45,int(met_trig_time)+45)
         times2cover = np.arange(int(met_trig_time) - 30, int(met_trig_time) + 30)
-        times_coverd = np.zeros(len(times2cover), dtype=np.bool)
+        times_coverd = np.zeros(len(times2cover), dtype=bool)
 
         ev_fnames = []
         for index, row in ev_data_table.iterrows():
@@ -508,11 +510,19 @@ def get_att(args, MET_time):
 
     if args.Obsid_Dir is not None:
         aux_dir = os.path.join(args.Obsid_Dir, "auxil")
-        att_fname = [
+        att_fnames = [
             os.path.join(aux_dir, fname)
             for fname in os.listdir(aux_dir)
             if "pat" in fname
-        ][0]
+        ]
+        if len(att_fnames) > 0:
+            att_fname = att_fnames[0]
+        else:
+            att_fname = [
+                os.path.join(aux_dir, fname)
+                for fname in os.listdir(aux_dir)
+                if "sat" in fname
+            ][0]
         return Table.read(att_fname)
 
     # min_ev_time = np.min(evdata['TIME'])
@@ -550,11 +560,19 @@ def get_acs(args, trigtime):
 
     if args.Obsid_Dir is not None:
         aux_dir = os.path.join(args.Obsid_Dir, "auxil")
-        att_fname = [
+        att_fnames = [
             os.path.join(aux_dir, fname)
             for fname in os.listdir(aux_dir)
             if "pat" in fname
-        ][0]
+        ]
+        if len(att_fnames) > 0:
+            att_fname = att_fnames[0]
+        else:
+            att_fname = [
+                os.path.join(aux_dir, fname)
+                for fname in os.listdir(aux_dir)
+                if "sat" in fname
+            ][0]
         return Table.read(att_fname, hdu=2)
 
     acs_dname = args.acs_dname
@@ -580,6 +598,12 @@ def get_acs(args, trigtime):
         return
     return acs_tab
 
+def get_sao(args):
+
+    fname = get_sao_file(args.trig_time)
+    new_fname = os.path.join(args.work_dir,'sao.fits')
+    shutil.move(fname, new_fname)
+    return new_fname
 
 def cli():
     parser = argparse.ArgumentParser()
@@ -597,25 +621,25 @@ def cli():
         "--data_dbfname",
         type=str,
         help="DB file name with information on the BAT data already downloaded from the QL site",
-        default="/gpfs/group/jak51/default/realtime_workdir/BATQL.db",
+        default="/storage/group/jak51/default/realtime_workdir/BATQL.db",
     )
     parser.add_argument(
         "--att_dname",
         type=str,
         help="Directory name that contains merged attfiles over chunks of time",
-        default="/gpfs/group/jak51/default/realtime_workdir/merged_atts/",
+        default="/storage/group/jak51/default/realtime_workdir/merged_atts/",
     )
     parser.add_argument(
         "--acs_dname",
         type=str,
         help="Directory name that contains merged acsfiles over chunks of time",
-        default="/gpfs/group/jak51/default/realtime_workdir/merged_acs/",
+        default="/storage/group/jak51/default/realtime_workdir/merged_acs/",
     )
     parser.add_argument(
         "--enb_dname",
         type=str,
         help="Directory name that contains merged enable/disable files over chunks of time",
-        default="/gpfs/group/jak51/default/realtime_workdir/merged_enbs/",
+        default="/storage/group/jak51/default/realtime_workdir/merged_enbs/",
     )
     parser.add_argument("--evfname", type=str, help="Event data file", default=None)
     parser.add_argument("--dmask", type=str, help="detmask file name", default=None)
@@ -770,6 +794,13 @@ def main(args):
         return -1
 
     ev_fname = evfnames2write(evfname, dmask, args.work_dir, acs_tab)
+
+    try:
+        sao_fname = get_sao(args)
+    except Exception as E:
+        logging.warning("Couldn't get sao file")
+        logging.error(E)
+        logging.error(traceback.format_exc())        
 
     logging.info("Finally got all the data")
 

@@ -158,7 +158,7 @@ def cli():
         "--save_dir",
         type=str,
         help="Directory to save data to",
-        default="/gpfs/group/jak51/default/realtime_workdir/",
+        default="/storage/group/jak51/default/realtime_workdir/",
     )
     parser.add_argument(
         "--dbfname", type=str, help="Name of the sqlite database", default=None
@@ -167,7 +167,7 @@ def cli():
         "--htmldir",
         type=str,
         help="bash script to run analysis",
-        default="/gpfs/group/jak51/default/realtime_workdir/htmls",
+        default="/storage/group/jak51/default/realtime_workdir/htmls",
     )
     parser.add_argument(
         "--loglevel", type=int, help="loglevel, 10=debug, 20=info", default=20
@@ -229,7 +229,7 @@ def main(args):
             bl = ~np.isin(obsids, ql_db_tab["obsid"])
         except Exception as E:
             logging.error(E)
-            bl = np.ones(len(obsids), dtype=np.bool)
+            bl = np.ones(len(obsids), dtype=bool)
         new_obsids = obsids[bl]
         Nnew = len(new_obsids)
         Nobsids = len(obsids)

@@ -73,7 +73,7 @@ def filter_evdata(evdata, dmask, emin, emax, tmin, tmax):
         mask_vals = mask_detxy(dmask, evdata)
         bl_mask = mask_vals == 0
     else:
-        bl_mask = np.ones(len(evdata["TIME"]), dtype=np.bool)
+        bl_mask = np.ones(len(evdata["TIME"]), dtype=bool)
     bl_ev = (
         (evdata["TIME"] >= tmin)
         & (evdata["TIME"] < tmax)

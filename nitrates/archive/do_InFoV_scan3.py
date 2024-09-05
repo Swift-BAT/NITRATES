@@ -164,11 +164,11 @@ def shift_resp_tab_pha_bins(
         new_resp = np.zeros((NphotonEs, len(new_pha_bins0)))
         for i in range(NphotonEs):
             new_resp[i] += shift_pha_bins(
-                resp_tab[cname][i].astype(np.float),
-                pha_bins0.astype(np.float),
-                pha_bins1.astype(np.float),
-                new_pha_bins0.astype(np.float),
-                new_pha_bins1.astype(np.float),
+                resp_tab[cname][i].astype(np.float64),
+                pha_bins0.astype(np.float64),
+                pha_bins1.astype(np.float64),
+                new_pha_bins0.astype(np.float64),
+                new_pha_bins1.astype(np.float64),
             )
         new_tab[cname] = new_resp
 
@@ -359,18 +359,18 @@ detys_by_sand1 = detys_by_sand0 + 7
 print(len(detys_by_sand0))
 
 detxs_in_cols_not_edges = [
-    np.arange(detxs_by_sand0[i] + 1, detxs_by_sand1[i], 1, dtype=np.int)
+    np.arange(detxs_by_sand0[i] + 1, detxs_by_sand1[i], 1, dtype=np.int64)
     for i in range(16)
 ]
 detys_in_rows_not_edges = [
-    np.arange(detys_by_sand0[i] + 1, detys_by_sand1[i], 1, dtype=np.int)
+    np.arange(detys_by_sand0[i] + 1, detys_by_sand1[i], 1, dtype=np.int64)
     for i in range(16)
 ]
 print(detxs_in_cols_not_edges)
 
 dpi_shape = (173, 286)
-detxax = np.arange(286, dtype=np.int)
-detyax = np.arange(173, dtype=np.int)
+detxax = np.arange(286, dtype=np.int64)
+detyax = np.arange(173, dtype=np.int64)
 detx_dpi, dety_dpi = np.meshgrid(detxax, detyax)
 print(np.shape(detx_dpi), np.shape(dety_dpi))
 print(np.max(detx_dpi), np.max(dety_dpi))
@@ -620,7 +620,7 @@ def get_resp_arr(drm_dir):
     thetas = np.array([float(fn.split("_")[2]) for fn in fnames])
     phis = np.array([float(fn.split("_")[4]) for fn in fnames])
 
-    dtp = [("theta", np.float), ("phi", np.float), ("fname", fnames.dtype)]
+    dtp = [("theta", np.float64), ("phi", np.float64), ("fname", fnames.dtype)]
     drm_arr = np.empty(len(thetas), dtype=dtp)
     drm_arr["theta"] = thetas
     drm_arr["phi"] = phis
@@ -683,8 +683,8 @@ class ResponseDPI(object):
 
 
 def get_flor_intp_inds_wts(batxs, batys):
-    detxax = np.arange(-1, 286 + 2, 8, dtype=np.int)
-    detyax = np.arange(-2, 173 + 2, 8, dtype=np.int)
+    detxax = np.arange(-1, 286 + 2, 8, dtype=np.int64)
+    detyax = np.arange(-2, 173 + 2, 8, dtype=np.int64)
     batxax, batyax = detxy2batxy(detxax, detyax)
     flor_detx_dpi, flor_dety_dpi = np.meshgrid(detxax, detyax)
     shp = flor_detx_dpi.shape
@@ -746,8 +746,8 @@ class FlorResponseDPI(object):
     ):
         self.resp_dname = resp_dname
         self.pha_tab = pha_tab
-        self.orig_pha_emins = self.pha_tab["E_MIN"].astype(np.float)
-        self.orig_pha_emaxs = self.pha_tab["E_MAX"].astype(np.float)
+        self.orig_pha_emins = self.pha_tab["E_MIN"].astype(np.float64)
+        self.orig_pha_emaxs = self.pha_tab["E_MAX"].astype(np.float64)
         self.pha_emins = pha_emins
         self.pha_emaxs = pha_emaxs
         self.Nphabins = len(pha_emins)
@@ -813,8 +813,8 @@ class FlorResponseDPI(object):
     ):
         self.resp_dname = resp_dname
         self.pha_tab = pha_tab
-        self.orig_pha_emins = self.pha_tab["E_MIN"].astype(np.float)
-        self.orig_pha_emaxs = self.pha_tab["E_MAX"].astype(np.float)
+        self.orig_pha_emins = self.pha_tab["E_MIN"].astype(np.float64)
+        self.orig_pha_emaxs = self.pha_tab["E_MAX"].astype(np.float64)
         self.pha_emins = pha_emins
         self.pha_emaxs = pha_emaxs
         self.Nphabins = len(pha_emins)
@@ -851,9 +851,9 @@ class FlorResponseDPI(object):
     def open_new_file(self, hp_ind):
         fname = "hp_order_3_ind_%d_.npy" % (hp_ind)
         resp_arr = np.load(os.path.join(self.resp_dname, fname))
-        sn_inds = np.arange(1, 13, dtype=np.int)
-        ta_inds = np.arange(14, 29, dtype=np.int)
-        pb_inds = np.arange(29, 39, dtype=np.int)
+        sn_inds = np.arange(1, 13, dtype=np.int64)
+        ta_inds = np.arange(14, 29, dtype=np.int64)
+        pb_inds = np.arange(29, 39, dtype=np.int64)
         for sn_ind in sn_inds:
             resp_arr[:, :, sn_ind] *= self.sn_ratios
         for ta_ind in ta_inds:
@@ -902,7 +902,7 @@ class ResponseOutFoV(object):
         )
         self.PhotonEmins = tab["ENERG_LO"]
         self.PhotonEmaxs = tab["ENERG_HI"]
-        self.PhotonEs = ((self.PhotonEmins + self.PhotonEmaxs) / 2.0).astype(np.float)
+        self.PhotonEs = ((self.PhotonEmins + self.PhotonEmaxs) / 2.0).astype(np.float64)
         self.NphotonEs = len(self.PhotonEs)
 
         self.pha_emins = pha_emins
@@ -1316,7 +1316,7 @@ class LLH_webins(object):
         self.dt = 0.0
         self.t1 = t1
 
-        t_bl = np.zeros(len(self._all_data), dtype=np.bool)
+        t_bl = np.zeros(len(self._all_data), dtype=bool)
         for i in range(len(self.t0)):
             t_bl = np.logical_or(
                 (self._all_data["TIME"] >= self.t0[i])
@@ -2208,7 +2208,7 @@ def bkg_withPS_fit(
     imgs = np.meshgrid(*imlist)
     Npnts = imgs[0].size
     if im_steps == 2:
-        ind_grids = np.meshgrid(*(np.arange(3, dtype=np.int) for i in range(Nps)))
+        ind_grids = np.meshgrid(*(np.arange(3, dtype=np.int64) for i in range(Nps)))
         Npnts = ind_grids[0].size
     logging.info("Npnts: %d" % (Npnts))
 
@@ -2423,7 +2423,7 @@ def do_init_bkg_wPSs(
             break
         if len(PSs2keep) == 0:
             Nsrcs = 0
-            src_tab = src_tab[np.zeros(len(src_tab), dtype=np.bool)]
+            src_tab = src_tab[np.zeros(len(src_tab), dtype=bool)]
             break
         bl = np.array([src_tab["Name"][i] in PSs2keep for i in range(Nsrcs)])
         src_tab = src_tab[bl]
@@ -2863,7 +2863,7 @@ class Swift_Mask_Interactions(object):
         )
 
     def calc_dists(self):
-        self.dists = (self.does_int_mask.astype(np.float)) * self.d
+        self.dists = (self.does_int_mask.astype(np.float64)) * self.d
 
     def calc_tot_rhomu_dist(self):
         #         self.tot_rhomu_dists = np.zeros((self.ndets,self.Ne))
@@ -2874,7 +2874,7 @@ class Swift_Mask_Interactions(object):
         self.mask_trans = np.exp(-self.mask_tot_rhomu_dists)
 
     def does_int_fix(self):
-        #         does_int_fix = np.zeros(self.ndets, dtype=np.bool)
+        #         does_int_fix = np.zeros(self.ndets, dtype=bool)
         self.fix_trans = np.ones((self.ndets, self.Ne))
         self.fix_struct.set_batxyzs(
             self.batxs[self.does_int_mask],
@@ -2958,7 +2958,7 @@ class ResponseInFoV(object):
         )
         self.PhotonEmins = tab["ENERG_LO"]
         self.PhotonEmaxs = tab["ENERG_HI"]
-        self.PhotonEs = ((self.PhotonEmins + self.PhotonEmaxs) / 2.0).astype(np.float)
+        self.PhotonEs = ((self.PhotonEmins + self.PhotonEmaxs) / 2.0).astype(np.float64)
         self.NphotonEs = len(self.PhotonEs)
 
         self.pha_emins = pha_emins
@@ -3288,7 +3288,7 @@ class Source_Model_InFoV(Model):
     #                 return self._fp
     #         else:
     #             fp = self.fp_obj.get_fp(imx, imy)
-    #             self._fp = fp[self.bl_dmask].astype(np.int)
+    #             self._fp = fp[self.bl_dmask].astype(np.int64)
     #             self._fp[(self._rt>1e-2)] = 1
     #             self._unfp = 1 - self._fp
     #             self.uncoded = (self._fp<.1)
@@ -3580,7 +3580,7 @@ def analysis_for_imxy_square(
     imx_ax = np.arange(0, dimxy, imxstep)
     imy_ax = np.arange(0, dimxy, imstep)
     imxg, imyg = np.meshgrid(imx_ax, imy_ax)
-    bl = np.isclose((imyg * 1e4).astype(np.int) % int(imstep * 2 * 1e4), 0)
+    bl = np.isclose((imyg * 1e4).astype(np.int64) % int(imstep * 2 * 1e4), 0)
     imxg[bl] += imxstep / 2.0
     imxs = np.ravel(imxg) + imx0
     imys = np.ravel(imyg) + imy0
@@ -3827,9 +3827,9 @@ def main(args):
     )
 
     resp_file = fits.open(resp_fname)
-    pha_emins, pha_emaxs = resp_file[2].data["E_MIN"].astype(np.float), resp_file[
+    pha_emins, pha_emaxs = resp_file[2].data["E_MIN"].astype(np.float64), resp_file[
         2
-    ].data["E_MAX"].astype(np.float)
+    ].data["E_MAX"].astype(np.float64)
 
     ebins0 = np.array([15.0, 24.0, 35.0, 48.0, 64.0])
     ebins0 = np.append(ebins0, np.logspace(np.log10(84.0), np.log10(500.0), 5 + 1))[:-1]

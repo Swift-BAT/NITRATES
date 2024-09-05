@@ -410,10 +410,10 @@ def multi_mutau_func(
 
     result = gauss_conv(
         res_pre_gauss,
-        pha_emins.astype(np.float),
-        pha_emaxs.astype(np.float),
-        emin_pre.astype(np.float),
-        emax_pre.astype(np.float),
+        pha_emins.astype(np.float64),
+        pha_emaxs.astype(np.float64),
+        emin_pre.astype(np.float64),
+        emax_pre.astype(np.float64),
         sigma,
     )
 
@@ -503,8 +503,8 @@ def get_Es_Zs_PixIDs_detxys_from_root_file(fname):
     pos_xs = np.array(pos_xs)
     pos_ys = np.array(pos_ys)
     detxs, detys = batxy2detxy(pos_xs / 10.0, pos_ys / 10.0)
-    detxs = np.round(detxs).astype(np.int)
-    detys = np.round(detys).astype(np.int)
+    detxs = np.round(detxs).astype(np.int64)
+    detys = np.round(detys).astype(np.int64)
 
     return Edeps * 1e3, (wtd_zs - 29.87) / 10.0, pix_ids, detxs, detys
 
@@ -512,8 +512,8 @@ def get_Es_Zs_PixIDs_detxys_from_root_file(fname):
 def get_Es_Zs_detxys_Ngammas_PrimaryE_from_direc_root_files(dname):
     Edeps = np.empty(0)
     wtd_zs = np.empty(0)
-    detxs = np.empty(0, dtype=np.int)
-    detys = np.empty(0, dtype=np.int)
+    detxs = np.empty(0, dtype=np.int64)
+    detys = np.empty(0, dtype=np.int64)
     Ngammas = 0
     fnames = [
         os.path.join(dname, fname) for fname in os.listdir(dname) if ".root" in fname
@@ -540,8 +540,8 @@ def get_Es_Zs_detxys_Ngammas_PrimaryE_from_direc_root_files(dname):
 def get_Es_Zs_detxys_Ngammas_PrimaryE_from_direc_root_files_mp(dname, Nprocs=4):
     Edeps = np.empty(0)
     wtd_zs = np.empty(0)
-    detxs = np.empty(0, dtype=np.int)
-    detys = np.empty(0, dtype=np.int)
+    detxs = np.empty(0, dtype=np.int64)
+    detys = np.empty(0, dtype=np.int64)
     Ngammas = 0
     fnames = [
         os.path.join(dname, fname) for fname in os.listdir(dname) if ".root" in fname
@@ -906,8 +906,8 @@ def main(args):
 
     pha_emins = ebins_tab["E_MIN"]
     pha_emaxs = ebins_tab["E_MAX"]
-    pha_emins = np.round(pha_emins.astype(np.float)[:-1], decimals=1)
-    pha_emaxs = np.round(pha_emaxs.astype(np.float)[:-1], decimals=1)
+    pha_emins = np.round(pha_emins.astype(np.float64)[:-1], decimals=1)
+    pha_emaxs = np.round(pha_emaxs.astype(np.float64)[:-1], decimals=1)
     pha_extras = np.round(
         np.logspace(np.log10(194.9), np.log10(500.0), 24 + 1), decimals=1
     )
@@ -936,9 +936,9 @@ def main(args):
     drm_tab = Table(data={"Ephoton": np.array(Primary_Es), "RESPONSE": np.array(resps)})
 
     ebounds_tab = Table(
-        data=[np.arange(len(pha_emaxs), dtype=np.int), pha_emins, pha_emaxs],
+        data=[np.arange(len(pha_emaxs), dtype=np.int64), pha_emins, pha_emaxs],
         names=["CHANNEL", "E_MIN", "E_MAX"],
-        dtype=[np.int, np.float, np.float],
+        dtype=[np.int64, np.float64, np.float64],
     )
 
     primary_hdu = fits.PrimaryHDU()

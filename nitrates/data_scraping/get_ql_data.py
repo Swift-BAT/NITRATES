@@ -125,7 +125,7 @@ def cli():
         "--save_dir",
         type=str,
         help="Directory to save data to",
-        default="/gpfs/group/jak51/default/realtime_workdir/",
+        default="/storage/group/jak51/default/realtime_workdir/",
     )
     parser.add_argument(
         "--dbfname", type=str, help="Name of the sqlite database", default=None
@@ -266,10 +266,20 @@ def main(args):
 
         if new_obsid:
             logging.debug("Making DB row for obsid " + obsid)
-            write_new_obsid_line(conn, obsid, data_dict=db_data_dict)
+            try:
+                write_new_obsid_line(conn, obsid, data_dict=db_data_dict)
+            except Exception as E:
+                logging.warn("Trouble writing to DB")
+                logging.error(E)
+                continue
         else:
             logging.debug("Updating DB for obsid " + obsid)
-            update_obsid_line(conn, obsid, db_data_dict)
+            try:
+                update_obsid_line(conn, obsid, db_data_dict)
+            except Exception as E:
+                logging.warn("Trouble writing to DB")
+                logging.error(E)
+                continue
 
         conn.close()
 

@@ -187,7 +187,7 @@ def bkg_withPS_fit(
     imgs = np.meshgrid(*imlist)
     Npnts = imgs[0].size
     if im_steps == 2:
-        ind_grids = np.meshgrid(*(np.arange(3, dtype=np.int) for i in range(Nps)))
+        ind_grids = np.meshgrid(*(np.arange(3, dtype=np.int64) for i in range(Nps)))
         Npnts = ind_grids[0].size
     logging.info("Npnts: %d" % (Npnts))
 
@@ -421,7 +421,7 @@ def do_init_bkg_wPSs(
             break
         if len(PSs2keep) == 0:
             Nsrcs = 0
-            src_tab = src_tab[np.zeros(len(src_tab), dtype=np.bool)]
+            src_tab = src_tab[np.zeros(len(src_tab), dtype=bool)]
             break
         bl = np.array([src_tab["Name"][i] in PSs2keep for i in range(Nsrcs)])
         src_tab = src_tab[bl]

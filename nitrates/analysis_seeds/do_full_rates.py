@@ -108,7 +108,7 @@ class Linear_Rates(object):
         )
 
         self.GTI = GTI
-        self.gti_tbin_bl = np.zeros(self.n_tbins, dtype=np.bool)
+        self.gti_tbin_bl = np.zeros(self.n_tbins, dtype=bool)
         for i in range(self.n_tbins):
             self.gti_tbin_bl[i] = check_if_in_GTI(GTI, self.t_bins0[i], self.t_bins1[i])
         print(len(self.gti_tbin_bl), np.sum(self.gti_tbin_bl))
@@ -141,7 +141,7 @@ class Linear_Rates(object):
         self.ints = np.zeros_like(self.slopes)
         self.errs = np.zeros_like(self.slopes)
         self.chi2s = np.zeros_like(self.errs)
-        self.dof = np.zeros_like(self.slopes, dtype=np.int)
+        self.dof = np.zeros_like(self.slopes, dtype=np.int64)
         self.sig_clip = sig_clip
 
         self.npars = self.deg + 1
@@ -167,7 +167,7 @@ class Linear_Rates(object):
             )
             #             bkg_bti = Table(data=([-np.inf, t_0], [t_1, np.inf]), names=('START', 'STOP'))
             gti_ = add_bti2gti(bkg_bti, gti_)
-            tbl = np.zeros(self.n_tbins, dtype=np.bool)
+            tbl = np.zeros(self.n_tbins, dtype=bool)
             for ii in range(self.n_tbins):
                 tbl[ii] = check_if_in_GTI(gti_, self.t_bins0[ii], self.t_bins1[ii])
 
@@ -188,7 +188,7 @@ class Linear_Rates(object):
             cnts = self.cnts_per_tbin[tbl]
 
             try:
-                bl = np.ones(len(cnts), dtype=np.bool)
+                bl = np.ones(len(cnts), dtype=bool)
                 if self.sig_clip is not None:
                     avg = np.mean(cnts)
                     std = np.std(cnts)
@@ -397,7 +397,7 @@ def choose_tbins(snr_res_tab, snr_min=2.5, GTI=None):
             #     else:
             #         continue
         else:
-            gti_bl = np.ones(len(dur_df), dtype=np.bool)
+            gti_bl = np.ones(len(dur_df), dtype=bool)
 
         snr_max = np.max(dur_df[gti_bl]["snr"])
 

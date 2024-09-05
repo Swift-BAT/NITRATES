@@ -80,7 +80,7 @@ def check_if_in_GTI(GTI, t0, t1):
 def flags2gti(times, flags):
     # make it seem that it's changing to bad at the end
     Ntimes = len(times)
-    diffs = np.append(np.diff(flags.astype(np.int)), [-1])
+    diffs = np.append(np.diff(flags.astype(np.int64)), [-1])
     if not flags[-1]:
         diffs[-1] = 0
 
@@ -217,7 +217,7 @@ def find_and_remove_cr_glitches(ev_data, GTI, tbin_size=5e-5):
     logging.debug("Got all bad times")
     logging.debug(bad_times)
 
-    bad_time_bl = np.zeros(len(ev_data), dtype=np.bool)
+    bad_time_bl = np.zeros(len(ev_data), dtype=bool)
 
     for bad_time in bad_times:
         tmid = bad_time + tbin_size / 2.0

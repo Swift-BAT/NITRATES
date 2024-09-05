@@ -615,7 +615,7 @@ def main(args):
     )
 
     names = ["exp", "time", "bkg_nllh", "sig_nllh", "imx", "imy", "sig_cnts", "index"]
-    dtypes = [np.float for i in range(len(names))]
+    dtypes = [np.float64 for i in range(len(names))]
     tab = Table(names=names, dtype=dtypes)
 
     bkg_nllhs = []

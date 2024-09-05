@@ -58,13 +58,13 @@ def find_and_write_seeds(
         rates_group = rates_twind_groups.get_group(timeID)
 
         job_ids = (
-            i * N_jobs2twinds + np.arange(N_jobs2twinds, dtype=np.int) + job_id_start
+            i * N_jobs2twinds + np.arange(N_jobs2twinds, dtype=np.int64) + job_id_start
         )
         for ii in range(len(job_ids)):
             job_ids[ii] = job_ids[ii] % args.njobs
         logging.debug("job_ids: " + str(job_ids))
 
-        priority = max_priority * np.ones(len(blips), dtype=np.int)
+        priority = max_priority * np.ones(len(blips), dtype=np.int64)
         maxp = max_priority
 
         # blips['priority'] = priority
@@ -147,9 +147,9 @@ def find_and_write_seeds(
                 # for j in xrange(N_jobs2twinds):
                 #    j0 = j*n_per_job
                 #    j1 = j0 + n_per_job
-                #    inds = np.arange(j0, j1+1, dtype=np.int)
+                #    inds = np.arange(j0, j1+1, dtype=np.int64)
                 #    logging.debug("assigning %d seeds job_id %d" %(j1-j0, job_ids[j]))
-                #    proc_group[bl][inds] = job_ids[j]*np.ones(len(inds), dtype=np.int)
+                #    proc_group[bl][inds] = job_ids[j]*np.ones(len(inds), dtype=np.int64)
                 #    proc_group[bl][j0:j1] = job_ids[j]
 
         logging.debug("min(proc_group): %d" % (np.min(proc_group)))

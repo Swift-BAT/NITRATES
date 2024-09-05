@@ -3,6 +3,7 @@ import abc
 from scipy import stats, interpolate
 import logging, traceback
 from copy import copy, deepcopy
+import healpy as hp
 
 from ..response.response import Response, ResponseInFoV, ResponseInFoV2
 from ..models.flux_models import Plaw_Flux
@@ -1326,7 +1327,7 @@ class Point_Source_Model_Wuncoded(Model):
             return self._fp
         else:
             fp = self.fp_obj.get_fp(imx, imy)
-            self._fp = fp[self.bl_dmask].astype(np.int)
+            self._fp = fp[self.bl_dmask].astype(np.int64)
             self._fp[(self._rt > 1e-2)] = 1
             self._unfp = 1 - self._fp
             self.uncoded = self._fp < 0.1
@@ -3076,6 +3077,8 @@ class Source_Model_InOutFoV(Model):
         resp_tab_dname=None,
         hp_flor_resp_dname=None,
         comp_flor_resp_dname=None,
+        use_tube_corr=False,
+        use_under_corr=False
     ):
         self.fmodel = flux_model
 
@@ -3174,6 +3177,13 @@ class Source_Model_InOutFoV(Model):
 
         self.norm_photon_flux_dict = {}
 
+        # whether to apply ofov corrections to responses 
+        self.use_tube_corr = use_tube_corr
+        self.tube_corr = False
+        self.use_under_corr = use_under_corr
+        self.under_corr = False
+
+
     def get_batxys(self):
         yinds, xinds = np.where(self.bl_dmask)
         self.batxs, self.batys = detxy2batxy(xinds, yinds)
@@ -3198,6 +3208,47 @@ class Source_Model_InOutFoV(Model):
             self._trans_theta = theta
             self._trans_phi = phi
             self.resp_obj.set_theta_phi(theta, phi)
+
+            if (theta < 90.0 - hp.pix2ang(2**2, 56, lonlat=True)[1]) and (phi > 220.0) and (phi < 335.0) and self.use_tube_corr:
+                self.resp_obj2 = ResponseInFoV2(
+                    self.resp_dname,
+                    self.flor_resp_dname,
+                    self.comp_flor_resp_dname,
+                    self.ebins0,
+                    self.ebins1,
+                    self.bl_dmask,
+                    self.rt_obj,
+                )
+
+                self.resp_obj2.set_theta_phi(71.0, phi)
+
+                self.tube_corr = True
+            elif theta > 93.0 and self.use_under_corr:
+                self.resp_obj2 = ResponseInFoV2(
+                    self.resp_dname,
+                    self.flor_resp_dname,
+                    self.comp_flor_resp_dname,
+                    self.ebins0,
+                    self.ebins1,
+                    self.bl_dmask,
+                    self.rt_obj,
+                )
+
+                self.resp_obj2.set_theta_phi(93.0, phi)
+
+                hp_inds = np.array(list(self.resp_obj2.comp_flor_resp_obj.resp_dict.keys()))
+                phis, lats = hp.pix2ang(2**2, hp_inds, lonlat=True)
+                thetas = 90 - lats
+                for i in range(len(hp_inds)):
+                    if phis[i] > 230 and phis[i] < 271:
+                        for j in range(5):
+                            self.resp_obj2.comp_flor_resp_obj.resp_dict[hp_inds[i]][15,j,:,:] = self.resp_obj2.comp_flor_resp_obj.resp_dict[hp_inds[i]][15,5,:,:]
+
+                self.under_corr = True
+            else:
+                self.tube_corr = False
+                self.under_corr = False
+
 
         elif (
             ang_sep(phi, 90.0 - theta, self._trans_phi, 90.0 - self._trans_theta)
@@ -3251,13 +3302,24 @@ class Source_Model_InOutFoV(Model):
         #         self.normed_err_rate_dpis = np.sqrt((self.flor_err*self.normed_flor_rate_dpis)**2 +\
         #                                             (self.non_flor_err*self.normed_non_flor_rate_dpis)**2)
 
-        self.normed_comp_flor_rate_dpis = np.swapaxes(
-            self.resp_obj.get_comp_flor_rate_dpis_from_photon_fluxes(
-                self.normed_photon_fluxes
-            ),
-            0,
-            1,
-        )
+        if self.tube_corr or self.under_corr:
+            self.normed_comp_flor_rate_dpis = np.swapaxes(
+                self.resp_obj.get_comp_flor_rate_dpis_from_photon_fluxes(
+                    self.normed_photon_fluxes
+                ) + self.resp_obj2.get_comp_flor_rate_dpis_from_photon_fluxes(
+                    self.normed_photon_fluxes)
+,
+                0,
+                1,
+            )
+        else:
+            self.normed_comp_flor_rate_dpis = np.swapaxes(
+                self.resp_obj.get_comp_flor_rate_dpis_from_photon_fluxes(
+                    self.normed_photon_fluxes
+                ),
+                0,
+                1,
+            )
 
         self.normed_photoe_rate_dpis = np.swapaxes(
             self.resp_obj.get_photoe_rate_dpis_from_photon_fluxes(

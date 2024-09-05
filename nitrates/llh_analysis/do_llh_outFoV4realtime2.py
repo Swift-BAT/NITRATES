@@ -168,7 +168,7 @@ def get_new_Epeaks_gammas2scan(
     gammas = gammas.ravel()
     Epeaks = Epeaks.ravel()
 
-    bl = np.ones(len(Epeaks), dtype=np.bool)
+    bl = np.ones(len(Epeaks), dtype=bool)
     for i in range(len(Epeaks)):
         bl[i] = np.any(
             ~(np.isclose(Epeaks[i], Epeaks_done) & np.isclose(gammas[i], gammas_done))
@@ -224,7 +224,7 @@ def analysis_at_theta_phi(
 
     # sig_mod = Source_Model_OutFoV(flux_mod, [ebins0,ebins1], bl_dmask, use_deriv=True)
     sig_mod = Source_Model_InOutFoV(
-        flux_mod, [ebins0, ebins1], bl_dmask, rt_obj, use_deriv=True
+        flux_mod, [ebins0, ebins1], bl_dmask, rt_obj, use_deriv=True, use_tube_corr=True, use_under_corr=True
     )
     # sig_mod.flor_resp_dname = '/gpfs/scratch/jjd330/bat_data/flor_resps_ebins/'
     sig_mod.set_theta_phi(theta, phi)
@@ -524,7 +524,7 @@ def main(args):
     #     if proc_num >= 0:
     #         bl = (seed_tab['proc_group']==proc_num)
     #     else:
-    #         bl = np.ones(len(seed_tab), dtype=np.bool)
+    #         bl = np.ones(len(seed_tab), dtype=bool)
     #     seed_tab = seed_tab[bl]
 
     logging.info("Read in Seed Table, now to do analysis")
