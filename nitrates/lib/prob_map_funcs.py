@@ -270,3 +270,134 @@ def write_moc_skymap(skymap, filename, name=0):
     header['INSTRUME'] = ('Swift BAT', 'Instrument')
     
     file.writeto(filename, overwrite=True)
+
+
+def moc_prob2percs(moc_skymap):
+
+    p_map = np.copy(moc_skymap.data)
+
+    inds_sort = np.argsort(p_map)[::-1]
+
+    perc_map = np.zeros_like(p_map)
+
+    perc_map[inds_sort] = np.cumsum((p_map*moc_skymap.pixarea())[inds_sort])
+
+    perc_map = mhp.HealpixMap(data=perc_map, uniq=moc_skymap.uniq)
+
+    return perc_map
+
+def pcfile2mocmap(moc_map, pcfname, att_row):
+
+    att_q = att_row["QPARAM"]
+    pnt_ra, pnt_dec = att_row["POINTING"][:2]
+
+    Npix = len(moc_map.uniq)
+    pc_map = np.zeros(Npix)
+
+    vec = hp.ang2vec(pnt_ra, pnt_dec, lonlat=True)
+
+    inds = mmap.query_disc(vec, np.radians(70.0))
+
+    moc_ras, moc_decs = moc_map.pix2ang(inds, lonlat=True)
+
+    moc_imxs, moc_imys = convert_radec2imxy(moc_ras, moc_decs, att_q)
+
+    bl = (np.abs(moc_imys) < 1.01) & (np.abs(moc_imxs) < 2.0)
+
+    PC = fits.open(pc_fname)[0]
+    w_t = WCS(PC.header, key="T")
+    pc = PC.data
+
+    pc_vals = world2val(w_t, pc, moc_imxs[bl], moc_imys[bl])
+
+    pc_map[inds[bl]] = pc_vals
+
+    pc_moc_map = mhp.HealpixMap(data=pc_map, uniq=moc_map.uniq)
+
+    return pc_moc_map
+
+def mk_probmap_plots(mmap, pc_mmap, sao_row):
+    
+    import matplotlib.pyplot as plt
+    from matplotlib.colors import LogNorm
+    from matplotlib import cm
+    from astropy.visualization.wcsaxes import SphericalCircle
+    from matplotlib.patches import Rectangle
+    import ligo.skymap.plot
+
+
+    moc_perc = moc_prob2percs(mmap)
+
+    sun_ra, sun_dec = sao_row['SUN_RA'], sao_row['SUN_DEC']
+    
+    vmax = np.percentile(mmap.data, 99.0)
+    vmin = np.percentile(mmap.data[mmap.data>0], 10.0)
+    vmin = max(vmax/1e3, vmin)
+    logging.debug('vmin, vmax: %f, %f)'%(vmin, vmax))
+    
+    im,ax = mmap.plot(norm=LogNorm(vmin=vmin, vmax=vmax), ax='astro degrees mollweide', cmap=cm.Oranges, rasterize=False, cbar=False)
+    img = mmap.get_wcs_img(ax)
+    img_perc = moc_perc.get_wcs_img(ax, rasterize=False)
+    CS = ax.contour(img_perc, levels=[0.5, 0.9], colors=['cyan','green'], linestyles=['-', '--'])
+    ax.grid(True)
+    ax.scatter(sun_ra, sun_dec, transform=ax.get_transform('world'), c='yellow')
+    lon = ax.coords[0]
+    lat = ax.coords[1]
+
+    area_50 = np.sum(moc_perc.pixarea()[moc_perc.data<0.5])
+    area_90 = np.sum(moc_perc.pixarea()[moc_perc.data<0.9])
+    print(area_50.to(u.deg*u.deg))
+    print(area_90.to_string(unit=(u.deg*u.deg)))
+    prob_infov = np.sum((mmap.data*mmap.pixarea()/u.steradian)[pc_mmap.data>1e-3])
+    print(prob_infov)
+
+    ax.text(550,260,'90%% Area = %.2f deg$^2$ \n50%% Area = %.2f deg$^2$ \nProb In FoV = %.2f'\
+            %(area_90.to(u.deg**2).value,area_50.to(u.deg**2).value,prob_infov),\
+            size=8, bbox=dict(facecolor='none', alpha=0.5))
+
+    theta_max,phi_max = mmap.pix2ang(np.argmax(mmap))
+
+    ra_max = np.rad2deg(phi_max)
+    dec_max = 90-np.rad2deg(theta_max)
+    print(ra_max, dec_max)
+
+    lonra = np.rad2deg(phi_max) + np.array([-5,5])/np.cos(np.pi/2 - theta_max)
+    latra = (90-np.rad2deg(theta_max)) + np.array([-5,5])
+
+    r = Rectangle((np.rad2deg(phi_max) - 5.0/ np.cos(np.pi/2. - theta_max), 90 - np.rad2deg(theta_max) - 5),\
+                  10.0 / np.cos(np.pi/2. - theta_max), 10, edgecolor='black', facecolor='none',
+                  transform=ax.get_transform('world'))
+    ax.add_patch(r)
+
+    moll_fname = 'mollview_plot.png'
+    plt.savefig(moll_fname, bbox_inches='tight')
+    
+    plt.close()
+    
+    
+
+    im,ax = mmap.plot(ax = 'cartview',aspect='auto', norm=LogNorm(vmin=vmin, vmax=vmax), ax_kw = {'latra': latra, 'lonra': lonra},\
+                      rasterize=False, cmap=cm.Oranges, cbar=False);
+
+    img_perc = moc_perc.get_wcs_img(ax, rasterize=False)
+    CS = ax.contour(img_perc, levels=[0.5, 0.9], colors=['cyan','green'], linestyles=['-', '--'])
+    plt.clabel(CS, fmt='%.1f')
+
+    ax.grid(True)
+
+    lon = ax.coords[0]
+    lat = ax.coords[1]
+
+    lon.set_ticklabel_visible(True)
+    lat.set_ticklabel_visible(True)
+
+    lon.set_major_formatter('d')
+
+    lon.set_axislabel('RA')
+    lat.set_axislabel('Dec')
+    
+    zoom_fname = 'zoom_plot.png'
+    plt.savefig(zoom_fname, bbox_inches='tight')
+
+    return moll_fname, zoom_fname
+
