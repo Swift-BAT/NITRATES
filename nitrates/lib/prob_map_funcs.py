@@ -328,7 +328,6 @@ def mk_probmap_plots(mmap, pc_mmap, sao_row):
 
     moc_perc = moc_prob2percs(mmap)
 
-    sun_ra, sun_dec = sao_row['SUN_RA'], sao_row['SUN_DEC']
     
     vmax = np.percentile(mmap.data, 99.0)
     vmin = np.percentile(mmap.data[mmap.data>0], 10.0)
@@ -339,8 +338,11 @@ def mk_probmap_plots(mmap, pc_mmap, sao_row):
     img = mmap.get_wcs_img(ax)
     img_perc = moc_perc.get_wcs_img(ax, rasterize=False)
     CS = ax.contour(img_perc, levels=[0.5, 0.9], colors=['cyan','green'], linestyles=['-', '--'])
+    plt.clabel(CS, fmt='%.1f')
     ax.grid(True)
-    ax.scatter(sun_ra, sun_dec, transform=ax.get_transform('world'), c='yellow')
+    if sao_row is not None:
+        sun_ra, sun_dec = sao_row['SUN_RA'], sao_row['SUN_DEC']
+        ax.scatter(sun_ra, sun_dec, transform=ax.get_transform('world'), c='yellow')
     lon = ax.coords[0]
     lat = ax.coords[1]
 
