@@ -951,6 +951,24 @@ def read_results_dirs(paths, api_token, figures=True, ismpi4py=False):
                 print(e)
                 failed[path] = "Failed to ingest prob skymap."
 
+            # ProbSkymap Figures
+            try:
+                moll_fname = os.path.join(paths[i],[fname for fname in os.listdir(paths[i]) if 'mollview_plot.png' in fname][0])
+                zoom_fname = os.path.join(paths[i],[fname for fname in os.listdir(paths[i]) if 'zoom_plot.png' in fname][0])
+                plot_data = {'moll_fname':moll_fname, 'zoom_fname':zoom_fname}
+                result = api.post_nitrates_plot(
+                    trigger=trig_ids[i],
+                    config_id=config_id,
+                    result_type="n_PROBMAP",
+                    plot_data=plot_fname,
+                )
+                print(result)
+            except Exception as e:
+                print("Failed to ingest prob skymap plots :(")
+                print(e)
+                failed[path] = "Failed to ingest prob skymap plots."
+
+
             print("Successfully loaded into database.")
         except Exception as e:
             print("Failed for untested reason")
