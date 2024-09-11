@@ -6,7 +6,7 @@ from astropy import units as u
 from astropy.table import Table
 from astropy.io import fits
 import logging, traceback
-
+from astropy.wcs import WCS
 
 from ..lib.coord_conv_funcs import (
     convert_imxy2radec,
@@ -16,6 +16,7 @@ from ..lib.coord_conv_funcs import (
     convert_radec2imxy,
 )
 from .hp_funcs import pcfile2hpmap
+from .wcs_funcs import world2val
 
 
 def get_prob_map(nllhs0, att_q, pc_map, ifov_fact=1.0, ofov_fact=0.5, dllh_out=0.0, infov_smooth=None):
@@ -288,25 +289,31 @@ def moc_prob2percs(moc_skymap):
 
 def pcfile2mocmap(moc_map, pcfname, att_row):
 
+    print('enter pcfile2mocmap')
     att_q = att_row["QPARAM"]
     pnt_ra, pnt_dec = att_row["POINTING"][:2]
+    print(att_row)
 
     Npix = len(moc_map.uniq)
     pc_map = np.zeros(Npix)
+    print(Npix)
 
     vec = hp.ang2vec(pnt_ra, pnt_dec, lonlat=True)
 
-    inds = mmap.query_disc(vec, np.radians(70.0))
+    inds = moc_map.query_disc(vec, np.radians(70.0))
 
     moc_ras, moc_decs = moc_map.pix2ang(inds, lonlat=True)
 
     moc_imxs, moc_imys = convert_radec2imxy(moc_ras, moc_decs, att_q)
 
     bl = (np.abs(moc_imys) < 1.01) & (np.abs(moc_imxs) < 2.0)
+    print("np.sum(bl), ", np.sum(bl))
 
-    PC = fits.open(pc_fname)[0]
+    PC = fits.open(pcfname)[0]
     w_t = WCS(PC.header, key="T")
     pc = PC.data
+
+    print('opened PC')
 
     pc_vals = world2val(w_t, pc, moc_imxs[bl], moc_imys[bl])
 
@@ -325,9 +332,11 @@ def mk_probmap_plots(mmap, pc_mmap, sao_row):
     from matplotlib.patches import Rectangle
     import ligo.skymap.plot
 
+    print('imported stuff')
 
     moc_perc = moc_prob2percs(mmap)
 
+    print('got moc_perc')
     
     vmax = np.percentile(mmap.data, 99.0)
     vmin = np.percentile(mmap.data[mmap.data>0], 10.0)
