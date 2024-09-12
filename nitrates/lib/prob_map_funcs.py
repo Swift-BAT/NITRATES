@@ -349,9 +349,6 @@ def mk_probmap_plots(mmap, pc_mmap, sao_row):
     CS = ax.contour(img_perc, levels=[0.5, 0.9], colors=['cyan','green'], linestyles=['-', '--'])
     plt.clabel(CS, fmt='%.1f')
     ax.grid(True)
-    if sao_row is not None:
-        sun_ra, sun_dec = sao_row['SUN_RA'], sao_row['SUN_DEC']
-        ax.scatter(sun_ra, sun_dec, transform=ax.get_transform('world'), c='yellow')
     lon = ax.coords[0]
     lat = ax.coords[1]
 
@@ -372,13 +369,28 @@ def mk_probmap_plots(mmap, pc_mmap, sao_row):
     dec_max = 90-np.rad2deg(theta_max)
     print(ra_max, dec_max)
 
-    lonra = np.rad2deg(phi_max) + np.array([-5,5])/np.cos(np.pi/2 - theta_max)
-    latra = (90-np.rad2deg(theta_max)) + np.array([-5,5])
+    vec = mhp.ang2vec(ra_max, dec_max, lonlat=True)
+    half_wind = 5.0
+    inds = mmap.query_disc(vec, np.radians(half_wind))
+    min_max = np.min(mmap[inds]) / np.max(mmap[inds])
+    print('min_max: ', min_max)
+    if min_max > 0.1:
+        half_wind = 10.0
+    print('half_wind = ', half_wind)
 
-    r = Rectangle((np.rad2deg(phi_max) - 5.0/ np.cos(np.pi/2. - theta_max), 90 - np.rad2deg(theta_max) - 5),\
-                  10.0 / np.cos(np.pi/2. - theta_max), 10, edgecolor='black', facecolor='none',
+    lonra = np.rad2deg(phi_max) + np.array([-half_wind,half_wind])/np.cos(np.pi/2 - theta_max)
+    latra = (90-np.rad2deg(theta_max)) + np.array([-half_wind,half_wind])
+
+    r = Rectangle((np.rad2deg(phi_max) - half_wind/ np.cos(np.pi/2. - theta_max), 90 - np.rad2deg(theta_max) - half_wind),\
+                  2*half_wind / np.cos(np.pi/2. - theta_max), 2*half_wind, edgecolor='black', facecolor='none',
                   transform=ax.get_transform('world'))
+
     ax.add_patch(r)
+
+    if sao_row is not None:
+        sun_ra, sun_dec = sao_row['SUN_RA'], sao_row['SUN_DEC']
+        ax.scatter(sun_ra, sun_dec, s=15, marker="$\u263b$", transform=ax.get_transform('world'), c='yellow', label='Sun', alpha=0.5)
+        ax.scatter(sun_ra, sun_dec, s=30, marker="$\u263c$", transform=ax.get_transform('world'), c='yellow', label='Sun', alpha=0.5)
 
     moll_fname = 'mollview_plot.png'
     plt.savefig(moll_fname, bbox_inches='tight')
@@ -407,6 +419,10 @@ def mk_probmap_plots(mmap, pc_mmap, sao_row):
     lon.set_axislabel('RA')
     lat.set_axislabel('Dec')
     
+    if sao_row is not None:
+        ax.scatter(sun_ra, sun_dec, s=30, marker="$\u263b$", transform=ax.get_transform('world'), c='yellow', label='Sun', alpha=0.5)
+        ax.scatter(sun_ra, sun_dec, s=60, marker="$\u263c$", transform=ax.get_transform('world'), c='yellow', label='Sun', alpha=0.5)
+
     zoom_fname = 'zoom_plot.png'
     plt.savefig(zoom_fname, bbox_inches='tight')
 
