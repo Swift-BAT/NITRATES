@@ -326,8 +326,8 @@ class LLH_webins(object):
         self.ebins1 = ebins1
         self.nebins = len(ebins0)
         self.bl_dmask = bl_dmask
-        self.t0 = 0.0
-        self.t1 = 0.0
+        self.t0 = np.array([0.0])
+        self.t1 = np.array([0.0])
         self.ebin = -1
         self.set_has_error(has_err)
 
@@ -352,8 +352,9 @@ class LLH_webins(object):
         if np.isscalar(t1):
             t1 = np.array([t1])
 
-        if np.all(self.t0 == t0) and np.all(self.t1 == t1):
-            return
+        if len(self.t0) == len(t0):
+            if np.all(self.t0 == t0) and np.all(self.t1 == t1):
+                return
         self.t0 = t0
         self.dt = 0.0
         self.t1 = t1

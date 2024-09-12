@@ -36,7 +36,14 @@ from ..lib.coord_conv_funcs import (
 from ..lib.hp_funcs import pc_probmap2good_outFoVmap_inds, get_dlogl_skymap, pcfile2hpmap
 from ..lib.search_config import Config
 from ..response.response import get_pc
-from ..lib.prob_map_funcs import pmap2moc_map, rm_earth_prob_map, write_moc_skymap, get_prob_map
+from ..lib.prob_map_funcs import (
+        pmap2moc_map,
+        rm_earth_prob_map, 
+        write_moc_skymap,
+        get_prob_map,
+        mk_probmap_plots, 
+        pcfile2mocmap,
+)
 from ..data_scraping.api_funcs import get_sao_file
 
 
@@ -2171,14 +2178,17 @@ def main(args):
                 logging.debug('sao_fname: ' + sao_fname)
                 if sao_fname is not None:
                     sao_tab = Table.read(sao_fname)
+                    sao_row = sao_tab[np.argmin(np.abs(sao_tab['TIME'] - tmid))]
                     prob_map = rm_earth_prob_map(prob_map, sao_tab, tmid)
                     logging.debug('Removed Earth')
                 else:
+                    sao_row = None
                     logging.warn('No sao file, Earth is still there')
             except Exception as E:
                 logging.error(E)
                 logging.error(traceback.format_exc())
                 logging.warn("trouble getting sao file, Earth is still there")
+                sao_row = None
 
             logging.info('converting to moc map')
             moc_map = pmap2moc_map(prob_map, args.pcfname, att_row)
@@ -2188,6 +2198,14 @@ def main(args):
             logging.info(moc_map_fname)
             write_moc_skymap(moc_map, moc_map_fname, name=args.GWname)
 
+            logging.debug("making pc moc map")
+            pc_moc_map = pcfile2mocmap(moc_map, args.pcfname, att_row)
+            logging.debug("making probmap plots now")
+            moll_fname, zoom_fname = mk_probmap_plots(moc_map, pc_moc_map, sao_row=sao_row)
+            logging.info("made probmap plots:")
+            logging.info(moll_fname)
+            logging.info(zoom_fname)
+
             if args.api_token is not None:
                 try:
                     api.post_nitrates_results(trigger=search_config.triggerID,config_id=search_config.id,result_type='n_PROBMAP',result_data=moc_map_fname)
@@ -2195,7 +2213,13 @@ def main(args):
                     logging.error(e)
                     logging.error(traceback.format_exc())
                     logging.error('Could not report PROBMAP file via EchoAPI.')   
-
+                try:
+                    plot_data = {'moll_fname':moll_fname, 'zoom_fname':zoom_fname}
+                    api.post_nitrates_plot(trigger=search_config.triggerID,config_id=search_config.id,result_type='n_PROBMAP',plot_data=plot_data)
+                except Exception as e:
+                    logging.error(e)
+                    logging.error(traceback.format_exc())
+                    logging.error('Could not report PROBMAP plots via EchoAPI.')   
 
 
 
