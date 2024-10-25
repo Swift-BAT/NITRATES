@@ -243,8 +243,11 @@ def pmap2moc_map(prob_map, pcfname, att_row, max_bytes=2.9e6):
                         print(max_perc, mmap.uniq.nbytes)
                         mmap = mhp.HealpixMap.adaptive_moc_mesh(nside2, split_func, density=True, unit=1/u.steradian)
 
-    ras, decs = mmap.pix2ang(np.arange(len(mmap.uniq)), lonlat=True)
-    mmap[:] = hp.get_interp_val(prob_map/hp.nside2pixarea(nside), ras, decs, nest=True, lonlat=True)/u.steradian
+    for pix in range(len(mmap.data)):
+        # for each pix in moc, get integrated prob divided by solid angle of pix
+        ind0, ind1 = mmap.pix2range(nside, pix)
+        mmap[pix] = np.sum(prob_map[ind0:ind1]) / ((ind1 - ind0)*hp.nside2pixarea(nside)) / u.steradian
+
             
     return mmap
 
