@@ -1211,15 +1211,17 @@ class Swift_Mask_Interactions(object):
         return self._rt
 
 
-@njit(cache=True)
+@njit(cache=True, parallel=True)
 def get_rate_dpis_from_photon_fluxes(resp_dpi, photon_fluxes):
     ndets, NphotonEs, Nphabins = resp_dpi.shape
     rate_dpis = np.zeros((ndets, Nphabins))
 
-    for i in range(ndets):
+    for i in prange(ndets):
         for j in range(Nphabins):
+            tot = 0
             for k in range(NphotonEs):
-                rate_dpis[i, j] += photon_fluxes[k] * resp_dpi[i, k, j]
+                tot += photon_fluxes[k] * resp_dpi[i, k, j]
+            rate_dpis[i, j] = tot
     return rate_dpis
 
 
@@ -1231,7 +1233,7 @@ def add_3d_arrays(arr1, arr2):
     for i in prange(len0):
         for j in range(len1):
             for k in range(len2):
-                dpis[i, j, k] = arr1[i, j, k] * arr2[i, j, k]
+                dpis[i, j, k] = arr1[i, j, k] + arr2[i, j, k]
 
     return dpis
 
