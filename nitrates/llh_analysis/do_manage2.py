@@ -1790,6 +1790,8 @@ def main(args):
             rhel7=args.rhel7,
             q=args.q,
             sub_type=args.sub_type,
+            mem_per_cpu='4GB',
+            ppn=2
         )
 
         if args.api_token is not None:
@@ -1810,7 +1812,8 @@ def main(args):
             rhel7=args.rhel7,
             q=args.q,
             sub_type=args.sub_type,
-            mem_per_cpu='9GB',
+            mem_per_cpu='4GB',
+            ppn=3
         )
         logging.info("Jobs submitted, now going to monitor progress")
 
@@ -2092,6 +2095,8 @@ def main(args):
             rhel7=args.rhel7,
             q=args.q,
             sub_type=args.sub_type,
+            ppn=2,
+            mem_per_cpu='4GB'
         )
 
 

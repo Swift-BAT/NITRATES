@@ -1223,15 +1223,27 @@ def get_rate_dpis_from_photon_fluxes(resp_dpi, photon_fluxes):
     return rate_dpis
 
 
-@njit(cache=True)
+@njit(cache=True, parallel=True)
+def add_3d_arrays(arr1, arr2):
+    len0, len1, len2 = arr1.shape
+    dpis = np.empty((len0, len1, len2))
+
+    for i in prange(len0):
+        for j in range(len1):
+            for k in range(len2):
+                dpis[i, j, k] = arr1[i, j, k] * arr2[i, j, k]
+
+    return dpis
+
+@njit(cache=True, parallel=True)
 def multiply_resp_trans_dpis(resp_dpis, trans_dpis):
     ndets, NphotonEs, Nphabins = resp_dpis.shape
-    dpis = np.zeros((ndets, NphotonEs, Nphabins))
+    dpis = np.empty((ndets, NphotonEs, Nphabins))
 
-    for i in range(ndets):
+    for i in prange(ndets):
         for j in range(Nphabins):
             for k in range(NphotonEs):
-                dpis[i, k, j] += resp_dpis[i, k, j] * trans_dpis[i, k]
+                dpis[i, k, j] = resp_dpis[i, k, j] * trans_dpis[i, k]
 
     return dpis
 
@@ -1921,8 +1933,10 @@ class ResponseInFoV2(object):
             self.comp_resp_dpis += self.wts[i] * self.resp_files[k].get_comp_resp_dpis()
 
     def calc_tot_resp_dpis(self):
-        lines_dpi = self.lines_resp_dpis * (self.lines_trans_dpis[:, :, np.newaxis])
-        comp_dpi = self.comp_resp_dpis * (self.comp_trans_dpis[:, :, np.newaxis])
+        #lines_dpi = self.lines_resp_dpis * (self.lines_trans_dpis[:, :, np.newaxis])
+        #comp_dpi = self.comp_resp_dpis * (self.comp_trans_dpis[:, :, np.newaxis])
+        lines_dpi = multiply_resp_trans_dpis(self.lines_resp_dpis, self.lines_trans_dpis)
+        comp_dpi = multiply_resp_trans_dpis(self.comp_resp_dpis, self.comp_trans_dpis)
         self.comp_resp_dpi = comp_dpi
         self.lines_resp_dpi = lines_dpi
         # self.non_flor_resp_dpi = lines_dpi + comp_dpi
@@ -1933,11 +1947,13 @@ class ResponseInFoV2(object):
         if self.use_comp_flor:
             if self.use_comp_flor4flor_only:
                 self.flor_resp_dpi = self.comp_flor_resp_obj.get_resp_dpi()
-                self.comp_flor_resp_dpis = self.comp_resp_dpi + self.flor_resp_dpi
+                #self.comp_flor_resp_dpis = self.comp_resp_dpi + self.flor_resp_dpi
+                self.comp_flor_resp_dpis = add_3d_arrays(self.comp_resp_dpi, self.flor_resp_dpi)
             else:
                 self.comp_flor_resp_dpis = self.comp_flor_resp_obj.get_resp_dpi()
         else:
-            self.comp_flor_resp_dpis = self.comp_resp_dpi + self.flor_resp_dpi
+            #self.comp_flor_resp_dpis = self.comp_resp_dpi + self.flor_resp_dpi
+            self.comp_flor_resp_dpis = add_3d_arrays(self.comp_resp_dpi, self.flor_resp_dpi)
 
         # self.tot_resp_dpis = self.lines_resp_dpi + self.comp_flor_resp_dpis
 
