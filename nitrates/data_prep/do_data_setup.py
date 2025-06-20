@@ -156,6 +156,9 @@ def evfnames2write(
         logging.info(bti)
         gti_pnt = add_bti2gti(bti, gti_pnt)
         gti_pnt_hdu = fits.BinTableHDU(gti_pnt, name="GTI_POINTING")
+        gti_tot = add_bti2gti(bti, gti_tot)
+        gti_slew = add_bti2gti(bti, gti_slew)
+        gti_slew_hdu = fits.BinTableHDU(gti_pnt, name="GTI_SLEW")
 
     ev_data0 = find_and_remove_cr_glitches(ev_data0, gti_pnt)
 
