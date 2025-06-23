@@ -154,11 +154,13 @@ def evfnames2write(
     for bti in glitch_btis:
         logging.info("Found glitch bti: ")
         logging.info(bti)
-        gti_pnt = add_bti2gti(bti, gti_pnt)
-        gti_pnt_hdu = fits.BinTableHDU(gti_pnt, name="GTI_POINTING")
+        if len(gti_pnt) >= 1:
+            gti_pnt = add_bti2gti(bti, gti_pnt)
+            gti_pnt_hdu = fits.BinTableHDU(gti_pnt, name="GTI_POINTING")
         gti_tot = add_bti2gti(bti, gti_tot)
-        gti_slew = add_bti2gti(bti, gti_slew)
-        gti_slew_hdu = fits.BinTableHDU(gti_pnt, name="GTI_SLEW")
+        if len(gti_slew) >= 1:
+            gti_slew = add_bti2gti(bti, gti_slew)
+            gti_slew_hdu = fits.BinTableHDU(gti_pnt, name="GTI_SLEW")
 
     ev_data0 = find_and_remove_cr_glitches(ev_data0, gti_pnt)
 
