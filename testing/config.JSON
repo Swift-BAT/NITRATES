@@ -1,1 +1,0 @@
-{"ERRORS": [], "WARNINGS": [], "config": {"BkgPost": true, "BkgPre": true, "BkgSrcPosFit": null, "Epeaks": [97.7, 212.1, 460.6], "Gammas": [0.1, 0.6, 1.1], "MaxDT": 20.48, "MaxDur": 16.384, "MinDT": -20.48, "MinDur": 0.128, "id": 99, "minSNR": 2.5, "name": "Default", "version": "0.0.0"}, "queueID": 0, "triggerID": 0, "trigtime": "2020-11-23T17:15:00.00"}
