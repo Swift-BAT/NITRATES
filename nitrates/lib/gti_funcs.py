@@ -1,7 +1,6 @@
 from astropy.table import Table, vstack
 import numpy as np
-import logging
-
+import logging, pickle, os
 
 def union_gtis(gti_tabs):
     """Union of overlapping time intervals.
@@ -127,7 +126,7 @@ def mk_gti_bl(times, GTI, time_pad=0.0):
     return bl
 
 
-def get_btis_for_glitches(evdata, tstart, tstop, tbin_size=16e-3):
+def get_btis_for_glitches(evdata, tstart, tstop, clf, tbin_size=16e-3, lowE_snr_thresh=6.0, snr_ratio_thresh=2.0):
     bins = np.arange(tstart, tstop + tbin_size / 2.0, tbin_size)
     ebl = evdata["ENERGY"] <= 25.0
     ebl2 = evdata["ENERGY"] > 50.0
@@ -138,9 +137,9 @@ def get_btis_for_glitches(evdata, tstart, tstop, tbin_size=16e-3):
     stds2 = (h2 - np.mean(h2)) / np.std(h2)
 
     # bl_bad = (stds>10.0)&(stds2<2.5)
-    bl_lowE_highSNR = stds > 10.0
+    bl_lowE_highSNR = stds > lowE_snr_thresh
     # bl_highE_lowSNR = (stds2<2.5)|((stds/stds2)>5)
-    bl_highE_lowSNR = (stds / np.abs(stds2)) > 3
+    bl_highE_lowSNR = (stds / np.abs(stds2)) > snr_ratio_thresh
     logging.debug("N_lowE_highSNR: " + str(np.sum(bl_lowE_highSNR)))
     if np.sum(bl_lowE_highSNR) > 0:
         logging.debug("LowE highSNRs: ")
@@ -156,12 +155,40 @@ def get_btis_for_glitches(evdata, tstart, tstop, tbin_size=16e-3):
         t1 = t0 + tbin_size
 
         bad_twind = (
-            bins[:-1][bl_bad][i] - tbin_size / 2.0,
-            bins[:-1][bl_bad][i] + 1.5 * tbin_size,
+            bins[:-1][bl_bad][i] - (tbin_size / 2.0) - tbin_size,
+            bins[:-1][bl_bad][i] + (1.5 * tbin_size) + tbin_size,
         )
         bad_twinds.append(bad_twind)
 
-    return bad_twinds
+    realbad_twinds = SVM_dpi_eval(evdata, bad_twinds, clf)
+
+    return realbad_twinds
+
+def SVM_dpi_eval(evtable, possibad_twinds, clf, threshold=0.45):
+    xbins = np.arange(286 + 1) - 0.5
+    ybins = np.arange(173 + 1) - 0.5
+
+    real_bads = []
+
+    for tmin, tmax in possibad_twinds:
+        bl = (evtable['TIME'] >= tmin) & (evtable['TIME'] <= tmax)
+        binned_events = evtable[bl]
+        
+        if len(binned_events) == 0:
+            continue
+        
+        dpi = np.histogram2d(binned_events['DETX'], binned_events['DETY'], bins=[xbins, ybins])[0]
+        flatdpi = dpi.ravel().reshape(1, -1)
+
+        probabilities = clf.predict_proba(flatdpi)[0]
+        glitch_prob = probabilities[0]
+        logging.debug("Glitch probability: %.4f" % glitch_prob)
+        
+        if glitch_prob  > threshold:
+            real_bads.append((tmin, tmax))
+
+    return(real_bads)
+
 
 
 def find_cr_glitch_times(ev_data, tmin, tmax, tbin_size=5e-5, emin=50, max_cnts=20):

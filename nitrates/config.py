@@ -52,6 +52,9 @@ ELEMENT_CROSS_SECTION_DNAME = os.path.join(dir, "data", "element_cross_sections"
 # Table of bright known sources from the Trans Monitor
 bright_source_table_fname = os.path.join(dir, "data", "bright_src_cat.fits")
 
+# Support Vector Model used in glitch_btis 
+SVM_model = os.path.join(dir, "data", "svm_original_model.pkl")
+
 
 EBINS0 = [15.0, 24.0, 35.0, 48.0, 64.0, 84.0, 120.0, 171.5, 245.0]
 EBINS1 = [24.0, 35.0, 48.0, 64.0, 84.0, 120.0, 171.5, 245.0, 350.0]

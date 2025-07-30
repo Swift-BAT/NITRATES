@@ -1,0 +1,14 @@
+2025-07-30 12:26:59,129-ERROR- [Errno 2] No such file or directory: 'testing1/sw00012872142bevshpo_uf.evt.gz'
+2025-07-30 12:26:59,153-ERROR- Traceback (most recent call last):
+  File "/mnt/c/Users/kbfoy/Documents/NITRATES/nitrates/data_prep/do_data_setup.py", line 740, in main
+    ev_data = Table.read(evfname[0])
+  File "/home/kbfoy/miniconda3/envs/nitrates-env/lib/python3.10/site-packages/astropy/table/connect.py", line 62, in __call__
+    out = self.registry.read(cls, *args, **kwargs)
+  File "/home/kbfoy/miniconda3/envs/nitrates-env/lib/python3.10/site-packages/astropy/io/registry/core.py", line 200, in read
+    fileobj = ctx.__enter__()
+  File "/home/kbfoy/miniconda3/envs/nitrates-env/lib/python3.10/contextlib.py", line 135, in __enter__
+    return next(self.gen)
+  File "/home/kbfoy/miniconda3/envs/nitrates-env/lib/python3.10/site-packages/astropy/utils/data.py", line 366, in get_readable_fileobj
+    fileobj = io.FileIO(name_or_obj, "r")
+FileNotFoundError: [Errno 2] No such file or directory: 'testing1/sw00012872142bevshpo_uf.evt.gz'
+
