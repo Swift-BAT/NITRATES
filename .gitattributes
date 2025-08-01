@@ -1,1 +1,6 @@
 * text=auto eol=lf
+*.fits binary
+*.npy binary
+*.pkl binary
+*.gz binary
+*.db binary
