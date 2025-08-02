@@ -11,6 +11,7 @@ import time
 from datetime import datetime
 import argparse
 import logging, traceback
+import pickle
 
 from ..lib.time_funcs import met2astropy, utc2met, met2utc_str, apy_time2met
 from ..lib.sqlite_funcs import (
@@ -50,6 +51,7 @@ from ..data_scraping.db_ql_funcs import get_gainoff_fname
 from ..data_scraping.api_funcs import get_sao_file
 from ..HeasoftTools.bat_tool_funcs import bateconvert
 from ..lib.search_config import Config
+from ..config import SVM_model
 
 def query_data_metslice(conn, met0, met1, table_name="SwiftQLevent"):
     sql = """SELECT * FROM %s
@@ -148,8 +150,11 @@ def evfnames2write(
     else:
         gti_tot = all_gtis[0]
 
+    with open(SVM_model, "rb") as f:
+        clf = pickle.load(f)
+
     glitch_btis = get_btis_for_glitches(
-        ev_data0, gti_tot["START"][0], gti_tot["STOP"][-1]
+        ev_data0, gti_tot["START"][0], gti_tot["STOP"][-1], clf
     )
     for bti in glitch_btis:
         logging.info("Found glitch bti: ")
