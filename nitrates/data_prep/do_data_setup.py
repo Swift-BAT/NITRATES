@@ -157,7 +157,8 @@ def evfnames2write(
     glitch_btis = get_btis_for_glitches(
         ev_data0, gti_tot["START"][0], gti_tot["STOP"][-1],
     )
-
+    
+    # new function added to evaluate glitches with a ML classifier
     realglitch_btis = SVM_dpi_eval(ev_data0, glitch_btis, clf)
 
 
