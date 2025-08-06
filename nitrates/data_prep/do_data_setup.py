@@ -46,6 +46,7 @@ from ..lib.gti_funcs import (
     get_btis_for_glitches,
     check_if_in_GTI,
     find_and_remove_cr_glitches,
+    SVM_dpi_eval,
 )
 from ..data_scraping.db_ql_funcs import get_gainoff_fname
 from ..data_scraping.api_funcs import get_sao_file
@@ -157,7 +158,7 @@ def evfnames2write(
         ev_data0, gti_tot["START"][0], gti_tot["STOP"][-1],
     )
 
-    realglitch_btis = SVM_dpi_eval(evdata, glitch_btis, clf)
+    realglitch_btis = SVM_dpi_eval(ev_data0, glitch_btis, clf)
 
 
     for bti in realglitch_btis:
