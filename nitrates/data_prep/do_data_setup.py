@@ -160,15 +160,15 @@ def evfnames2write(
     realglitch_btis = SVM_dpi_eval(evdata, glitch_btis, clf)
 
 
-    for realglitchbti in realglitch_btis:
+    for bti in realglitch_btis:
         logging.info("Found glitch bti: ")
-        logging.info(realglitchbti)
+        logging.info(bti)
         if len(gti_pnt) >= 1:
-            gti_pnt = add_bti2gti(realglitchbti, gti_pnt)
+            gti_pnt = add_bti2gti(bti, gti_pnt)
             gti_pnt_hdu = fits.BinTableHDU(gti_pnt, name="GTI_POINTING")
-        gti_tot = add_bti2gti(realglitchbti, gti_tot)
+        gti_tot = add_bti2gti(bti, gti_tot)
         if len(gti_slew) >= 1:
-            gti_slew = add_bti2gti(realglitchbti, gti_slew)
+            gti_slew = add_bti2gti(bti, gti_slew)
             gti_slew_hdu = fits.BinTableHDU(gti_pnt, name="GTI_SLEW")
 
     ev_data0 = find_and_remove_cr_glitches(ev_data0, gti_pnt)
