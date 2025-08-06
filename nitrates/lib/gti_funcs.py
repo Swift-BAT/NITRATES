@@ -126,7 +126,7 @@ def mk_gti_bl(times, GTI, time_pad=0.0):
     return bl
 
 
-def get_btis_for_glitches(evdata, tstart, tstop, clf, tbin_size=16e-3, lowE_snr_thresh=6.0, snr_ratio_thresh=2.0):
+def get_btis_for_glitches(evdata, tstart, tstop, tbin_size=16e-3, lowE_snr_thresh=6.0, snr_ratio_thresh=2.0):
     bins = np.arange(tstart, tstop + tbin_size / 2.0, tbin_size)
     ebl = evdata["ENERGY"] <= 25.0
     ebl2 = evdata["ENERGY"] > 50.0
@@ -160,9 +160,7 @@ def get_btis_for_glitches(evdata, tstart, tstop, clf, tbin_size=16e-3, lowE_snr_
         )
         bad_twinds.append(bad_twind)
 
-    realbad_twinds = SVM_dpi_eval(evdata, bad_twinds, clf)
-
-    return realbad_twinds
+    return bad_twinds
 
 def SVM_dpi_eval(evtable, possibad_twinds, clf, threshold=0.45):
     xbins = np.arange(286 + 1) - 0.5
