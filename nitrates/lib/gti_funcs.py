@@ -125,8 +125,14 @@ def mk_gti_bl(times, GTI, time_pad=0.0):
         bl = bl | bl_
     return bl
 
-
+# SNR threshold editing enabled as arguments for glitch energy parameters
 def get_btis_for_glitches(evdata, tstart, tstop, tbin_size=16e-3, lowE_snr_thresh=6.0, snr_ratio_thresh=2.0):
+    """ Finds where heat pipe glitches occur depending on SNR thresholds.
+    
+    Deafult set to lowE = 6 and the ratio = 2...algorithm was 
+    previously hard-coded 10 and 3. 
+    Returns list of possible glitch BTIS expanded to 64ms. 
+    """    
     bins = np.arange(tstart, tstop + tbin_size / 2.0, tbin_size)
     ebl = evdata["ENERGY"] <= 25.0
     ebl2 = evdata["ENERGY"] > 50.0
@@ -163,6 +169,15 @@ def get_btis_for_glitches(evdata, tstart, tstop, tbin_size=16e-3, lowE_snr_thres
     return bad_twinds
 
 def SVM_dpi_eval(evtable, possibad_twinds, clf, threshold=0.45):
+    """ Evaluates glitch probability and returns those with >.45
+    glitch probability to the rest of the pipeline. 
+    
+    Makes a detector plane image (DPI) out of counts from 64ms of event
+    data and determines glitch pattern likelihood. 
+
+    glitch_btis greater than .45 glitch probability get returned as
+    a list of true btis as 'realglitch_btis'
+    """
     xbins = np.arange(286 + 1) - 0.5
     ybins = np.arange(173 + 1) - 0.5
 
@@ -178,6 +193,7 @@ def SVM_dpi_eval(evtable, possibad_twinds, clf, threshold=0.45):
         dpi = np.histogram2d(binned_events['DETX'], binned_events['DETY'], bins=[xbins, ybins])[0]
         flatdpi = dpi.ravel().reshape(1, -1)
 
+        # class 0 are glitches, 1 are non-glitch
         probabilities = clf.predict_proba(flatdpi)[0]
         glitch_prob = probabilities[0]
         logging.debug("Glitch probability: %.4f" % glitch_prob)
