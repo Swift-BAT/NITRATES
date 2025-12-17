@@ -286,7 +286,7 @@ def get_event_failed_trigs(args, UTCFINIT_guess=-24.0):
 def get_event(args):
     if args.evfname is not None:
         evfname = args.evfname
-        return [evfname]
+        return evfname
     elif args.Obsid_Dir is not None:
         bat_ev_dir = os.path.join(args.Obsid_Dir, "bat", "event")
         bat_ev_fnames = [
@@ -656,7 +656,7 @@ def cli():
         help="Directory name that contains merged enable/disable files over chunks of time",
         default="/storage/group/jak51/default/realtime_workdir/merged_enbs/",
     )
-    parser.add_argument("--evfname", type=str, help="Event data file", default=None)
+    parser.add_argument("--evfname", nargs='+', help="Event data file", default=None)
     parser.add_argument("--dmask", type=str, help="detmask file name", default=None)
     parser.add_argument("--obsid", type=str, help="Obsid", default=None)
     parser.add_argument(
@@ -688,6 +688,7 @@ def cli():
 
 
 def main(args):
+    print(args.evfname)
     logging.basicConfig(
         filename="data_setup.log",
         level=logging.DEBUG,
@@ -929,6 +930,6 @@ def main(args):
 
 
 if __name__ == "__main__":
-    args = cli()
+    args = cli()    
 
     main(args)

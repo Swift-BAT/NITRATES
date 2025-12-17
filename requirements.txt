@@ -36,4 +36,4 @@ six>=1.16.0
 swifttools>=3.0.22
 soupsieve>=2.3.2.post1
 urllib3>=1.26.12
-voevent-parse>=1.0.3
+#voevent-parse>=1.0.3
