@@ -9,6 +9,13 @@ The BAT instrumental response functions necessary for this pipeline can be found
 This codebase is under active cleanup, and development, and at present time simply presents a snapshot of the entire autonomous pipeline (from listeners to results). Readability is low. \
 We welcome questions, comments, issues, and pull requests.
 
+# Laptop-friendly tutorial notebooks
+
+Two lightweight notebooks live in `notebooks/` for quick end-to-end non-imaging runs without a cluster:
+
+- `00_nonimaging_setup.ipynb` sets `NITRATES_RESP_DIR` to the bundled small response set and previews the trigger.
+- `01_end_to_end_nonimaging.ipynb` runs a minimal likelihood analysis on that bundle to extract a candidate’s TS, amplitude, and flux.
+
 # Response Files
 
 There are many internal data files (mostly used for generating the detector response) used in the codebase. Some are found in this repo and others are found in the [Zenodo community](https://zenodo.org/communities/swift-bat). 
@@ -111,4 +118,3 @@ Paths to these files can instead be given as arguments to some of the analysis o
 `ray_trace_funcs.py`
 * Contains the functions and objects to read and perform bilinear interpolation of the foward ray trace images that give the shadowed fraction of detectors at different in FoV sky positions
 * `RayTraces` class manages the reading and interpolation and is used by the point source response function and simple point source model
-
